@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -52,6 +53,7 @@ class WalletLedgerResponse(BaseModel):
     balance_after_cents: int
     related_usage_id: UUID | None = None
     note: str | None = None
+    created_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -67,5 +69,6 @@ class AIUsageResponse(BaseModel):
     output_tokens: int
     cost_cents: int
     status: str
+    created_at: datetime | None = None
 
     model_config = {"from_attributes": True}

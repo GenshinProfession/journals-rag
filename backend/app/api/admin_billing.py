@@ -1,8 +1,10 @@
+from datetime import date, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query
 
-from sqlalchemy import select
+from sqlalchemy import cast, func, select
+from sqlalchemy import Date as SADate
 
 from app.deps import AdminUserDep, DbSessionDep, ProviderGatewayDep
 from app.models.ai_usage import AIUsageRecord
@@ -124,6 +126,73 @@ def usage_list(
     if user_id is not None:
         stmt = stmt.where(AIUsageRecord.user_id == user_id)
     return list(db.scalars(stmt).all())
+
+
+@router.get("/usage/daily-stats")
+def usage_daily_stats(
+    _admin: AdminUserDep,
+    db: DbSessionDep,
+    user_id: UUID | None = Query(default=None),
+    scenario: str | None = Query(default=None),
+    days: int = Query(default=30, ge=1, le=90),
+) -> list[dict]:
+    """Daily aggregation of AI usage for charts."""
+    since = date.today() - timedelta(days=days)
+    stmt = (
+        select(
+            cast(AIUsageRecord.created_at, SADate).label("day"),
+            func.count().label("count"),
+            func.coalesce(func.sum(AIUsageRecord.input_tokens), 0).label("input_tokens"),
+            func.coalesce(func.sum(AIUsageRecord.output_tokens), 0).label("output_tokens"),
+            func.coalesce(func.sum(AIUsageRecord.cost_cents), 0).label("cost_cents"),
+        )
+        .where(cast(AIUsageRecord.created_at, SADate) >= since)
+        .group_by("day")
+        .order_by("day")
+    )
+    if user_id is not None:
+        stmt = stmt.where(AIUsageRecord.user_id == user_id)
+    if scenario is not None:
+        stmt = stmt.where(AIUsageRecord.scenario == scenario)
+    rows = db.execute(stmt).all()
+    return [
+        {
+            "day": str(row.day),
+            "count": row.count,
+            "input_tokens": int(row.input_tokens),
+            "output_tokens": int(row.output_tokens),
+            "cost_cents": int(row.cost_cents),
+        }
+        for row in rows
+    ]
+
+
+@router.get("/ledger/daily-stats")
+def ledger_daily_stats(
+    _admin: AdminUserDep,
+    db: DbSessionDep,
+    user_id: UUID | None = Query(default=None),
+    days: int = Query(default=30, ge=1, le=90),
+) -> list[dict]:
+    """Daily aggregation of wallet ledger for charts."""
+    since = date.today() - timedelta(days=days)
+    stmt = (
+        select(
+            cast(WalletLedger.created_at, SADate).label("day"),
+            func.count().label("count"),
+            func.coalesce(func.sum(WalletLedger.amount_cents), 0).label("total_cents"),
+        )
+        .where(cast(WalletLedger.created_at, SADate) >= since)
+        .group_by("day")
+        .order_by("day")
+    )
+    if user_id is not None:
+        stmt = stmt.where(WalletLedger.user_id == user_id)
+    rows = db.execute(stmt).all()
+    return [
+        {"day": str(row.day), "count": row.count, "total_cents": int(row.total_cents)}
+        for row in rows
+    ]
 
 
 @router.post("/usage/reconcile")

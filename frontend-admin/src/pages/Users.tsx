@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Button, Input, InputNumber, Modal, Popconfirm, Space, Table, Tag, Tooltip,
-  Typography, Badge, message
+  Badge, Button, Input, InputNumber, Modal, Popconfirm, Space, Table, Tooltip,
+  Typography, message
 } from 'antd';
 import {
   PlusOutlined, KeyOutlined, StopOutlined, CheckCircleOutlined,
-  DollarOutlined, ToolOutlined
+  DollarOutlined, ToolOutlined, CopyOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { apiFetch } from '../api/client';
 
-type UserRow = { id: string; username: string; role: string; is_active: boolean };
+type UserRow = { id: string; username: string; nickname: string | null; role: string; is_active: boolean };
 
 export function Users() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
 
   const [rechargeOpen, setRechargeOpen] = useState(false);
   const [adjustOpen, setAdjustOpen] = useState(false);
@@ -35,21 +36,18 @@ export function Users() {
   const writers = (data ?? []).filter(u => u.role === 'writer');
 
   const createMut = useMutation({
-    mutationFn: (body: { username: string; password: string }) =>
-      apiFetch('/api/admin/users', { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => {
+    mutationFn: (body: { username: string; nickname?: string }) =>
+      apiFetch('/api/admin/users', { method: 'POST', body: JSON.stringify(body) }) as Promise<{ secret_key: string; username: string }>,
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['admin', 'users'] });
       qc.invalidateQueries({ queryKey: ['admin', 'wallets'] });
-      message.success('已创建');
-      setCreateOpen(false);
-      setUsername('');
-      setPassword('');
+      setGeneratedKey(res.secret_key);
     },
     onError: (e: Error) => message.error(e.message)
   });
 
   const updateMut = useMutation({
-    mutationFn: (body: { id: string; is_active?: boolean; password?: string }) => {
+    mutationFn: (body: { id: string; is_active?: boolean; password?: string; nickname?: string }) => {
       const { id, ...payload } = body;
       return apiFetch(`/api/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
     },
@@ -81,31 +79,21 @@ export function Users() {
     onError: (e: Error) => message.error(e.message)
   });
 
-  const resetPassword = (user: UserRow) => {
-    const pwd = window.prompt(`为 ${user.username} 设置新密码（至少 6 位）`);
-    if (!pwd) return;
-    updateMut.mutate({ id: user.id, password: pwd });
-  };
-
   const handleCreate = () => {
     const u = username.trim();
-    if (!u || !password) { message.warning('用户名和密码不能为空'); return; }
-    createMut.mutate({ username: u, password });
+    if (!u) { message.warning('用户名不能为空'); return; }
+    createMut.mutate({ username: u, nickname: nickname.trim() || undefined });
   };
 
-  const openRecharge = (u: UserRow) => {
-    setTargetUser(u);
-    setAmountYuan(null);
-    setNote('');
-    setRechargeOpen(true);
+  const closeCreate = () => {
+    setCreateOpen(false);
+    setGeneratedKey(null);
+    setUsername('');
+    setNickname('');
   };
 
-  const openAdjust = (u: UserRow) => {
-    setTargetUser(u);
-    setAdjustYuan(null);
-    setAdjustNote('');
-    setAdjustOpen(true);
-  };
+  const openRecharge = (u: UserRow) => { setTargetUser(u); setAmountYuan(null); setNote(''); setRechargeOpen(true); };
+  const openAdjust = (u: UserRow) => { setTargetUser(u); setAdjustYuan(null); setAdjustNote(''); setAdjustOpen(true); };
 
   const handleRecharge = () => {
     if (!targetUser || !amountYuan || amountYuan <= 0) { message.warning('金额必须为正数'); return; }
@@ -120,30 +108,30 @@ export function Users() {
 
   const columns: ColumnsType<UserRow> = [
     { title: '用户名', dataIndex: 'username', ellipsis: true },
+    { title: '昵称', dataIndex: 'nickname', width: 120, ellipsis: true, render: (v: string | null) => v || '—' },
     {
-      title: '状态', dataIndex: 'is_active', width: 90, align: 'center',
-      render: (v: boolean) => v
-        ? <Badge status="success" text="启用" />
-        : <Badge status="error" text="停用" />
+      title: '状态', dataIndex: 'is_active', width: 80, align: 'center',
+      render: (v: boolean) => v ? <Badge status="success" text="启用" /> : <Badge status="error" text="停用" />
     },
     {
-      title: '用户 ID', dataIndex: 'id', width: 340, ellipsis: true,
+      title: '用户 ID', dataIndex: 'id', width: 300, ellipsis: true,
       render: (id: string) => (
-        <Typography.Text copyable={{ text: id }} style={{ fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-          {id}
-        </Typography.Text>
+        <Typography.Text copyable={{ text: id }} style={{ fontSize: 12, fontFamily: 'var(--font-mono)' }}>{id}</Typography.Text>
       )
     },
     {
       title: '操作', key: 'actions', width: 200, align: 'center',
       render: (_: unknown, u: UserRow) => (
         <Space size={4}>
-          <Tooltip title="充值"><Button size="small" type="text" icon={<DollarOutlined style={{ color: '#52c41a' }} />} onClick={() => openRecharge(u)} /></Tooltip>
+          <Tooltip title="充值"><Button size="small" type="text" icon={<DollarOutlined style={{ color: '#34a853' }} />} onClick={() => openRecharge(u)} /></Tooltip>
           <Tooltip title="调整"><Button size="small" type="text" icon={<ToolOutlined />} onClick={() => openAdjust(u)} /></Tooltip>
-          <Tooltip title="重置密码"><Button size="small" type="text" icon={<KeyOutlined />} onClick={() => resetPassword(u)} /></Tooltip>
-          <Popconfirm title={`确认${u.is_active ? '停用' : '启用'} ${u.username}？`} onConfirm={() => updateMut.mutate({ id: u.id, is_active: !u.is_active })}>
+          <Tooltip title="重置密码"><Button size="small" type="text" icon={<KeyOutlined />} onClick={() => {
+            const pwd = window.prompt(`为 ${u.username} 设置新密码`);
+            if (pwd) updateMut.mutate({ id: u.id, password: pwd });
+          }} /></Tooltip>
+          <Popconfirm title={`确认${u.is_active ? '停用' : '启用'}？`} onConfirm={() => updateMut.mutate({ id: u.id, is_active: !u.is_active })}>
             <Tooltip title={u.is_active ? '停用' : '启用'}>
-              <Button size="small" type="text" icon={u.is_active ? <StopOutlined style={{ color: '#faad14' }} /> : <CheckCircleOutlined style={{ color: '#52c41a' }} />} />
+              <Button size="small" type="text" icon={u.is_active ? <StopOutlined style={{ color: '#f9ab00' }} /> : <CheckCircleOutlined style={{ color: '#34a853' }} />} />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -151,10 +139,10 @@ export function Users() {
     }
   ];
 
-  const F = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
+  const Label = ({ text, required, children }: { text: string; required?: boolean; children: React.ReactNode }) => (
     <div>
-      <div style={{ fontSize: 13, marginBottom: 6, color: '#1f1f1f', fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ff4d4f', marginLeft: 2 }}>*</span>}
+      <div style={{ fontSize: 13, marginBottom: 6, color: '#202124', fontWeight: 500 }}>
+        {text}{required && <span style={{ color: '#d93025', marginLeft: 2 }}>*</span>}
       </div>
       {children}
     </div>
@@ -166,87 +154,86 @@ export function Users() {
         <div>
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>代写账号</h2>
           <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
-            管理 writer 账号，直接在操作列中充值或调整余额。
+            管理 writer 账号，操作列直接充值、调整余额。密码为一次性密钥。
           </p>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setUsername(''); setPassword(''); setCreateOpen(true); }}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setUsername(''); setNickname(''); setGeneratedKey(null); setCreateOpen(true); }}>
           新建 writer
         </Button>
       </div>
 
-      <Table<UserRow>
-        rowKey="id"
-        size="middle"
-        loading={isLoading}
-        columns={columns}
-        dataSource={writers}
-        pagination={false}
-        style={{ borderRadius: 8 }}
-      />
+      <Table<UserRow> rowKey="id" size="middle" loading={isLoading} columns={columns} dataSource={writers} pagination={false} style={{ borderRadius: 8 }} />
 
-      {/* 新建 */}
+      {/* Create writer */}
       <Modal
         title="新建 writer"
         open={createOpen}
-        onOk={handleCreate}
-        onCancel={() => setCreateOpen(false)}
+        onCancel={closeCreate}
+        footer={generatedKey ? (
+          <Button type="primary" onClick={closeCreate}>关闭</Button>
+        ) : undefined}
+        onOk={generatedKey ? undefined : handleCreate}
         okText="创建"
         cancelText="取消"
         confirmLoading={createMut.isPending}
         width={440}
         destroyOnClose
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px 0 4px' }}>
-          <F label="用户名" required>
-            <Input size="large" value={username} onChange={e => setUsername(e.target.value)} placeholder="登录用户名" autoComplete="off" />
-          </F>
-          <F label="初始密码" required>
-            <Input.Password size="large" value={password} onChange={e => setPassword(e.target.value)} placeholder="至少 6 位" autoComplete="new-password" />
-          </F>
-        </div>
+        {generatedKey ? (
+          <div style={{ padding: '16px 0' }}>
+            <div style={{ marginBottom: 12, color: '#34a853', fontWeight: 500 }}>创建成功</div>
+            <div style={{ marginBottom: 16, fontSize: 13, color: '#5f6368' }}>
+              以下密钥仅显示一次，请立即复制给 writer 使用：
+            </div>
+            <div style={{
+              padding: '12px 16px', borderRadius: 8, background: '#f8f9fa', border: '1px solid #e8eaed',
+              fontFamily: 'var(--font-mono)', fontSize: 15, letterSpacing: '0.05em',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <span>{generatedKey}</span>
+              <Button
+                type="text"
+                icon={<CopyOutlined />}
+                onClick={() => { navigator.clipboard.writeText(generatedKey); message.success('已复制'); }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
+            <Label text="用户名（登录用）" required>
+              <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="登录用户名" autoComplete="off" />
+            </Label>
+            <Label text="昵称">
+              <Input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="可选，显示名" />
+            </Label>
+            <div style={{ fontSize: 12, color: '#9aa0a6', background: '#f8f9fa', padding: '8px 12px', borderRadius: 4 }}>
+              密码将自动生成一次性密钥，创建后仅显示一次。
+            </div>
+          </div>
+        )}
       </Modal>
 
-      {/* 充值 */}
-      <Modal
-        title={`充值 — ${targetUser?.username ?? ''}`}
-        open={rechargeOpen}
-        onOk={handleRecharge}
-        onCancel={() => setRechargeOpen(false)}
-        okText="确认充值"
-        cancelText="取消"
-        confirmLoading={rechargeMut.isPending}
-        width={440}
-        destroyOnClose
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px 0 4px' }}>
-          <F label="充值金额（元）" required>
+      {/* Recharge */}
+      <Modal title={`充值 — ${targetUser?.nickname || targetUser?.username || ''}`} open={rechargeOpen} onOk={handleRecharge} onCancel={() => setRechargeOpen(false)} okText="确认充值" cancelText="取消" confirmLoading={rechargeMut.isPending} width={420} destroyOnClose>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
+          <Label text="充值金额（元）" required>
             <InputNumber size="large" style={{ width: '100%' }} value={amountYuan} min={0.01} step={10} onChange={v => setAmountYuan(v)} placeholder="100" />
-          </F>
-          <F label="备注">
-            <Input size="large" value={note} onChange={e => setNote(e.target.value)} placeholder="可选" />
-          </F>
+          </Label>
+          <Label text="备注">
+            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="可选" />
+          </Label>
         </div>
       </Modal>
 
-      {/* 调整 */}
-      <Modal
-        title={`账务调整 — ${targetUser?.username ?? ''}`}
-        open={adjustOpen}
-        onOk={handleAdjust}
-        onCancel={() => setAdjustOpen(false)}
-        okText="确认调整"
-        cancelText="取消"
-        confirmLoading={adjustMut.isPending}
-        width={440}
-        destroyOnClose
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px 0 4px' }}>
-          <F label="调整金额（元），正数加余额，负数扣余额" required>
-            <InputNumber size="large" style={{ width: '100%' }} value={adjustYuan} step={1} onChange={v => setAdjustYuan(v)} placeholder="例如 10 或 -3.5" />
-          </F>
-          <F label="调整备注" required>
-            <Input size="large" value={adjustNote} onChange={e => setAdjustNote(e.target.value)} placeholder="对账修正原因" />
-          </F>
+      {/* Adjust */}
+      <Modal title={`账务调整 — ${targetUser?.nickname || targetUser?.username || ''}`} open={adjustOpen} onOk={handleAdjust} onCancel={() => setAdjustOpen(false)} okText="确认调整" cancelText="取消" confirmLoading={adjustMut.isPending} width={420} destroyOnClose>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
+          <Label text="调整金额（元）" required>
+            <InputNumber size="large" style={{ width: '100%' }} value={adjustYuan} step={1} onChange={v => setAdjustYuan(v)} placeholder="正数加余额，负数扣余额" />
+          </Label>
+          <Label text="调整备注" required>
+            <Input value={adjustNote} onChange={e => setAdjustNote(e.target.value)} placeholder="对账修正原因" />
+          </Label>
         </div>
       </Modal>
     </div>

@@ -8,9 +8,11 @@ import { authMe, clearToken, getToken } from './api/client';
 import { Billing } from './pages/Billing';
 import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
+import { Members } from './pages/Members';
 import { PRODUCT_NAME, ADMIN_CONSOLE_TAGLINE } from './brand';
 import { Models } from './pages/Models';
 import { Schools } from './pages/Schools';
+import { Usage } from './pages/Usage';
 import { Users } from './pages/Users';
 import './styles.css';
 
@@ -89,7 +91,11 @@ function Layout() {
           </NavLink>
           <NavLink to="/billing" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
             <span className="sidebar__link-dot" aria-hidden />
-            充值计费
+            计费流水
+          </NavLink>
+          <NavLink to="/usage" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            AI 调用
           </NavLink>
           <NavLink to="/models" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
             <span className="sidebar__link-dot" aria-hidden />
@@ -98,6 +104,10 @@ function Layout() {
           <NavLink to="/schools" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
             <span className="sidebar__link-dot" aria-hidden />
             学校模板
+          </NavLink>
+          <NavLink to="/members" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            成员管理
           </NavLink>
         </nav>
         <div className="sidebar__footer">
@@ -111,8 +121,10 @@ function Layout() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/billing" element={<Billing />} />
+          <Route path="/usage" element={<Usage />} />
           <Route path="/models" element={<Models />} />
           <Route path="/schools" element={<Schools />} />
+          <Route path="/members" element={<Members />} />
         </Routes>
       </main>
     </div>

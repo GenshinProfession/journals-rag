@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "antd": "^5.24.0",
+    "recharts": "^2.15.0",
+    "dayjs": "^1.11.0",
     "@vitejs/plugin-react": "latest",
     "vite": "latest",
     "typescript": "latest",

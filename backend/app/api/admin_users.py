@@ -1,3 +1,4 @@
+import secrets
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
@@ -6,7 +7,7 @@ from sqlalchemy import select
 from app.deps import AdminUserDep, DbSessionDep
 from app.models.billing import AccountWallet
 from app.models.user import User
-from app.schemas.users import UserResponse, UserUpdate, WriterCreate
+from app.schemas.users import AdminCreate, UserResponse, UserUpdate, WriterCreate
 from app.security import hash_password
 
 router = APIRouter()
@@ -18,16 +19,18 @@ def list_users(_admin: AdminUserDep, db: DbSessionDep) -> list[User]:
     return list(rows)
 
 
-@router.post("", response_model=UserResponse, status_code=201)
-def create_writer(_admin: AdminUserDep, db: DbSessionDep, payload: WriterCreate) -> User:
+@router.post("")
+def create_writer(_admin: AdminUserDep, db: DbSessionDep, payload: WriterCreate) -> dict:
     dup = db.scalar(select(User.id).where(User.username == payload.username))
     if dup is not None:
         raise HTTPException(status_code=409, detail="Username already registered")
+    raw_key = secrets.token_hex(16)
     user = User(
         username=payload.username,
-        password_hash=hash_password(payload.password),
+        nickname=payload.nickname,
+        password_hash=hash_password(raw_key),
         role="writer",
-        is_active=payload.is_active,
+        is_active=True,
         created_by=_admin.id,
     )
     db.add(user)
@@ -35,7 +38,33 @@ def create_writer(_admin: AdminUserDep, db: DbSessionDep, payload: WriterCreate)
     db.add(AccountWallet(user_id=user.id))
     db.commit()
     db.refresh(user)
-    return user
+    return {
+        "id": str(user.id),
+        "username": user.username,
+        "nickname": user.nickname,
+        "role": user.role,
+        "is_active": user.is_active,
+        "secret_key": raw_key,
+    }
+
+
+@router.post("/admin", status_code=201)
+def create_admin(_admin: AdminUserDep, db: DbSessionDep, payload: AdminCreate) -> dict:
+    dup = db.scalar(select(User.id).where(User.username == payload.username))
+    if dup is not None:
+        raise HTTPException(status_code=409, detail="Username already registered")
+    user = User(
+        username=payload.username,
+        nickname=payload.nickname,
+        password_hash=hash_password(payload.password),
+        role="admin",
+        is_active=True,
+        created_by=_admin.id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"id": str(user.id), "username": user.username, "nickname": user.nickname, "role": user.role, "is_active": user.is_active}
 
 
 @router.patch("/{user_id}", response_model=UserResponse)
@@ -50,6 +79,8 @@ def update_user(_admin: AdminUserDep, db: DbSessionDep, user_id: UUID, payload: 
         user.is_active = payload.is_active
     if payload.password is not None:
         user.password_hash = hash_password(payload.password)
+    if payload.nickname is not None:
+        user.nickname = payload.nickname
 
     db.add(user)
     db.commit()

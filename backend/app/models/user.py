@@ -12,6 +12,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
     username: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    nickname: Mapped[str | None] = mapped_column(String(100), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(20), default="writer")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
