@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Input, InputNumber, Modal, Popconfirm, Space, Table, Tag, Tooltip, message } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
+import {
+  Button, Card, Col, Empty, Input, InputNumber, Modal, Popconfirm,
+  Row, Tag, Tooltip, Typography, Upload, message
+} from 'antd';
+import {
+  PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined,
+  CheckCircleOutlined, UploadOutlined, FileTextOutlined
+} from '@ant-design/icons';
 import { apiFetch } from '../api/client';
 
 type SchoolTemplate = {
@@ -100,10 +105,7 @@ export function Schools() {
   };
 
   const handleSave = () => {
-    if (!form.name.trim()) {
-      setFormError('模板名称不能为空');
-      return;
-    }
+    if (!form.name.trim()) { setFormError('模板名称不能为空'); return; }
     saveMut.mutate({
       name: form.name.trim(),
       degree_level: form.degreeLevel.trim() || null,
@@ -116,68 +118,31 @@ export function Schools() {
     });
   };
 
-  const columns: ColumnsType<SchoolTemplate> = [
-    {
-      title: '名称', dataIndex: 'name', ellipsis: true,
-      render: (name: string, item: SchoolTemplate) => (
-        <span>
-          {name}
-          {!item.enabled && <Tag color="red" style={{ marginLeft: 8 }}>已禁用</Tag>}
-        </span>
-      )
-    },
-    {
-      title: '层次/专业', key: 'deg', width: 180, ellipsis: true,
-      render: (_: unknown, item: SchoolTemplate) => `${item.degree_level || '通用'} / ${item.discipline || '通用'}`
-    },
-    {
-      title: '引用格式', dataIndex: 'citation_style', width: 130, ellipsis: true,
-      render: (v: string | null) => v || '—'
-    },
-    {
-      title: '字数范围', key: 'words', width: 130, align: 'right',
-      render: (_: unknown, item: SchoolTemplate) => (
-        <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-          {item.word_count_min ?? '—'} – {item.word_count_max ?? '—'}
-        </span>
-      )
-    },
-    {
-      title: '操作', key: 'actions', width: 140, align: 'center',
-      render: (_: unknown, item: SchoolTemplate) => (
-        <Space size={4}>
-          <Tooltip title="编辑">
-            <Button size="small" type="text" icon={<EditOutlined />} onClick={() => openEdit(item)} />
-          </Tooltip>
-          <Tooltip title={item.enabled ? '禁用' : '启用'}>
-            <Button
-              size="small"
-              type="text"
-              icon={item.enabled ? <StopOutlined style={{ color: '#faad14' }} /> : <CheckCircleOutlined style={{ color: '#52c41a' }} />}
-              disabled={toggleMut.isPending}
-              onClick={() => toggleMut.mutate(item)}
-            />
-          </Tooltip>
-          <Popconfirm title="确认删除此模板？" onConfirm={() => deleteMut.mutate(item.id)}>
-            <Tooltip title="删除">
-              <Button size="small" type="text" danger icon={<DeleteOutlined />} />
-            </Tooltip>
-          </Popconfirm>
-        </Space>
-      )
-    }
-  ];
+  const handleFileUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result;
+      if (typeof text === 'string') {
+        setForm(f => ({ ...f, formattingRules: text }));
+        message.success(`已读取 ${file.name}`);
+      }
+    };
+    reader.readAsText(file);
+    return false;
+  };
 
-  const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  const F = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
     <div>
-      <div style={{ fontSize: 13, marginBottom: 4, color: '#3f3f46' }}>{label}</div>
+      <div style={{ fontSize: 13, marginBottom: 6, color: '#1f1f1f', fontWeight: 500 }}>
+        {label}{required && <span style={{ color: '#ff4d4f', marginLeft: 2 }}>*</span>}
+      </div>
       {children}
     </div>
   );
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>学校模板</h2>
           <p style={{ margin: '4px 0 0', color: '#71717a', fontSize: 13 }}>
@@ -187,74 +152,129 @@ export function Schools() {
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>新增模板</Button>
       </div>
 
-      <Table<SchoolTemplate>
-        rowKey="id"
-        size="middle"
-        loading={listQ.isLoading}
-        columns={columns}
-        dataSource={listQ.data ?? []}
-        pagination={false}
-        style={{ borderRadius: 8 }}
-      />
+      {listQ.isLoading && <Card loading style={{ borderRadius: 12 }} />}
+      {!listQ.isLoading && (!listQ.data || listQ.data.length === 0) && (
+        <Empty description="暂无模板" style={{ padding: 60 }}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>创建第一个模板</Button>
+        </Empty>
+      )}
+
+      <Row gutter={[16, 16]}>
+        {(listQ.data ?? []).map(item => (
+          <Col key={item.id} xs={24} sm={12} lg={8} xl={6}>
+            <Card
+              hoverable
+              style={{
+                borderRadius: 12,
+                opacity: item.enabled ? 1 : 0.6,
+                transition: 'box-shadow 0.2s, opacity 0.2s',
+              }}
+              styles={{ body: { padding: '20px 20px 16px' } }}
+              actions={[
+                <Tooltip title="编辑" key="edit">
+                  <EditOutlined onClick={() => openEdit(item)} />
+                </Tooltip>,
+                <Tooltip title={item.enabled ? '禁用' : '启用'} key="toggle">
+                  {item.enabled
+                    ? <StopOutlined style={{ color: '#faad14' }} onClick={() => toggleMut.mutate(item)} />
+                    : <CheckCircleOutlined style={{ color: '#52c41a' }} onClick={() => toggleMut.mutate(item)} />
+                  }
+                </Tooltip>,
+                <Popconfirm title="确认删除？" onConfirm={() => deleteMut.mutate(item.id)} key="del">
+                  <DeleteOutlined style={{ color: '#ff4d4f' }} />
+                </Popconfirm>,
+              ]}
+            >
+              <div style={{ marginBottom: 10 }}>
+                <Typography.Text strong style={{ fontSize: 15 }}>{item.name}</Typography.Text>
+                {!item.enabled && <Tag color="red" style={{ marginLeft: 8, verticalAlign: 'text-top' }}>已禁用</Tag>}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13, color: '#71717a' }}>
+                <div>
+                  <span style={{ color: '#999', marginRight: 6 }}>层次</span>
+                  {item.degree_level || '通用'}
+                  <span style={{ margin: '0 8px', color: '#e5e5e5' }}>|</span>
+                  <span style={{ color: '#999', marginRight: 6 }}>专业</span>
+                  {item.discipline || '通用'}
+                </div>
+                {item.citation_style && (
+                  <div>
+                    <span style={{ color: '#999', marginRight: 6 }}>引用</span>
+                    {item.citation_style}
+                  </div>
+                )}
+                {(item.word_count_min || item.word_count_max) && (
+                  <div style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <span style={{ color: '#999', marginRight: 6 }}>字数</span>
+                    {item.word_count_min ?? '—'} – {item.word_count_max ?? '—'}
+                  </div>
+                )}
+                {item.formatting_rules && (
+                  <div style={{ marginTop: 4 }}>
+                    <Tag icon={<FileTextOutlined />} color="blue">已配置格式规则</Tag>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
       <Modal
-        title={editing ? `编辑：${editing.name}` : '新增模板'}
+        title={editing ? `编辑 — ${editing.name}` : '新增模板'}
         open={modalOpen}
         onCancel={closeModal}
         onOk={handleSave}
         okText={editing ? '保存' : '创建'}
         cancelText="取消"
         confirmLoading={saveMut.isPending}
-        width={520}
+        width={540}
         destroyOnClose
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '12px 0' }}>
-          <F label="模板名称">
-            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="例如 清华大学 MBA" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px 0 4px' }}>
+          <F label="模板名称" required>
+            <Input size="large" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="例如 清华大学 MBA" />
           </F>
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}>
-              <F label="层次（可空）">
+              <F label="层次">
                 <Input value={form.degreeLevel} onChange={e => setForm(f => ({ ...f, degreeLevel: e.target.value }))} placeholder="master" />
               </F>
             </div>
             <div style={{ flex: 1 }}>
-              <F label="专业/方向（可空）">
+              <F label="专业/方向">
                 <Input value={form.discipline} onChange={e => setForm(f => ({ ...f, discipline: e.target.value }))} />
               </F>
             </div>
           </div>
-          <F label="引用格式（可空）">
+          <F label="引用格式">
             <Input value={form.citationStyle} onChange={e => setForm(f => ({ ...f, citationStyle: e.target.value }))} placeholder="GB/T 7714" />
           </F>
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}>
               <F label="最少字数">
-                <InputNumber
-                  style={{ width: '100%' }}
-                  value={form.minWords !== '' ? Number(form.minWords) : undefined}
-                  min={0}
-                  onChange={v => setForm(f => ({ ...f, minWords: v ?? '' }))}
-                />
+                <InputNumber style={{ width: '100%' }} value={form.minWords !== '' ? Number(form.minWords) : undefined} min={0} onChange={v => setForm(f => ({ ...f, minWords: v ?? '' }))} />
               </F>
             </div>
             <div style={{ flex: 1 }}>
               <F label="最多字数">
-                <InputNumber
-                  style={{ width: '100%' }}
-                  value={form.maxWords !== '' ? Number(form.maxWords) : undefined}
-                  min={0}
-                  onChange={v => setForm(f => ({ ...f, maxWords: v ?? '' }))}
-                />
+                <InputNumber style={{ width: '100%' }} value={form.maxWords !== '' ? Number(form.maxWords) : undefined} min={0} onChange={v => setForm(f => ({ ...f, maxWords: v ?? '' }))} />
               </F>
             </div>
           </div>
-          <F label="格式规则（可空）">
-            <Input.TextArea
-              rows={3}
-              value={form.formattingRules}
-              onChange={e => setForm(f => ({ ...f, formattingRules: e.target.value }))}
-            />
+          <F label="格式规则">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Upload beforeUpload={handleFileUpload} accept=".txt,.md,.json" showUploadList={false} maxCount={1}>
+                <Button icon={<UploadOutlined />} size="small">上传规则文件（.txt / .md / .json）</Button>
+              </Upload>
+              <Input.TextArea
+                rows={4}
+                value={form.formattingRules}
+                onChange={e => setForm(f => ({ ...f, formattingRules: e.target.value }))}
+                placeholder="直接输入或上传文件后自动填充"
+                style={{ fontSize: 13 }}
+              />
+            </div>
           </F>
           {formError && <div className="alert alert--error" style={{ marginBottom: 0 }}>{formError}</div>}
         </div>

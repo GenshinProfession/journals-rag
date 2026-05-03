@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Tooltip, message } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { apiFetch } from '../api/client';
 
 type ModelRow = {
@@ -26,6 +26,15 @@ const ENDPOINT_OPTIONS = [
   { label: 'anthropic_messages (/v1/messages)', value: 'anthropic_messages' },
 ];
 
+const SCENARIO_OPTIONS = [
+  { label: '文献综述', value: 'reference_review' },
+  { label: 'RAG 检索', value: 'rag' },
+  { label: '大纲生成', value: 'outline' },
+  { label: '章节写作', value: 'chapter_write' },
+  { label: '章节审阅', value: 'chapter_review' },
+  { label: '章节改写', value: 'chapter_rewrite' },
+];
+
 const EMPTY_FORM = {
   displayName: '',
   providerModel: '',
@@ -33,7 +42,7 @@ const EMPTY_FORM = {
   apiKeyName: '',
   inputPrice: '',
   outputPrice: '',
-  scenarios: '',
+  scenarios: [] as string[],
 };
 
 export function Models() {
@@ -95,7 +104,7 @@ export function Models() {
       apiKeyName: m.api_key_name ?? '',
       inputPrice: String(m.input_price_per_1k_cents),
       outputPrice: String(m.output_price_per_1k_cents),
-      scenarios: m.allowed_scenarios?.join(', ') ?? '',
+      scenarios: m.allowed_scenarios ?? [],
     });
     setFormError(null);
     setModalOpen(true);
@@ -119,7 +128,6 @@ export function Models() {
       setFormError('价格须为非负数（美分/千 token）');
       return;
     }
-    const allowed = form.scenarios.split(',').map(s => s.trim()).filter(Boolean);
     saveMut.mutate({
       display_name: form.displayName.trim(),
       provider_model: form.providerModel.trim(),
@@ -127,7 +135,7 @@ export function Models() {
       api_key_name: form.apiKeyName.trim() || null,
       input_price_per_1k_cents: Math.round(inp),
       output_price_per_1k_cents: Math.round(outp),
-      allowed_scenarios: allowed
+      allowed_scenarios: form.scenarios
     });
   };
 
@@ -163,9 +171,12 @@ export function Models() {
     },
     {
       title: '场景', dataIndex: 'allowed_scenarios', width: 140, ellipsis: true,
-      render: (sc: string[]) => sc?.length
-        ? <Space size={2} wrap>{sc.map(s => <Tag key={s} style={{ margin: 0 }}>{s}</Tag>)}</Space>
-        : '—'
+      render: (sc: string[]) => {
+        if (!sc?.length) return '—';
+        const labelMap: Record<string, string> = {};
+        SCENARIO_OPTIONS.forEach(o => { labelMap[o.value] = o.label; });
+        return <Space size={2} wrap>{sc.map(s => <Tag key={s} style={{ margin: 0 }}>{labelMap[s] || s}</Tag>)}</Space>;
+      }
     },
     {
       title: '操作', key: 'actions', width: 160, align: 'center', fixed: 'right',
@@ -269,8 +280,15 @@ export function Models() {
               />
             </F>
           </div>
-          <F label="适用场景标签（逗号分隔，可空）">
-            <Input value={form.scenarios} onChange={e => setForm(f => ({ ...f, scenarios: e.target.value }))} placeholder="outline, rag" />
+          <F label="适用场景">
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              value={form.scenarios}
+              onChange={v => setForm(f => ({ ...f, scenarios: v }))}
+              options={SCENARIO_OPTIONS}
+              placeholder="选择适用场景"
+            />
           </F>
           {formError && <div className="alert alert--error" style={{ marginBottom: 0 }}>{formError}</div>}
         </div>
