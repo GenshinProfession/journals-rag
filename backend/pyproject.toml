@@ -9,7 +9,7 @@ description = "FastAPI backend for thesis generation, billing, model routing, an
 requires-python = ">=3.11"
 dependencies = [
   "alembic",
-  "bcrypt",
+  "bcrypt>=4.0.1,<5",
   "celery",
   "fastapi",
   "httpx",
