@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: journals_rag
+      POSTGRES_USER: journals
+      POSTGRES_PASSWORD: journer
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    env_file:
+      - ../.env.example
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    command: celery -A app.worker.celery_app worker --loglevel=INFO
+    env_file:
+      - ../.env.example
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      - postgres
+      - redis
+
+  admin-web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend-admin
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+
+  writer-web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend-writer
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  uploads:

@@ -1,0 +1,10 @@
+FROM node:20-alpine AS build
+WORKDIR /app/frontend-writer
+COPY frontend-writer/package*.json ./
+RUN npm install
+COPY frontend-writer/ ./
+RUN npm run build
+
+FROM nginx:1.27-alpine
+COPY deploy/nginx-writer.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/frontend-writer/dist /var/www/frontend-writer
