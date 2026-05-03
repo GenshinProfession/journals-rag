@@ -22,7 +22,7 @@ docker compose -f deploy/docker-compose.yml up
 ```
 
 On startup the backend installs dependencies, runs `alembic upgrade head`, starts FastAPI, and creates the optional bootstrap admin if configured.
-The compose file reads `.env.example` for a zero-setup local smoke run. For production, copy it to `.env` and update `deploy/docker-compose.yml` or your deployment secret manager to use real values.
+Compose loads **`.env`** in the repo root (create with `cp .env.example .env`). The helper bats copy `.env.example` → `.env` if missing. For production, keep secrets out of git and inject via your secret manager.
 For local smoke tests, `BOOTSTRAP_DEMO_MODEL=true` creates one zero-cost model row if the model catalog is empty.
 
 - Writer frontend: `http://localhost:8080`

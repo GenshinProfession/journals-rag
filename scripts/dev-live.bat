@@ -2,11 +2,19 @@
 setlocal
 cd /d "%~dp0.."
 
+if not exist ".env" (
+    echo 未找到 .env，从 .env.example 复制...
+    copy /y ".env.example" ".env" >nul
+)
+
 echo.
 echo === 开发模式：Docker 只跑后端；前端用 Vite 热更新 ===
 echo Admin:  http://localhost:5173
 echo Writer: http://localhost:5174
 echo API:    http://localhost:8000  （Vite 会把 /api 代理到此处）
+echo.
+echo 注意: 若本机已在跑「完整 Docker 栈」，请先停止以免端口冲突：
+echo   docker compose -f deploy\docker-compose.yml down
 echo.
 
 where docker >nul 2>&1

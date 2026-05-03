@@ -2,6 +2,11 @@
 setlocal
 cd /d "%~dp0.."
 
+if not exist ".env" (
+    echo 未找到 .env，从 .env.example 复制...
+    copy /y ".env.example" ".env" >nul
+)
+
 echo.
 echo === Journals RAG: 更新并全量 Docker 部署 ===
 

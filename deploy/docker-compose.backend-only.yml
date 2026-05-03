@@ -23,7 +23,7 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.backend
     env_file:
-      - ../.env.example
+      - ../.env
     volumes:
       - uploads:/data/uploads
     ports:
@@ -38,7 +38,7 @@ services:
       dockerfile: deploy/Dockerfile.backend
     command: celery -A app.worker.celery_app worker --loglevel=INFO
     env_file:
-      - ../.env.example
+      - ../.env
     volumes:
       - uploads:/data/uploads
     depends_on:
