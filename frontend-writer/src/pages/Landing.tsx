@@ -1,5 +1,6 @@
-import { Button, Card, Space } from 'antd';
+import { Button, Card } from 'antd';
 import { FileTextOutlined, DatabaseOutlined, WalletOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import { useWriterAuth } from '../auth/WriterAuthContext';
 
 export function Landing() {
@@ -12,11 +13,16 @@ export function Landing() {
       </h1>
       <p style={{ fontSize: 15, color: '#5f6368', marginBottom: 32, lineHeight: 1.6 }}>
         管理课题与参考文献，完成 RAG 入库、大纲与章节生成。<br />
-        登录后创建项目并进入论文向导。
+        登录后在「工作台」创建论文项目，从同一流程连续完成写作与导出。
       </p>
-      <Button type="primary" size="large" onClick={() => openLoginModal()} style={{ marginBottom: 48 }}>
-        登录
-      </Button>
+      <div style={{ marginBottom: 32 }}>
+        <Button type="primary" size="large" onClick={() => openLoginModal()} style={{ marginRight: 12 }}>
+          登录
+        </Button>
+        <Link to="/guide" style={{ fontSize: 14, color: '#1a73e8' }}>
+          先看使用教程
+        </Link>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, textAlign: 'left' }}>
         <Card style={{ borderColor: '#e8eaed' }}>

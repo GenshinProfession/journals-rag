@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import {
-  Alert, Button, Card, Checkbox, Collapse, Divider, Empty, Form, Input, List,
-  Select, Space, Steps, Tag, Tooltip, Upload, message as antMsg,
+  Alert, Button, Card, Checkbox, Collapse, Divider, Form, Input, List,
+  Select, Space, Steps, Tag, message as antMsg,
 } from 'antd';
 import {
   UploadOutlined, CheckCircleOutlined, SearchOutlined, FileTextOutlined,
@@ -44,15 +44,15 @@ function downloadBlob(filename: string, data: BlobPart, type: string) {
 }
 
 export function Wizard() {
-  const params = useParams();
+  const { projectId: projectIdParam } = useParams<{ projectId: string }>();
   const nav = useNavigate();
   const qc = useQueryClient();
   const [msgApi, ctxHolder] = antMsg.useMessage();
 
+  const projectId = projectIdParam ?? '';
   const projectsQ = useQuery({ queryKey: ['writer', 'projects'], queryFn: () => apiFetch('/api/projects') as Promise<ProjectRow[]> });
   const modelsQ = useQuery({ queryKey: ['writer', 'models'], queryFn: () => apiFetch('/api/models') as Promise<ModelRow[]> });
 
-  const [projectId, setProjectId] = useState(params.projectId ?? '');
   const project = useMemo(() => projectsQ.data?.find(p => p.id === projectId), [projectId, projectsQ.data]);
 
   const [title, setTitle] = useState('');
@@ -65,6 +65,19 @@ export function Wizard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchItems, setSearchItems] = useState<Array<{ id: string; text: string }>>([]);
   const [chapterDrafts, setChapterDrafts] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setTitle('');
+    setBodyText('');
+    setUploadFile(null);
+    setLiteratureId('');
+    setDocumentId('');
+    setChunkPreview([]);
+    setSelectedChunkIds([]);
+    setSearchQuery('');
+    setSearchItems([]);
+    setChapterDrafts({});
+  }, [projectId]);
 
   const literatureQ = useQuery({
     queryKey: ['writer', 'literature', projectId],
@@ -180,29 +193,7 @@ export function Wizard() {
   const selectedLiterature = literatureQ.data?.items?.find(x => x.id === literatureId);
 
   if (!projectId) {
-    return (
-      <div>
-        {ctxHolder}
-        <h2 style={{ fontSize: 20, fontWeight: 500, color: '#202124', marginBottom: 8 }}>论文生成向导</h2>
-        <p style={{ color: '#5f6368', marginBottom: 24, fontSize: 13 }}>选择一个项目来开始论文写作流程。</p>
-        {projectsQ.isLoading && <p style={{ color: '#5f6368' }}>加载中…</p>}
-        {projectsQ.data && projectsQ.data.length === 0 && (
-          <Empty description="还没有项目">
-            <Button type="primary" onClick={() => nav('/')}>去创建项目</Button>
-          </Empty>
-        )}
-        {projectsQ.data && projectsQ.data.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-            {projectsQ.data.map(p => (
-              <Card key={p.id} hoverable onClick={() => { setProjectId(p.id); nav(`/wizard/${p.id}`, { replace: true }); }} style={{ borderColor: '#e8eaed' }}>
-                <div style={{ fontWeight: 500, marginBottom: 4 }}>{p.title || p.discipline}</div>
-                <Tag>{p.status}</Tag>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   const currentStep = (() => {
@@ -227,7 +218,7 @@ export function Wizard() {
             按顺序完成参考论文、审核入库、检索大纲与章节写作。
           </p>
         </div>
-        <Button size="small" onClick={() => { setProjectId(''); nav('/wizard', { replace: true }); }}>切换项目</Button>
+        <Button size="small" onClick={() => nav('/', { replace: true })}>返回工作台</Button>
       </div>
 
       <Steps current={currentStep} size="small" style={{ marginBottom: 28 }} items={[
