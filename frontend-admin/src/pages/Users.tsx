@@ -1,6 +1,7 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Card, Space, Table, Tag, Typography } from 'antd';
+import { Button, Card, Input, Modal, Space, Table, Tag, Typography, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { apiFetch } from '../api/client';
 
@@ -8,9 +9,10 @@ type UserRow = { id: string; username: string; role: string; is_active: boolean 
 
 export function Users() {
   const qc = useQueryClient();
+  const [createOpen, setCreateOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [formError, setFormError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'users'],
@@ -23,11 +25,7 @@ export function Users() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'users'] });
       qc.invalidateQueries({ queryKey: ['admin', 'wallets'] });
-      setUsername('');
-      setPassword('');
-      setFormError(null);
-    },
-    onError: (e: Error) => setFormError(e.message)
+    }
   });
 
   const updateMut = useMutation({
@@ -36,7 +34,7 @@ export function Users() {
       return apiFetch(`/api/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'users'] }),
-    onError: (e: Error) => setFormError(e.message)
+    onError: (e: Error) => message.error(e.message)
   });
 
   const resetPassword = (user: UserRow) => {
@@ -45,10 +43,36 @@ export function Users() {
     updateMut.mutate({ id: user.id, password: pwd });
   };
 
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    createMut.mutate({ username, password });
+  const openCreateModal = () => {
+    setCreateError(null);
+    setUsername('');
+    setPassword('');
+    setCreateOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    setCreateOpen(false);
+    setUsername('');
+    setPassword('');
+    setCreateError(null);
+  };
+
+  const handleCreate = async () => {
+    const u = username.trim();
+    if (!u || !password) {
+      setCreateError('用户名和密码不能为空');
+      return Promise.reject(new Error('validation'));
+    }
+    setCreateError(null);
+    try {
+      await createMut.mutateAsync({ username: u, password });
+      message.success('已创建 writer');
+      closeCreateModal();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '创建失败';
+      setCreateError(msg);
+      return Promise.reject(e);
+    }
   };
 
   const columns: ColumnsType<UserRow> = [
@@ -104,33 +128,26 @@ export function Users() {
 
   return (
     <div className="panel stack">
-      <div>
-        <h2>代写账号</h2>
-        <p className="muted" style={{ marginBottom: 0 }}>
-          创建 writer 账号时会自动建立空钱包，可在「充值计费」里人工加款。
-        </p>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: 16,
+          marginBottom: 16,
+          flexWrap: 'wrap'
+        }}
+      >
+        <div>
+          <h2 style={{ margin: 0 }}>代写账号</h2>
+          <p className="muted" style={{ margin: '4px 0 0', fontSize: 13, lineHeight: 1.5 }}>
+            创建 writer 账号时会自动建立空钱包，可在「充值计费」里人工加款。
+          </p>
+        </div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+          新建 writer
+        </Button>
       </div>
-
-      <form className="form-stack" onSubmit={onSubmit}>
-        <h3 style={{ marginTop: 0 }}>新建 writer</h3>
-        <div className="field">
-          <label htmlFor="new-writer-user">用户名</label>
-          <input id="new-writer-user" value={username} onChange={(e) => setUsername(e.target.value)} />
-        </div>
-        <div className="field">
-          <label htmlFor="new-writer-pass">初始密码</label>
-          <input
-            id="new-writer-pass"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        {formError && <div className="alert alert--error">{formError}</div>}
-        <button className="btn btn--primary" type="submit" disabled={createMut.isPending}>
-          {createMut.isPending ? '创建中…' : '创建'}
-        </button>
-      </form>
 
       {error && <div className="alert alert--error">{(error as Error).message}</div>}
       <Card size="small" styles={{ body: { padding: 0 } }} className="antd-table-card">
@@ -144,6 +161,39 @@ export function Users() {
           scroll={{ x: 720 }}
         />
       </Card>
+
+      <Modal
+        title="新建 writer"
+        open={createOpen}
+        onOk={handleCreate}
+        onCancel={closeCreateModal}
+        okText="创建"
+        cancelText="取消"
+        confirmLoading={createMut.isPending}
+        destroyOnClose
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <div style={{ marginBottom: 4 }}>用户名</div>
+            <Input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="登录用户名"
+              autoComplete="off"
+            />
+          </div>
+          <div>
+            <div style={{ marginBottom: 4 }}>初始密码</div>
+            <Input.Password
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="至少 6 位"
+              autoComplete="new-password"
+            />
+          </div>
+          {createError && <div className="alert alert--error" style={{ marginBottom: 0 }}>{createError}</div>}
+        </div>
+      </Modal>
     </div>
   );
 }
