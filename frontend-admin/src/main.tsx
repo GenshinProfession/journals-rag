@@ -142,9 +142,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       theme={{
         algorithm: theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#0f766e',
-          colorLink: '#0d9488',
-          borderRadius: 8
+          colorPrimary: '#1a73e8',
+          colorLink: '#1a73e8',
+          borderRadius: 4,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif',
+          fontSize: 14,
+          colorBgContainer: '#fff',
+          colorBorder: '#dadce0',
+          colorBorderSecondary: '#e8eaed',
         }
       }}
     >

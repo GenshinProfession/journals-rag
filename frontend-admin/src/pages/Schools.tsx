@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Button, Card, Col, Empty, Input, InputNumber, Modal, Popconfirm,
+  Button, Card, Checkbox, Col, Empty, Input, InputNumber, Modal, Popconfirm,
   Row, Tag, Tooltip, Typography, Upload, message
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined,
-  CheckCircleOutlined, UploadOutlined, FileTextOutlined
+  CheckCircleOutlined, UploadOutlined, FileTextOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
 import { apiFetch } from '../api/client';
 
@@ -38,11 +39,23 @@ export function Schools() {
   const [editing, setEditing] = useState<SchoolTemplate | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const listQ = useQuery({
     queryKey: ['admin', 'schools'],
     queryFn: () => apiFetch('/api/admin/schools') as Promise<SchoolTemplate[]>
   });
+
+  const filtered = useMemo(() => {
+    const all = listQ.data ?? [];
+    const q = search.trim().toLowerCase();
+    if (!q) return all;
+    return all.filter(t =>
+      t.name.toLowerCase().includes(q) ||
+      (t.degree_level ?? '').toLowerCase().includes(q) ||
+      (t.discipline ?? '').toLowerCase().includes(q)
+    );
+  }, [listQ.data, search]);
 
   const saveMut = useMutation({
     mutationFn: (payload: Record<string, unknown>) => {
@@ -131,87 +144,93 @@ export function Schools() {
     return false;
   };
 
-  const F = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
-    <div>
-      <div style={{ fontSize: 13, marginBottom: 6, color: '#1f1f1f', fontWeight: 500 }}>
-        {label}{required && <span style={{ color: '#ff4d4f', marginLeft: 2 }}>*</span>}
-      </div>
-      {children}
+  const Label = ({ text, required }: { text: string; required?: boolean }) => (
+    <div style={{ fontSize: 13, marginBottom: 6, color: '#202124', fontWeight: 500 }}>
+      {text}{required && <span style={{ color: '#d93025', marginLeft: 2 }}>*</span>}
     </div>
   );
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>学校模板</h2>
-          <p style={{ margin: '4px 0 0', color: '#71717a', fontSize: 13 }}>
-            维护学校/专业的格式、引用和字数规则，writer 新建项目时可选择。
-          </p>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>新增模板</Button>
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>学校模板</h2>
+        <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
+          维护学校/专业的格式、引用和字数规则。
+        </p>
       </div>
 
-      {listQ.isLoading && <Card loading style={{ borderRadius: 12 }} />}
-      {!listQ.isLoading && (!listQ.data || listQ.data.length === 0) && (
-        <Empty description="暂无模板" style={{ padding: 60 }}>
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>创建第一个模板</Button>
+      {/* Search + add */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center' }}>
+        <Input
+          prefix={<SearchOutlined style={{ color: '#9aa0a6' }} />}
+          placeholder="搜索学校名称、层次或专业"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          allowClear
+          style={{ maxWidth: 400, borderRadius: 20, height: 40, paddingLeft: 16 }}
+        />
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+          新增模板
+        </Button>
+      </div>
+
+      {listQ.isLoading && <Card loading style={{ borderRadius: 8 }} />}
+
+      {!listQ.isLoading && filtered.length === 0 && (
+        <Empty
+          description={search ? `没有找到「${search}」相关的模板` : '暂无模板'}
+          style={{ padding: 60 }}
+        >
+          {!search && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>创建第一个模板</Button>
+          )}
         </Empty>
       )}
 
       <Row gutter={[16, 16]}>
-        {(listQ.data ?? []).map(item => (
+        {filtered.map(item => (
           <Col key={item.id} xs={24} sm={12} lg={8} xl={6}>
             <Card
               hoverable
               style={{
-                borderRadius: 12,
-                opacity: item.enabled ? 1 : 0.6,
-                transition: 'box-shadow 0.2s, opacity 0.2s',
+                borderRadius: 8,
+                opacity: item.enabled ? 1 : 0.55,
+                border: '1px solid #e8eaed',
+                boxShadow: 'none',
               }}
-              styles={{ body: { padding: '20px 20px 16px' } }}
+              styles={{ body: { padding: '16px 16px 12px' } }}
               actions={[
                 <Tooltip title="编辑" key="edit">
                   <EditOutlined onClick={() => openEdit(item)} />
                 </Tooltip>,
                 <Tooltip title={item.enabled ? '禁用' : '启用'} key="toggle">
                   {item.enabled
-                    ? <StopOutlined style={{ color: '#faad14' }} onClick={() => toggleMut.mutate(item)} />
-                    : <CheckCircleOutlined style={{ color: '#52c41a' }} onClick={() => toggleMut.mutate(item)} />
+                    ? <StopOutlined style={{ color: '#f9ab00' }} onClick={() => toggleMut.mutate(item)} />
+                    : <CheckCircleOutlined style={{ color: '#34a853' }} onClick={() => toggleMut.mutate(item)} />
                   }
                 </Tooltip>,
                 <Popconfirm title="确认删除？" onConfirm={() => deleteMut.mutate(item.id)} key="del">
-                  <DeleteOutlined style={{ color: '#ff4d4f' }} />
+                  <DeleteOutlined style={{ color: '#d93025' }} />
                 </Popconfirm>,
               ]}
             >
-              <div style={{ marginBottom: 10 }}>
-                <Typography.Text strong style={{ fontSize: 15 }}>{item.name}</Typography.Text>
-                {!item.enabled && <Tag color="red" style={{ marginLeft: 8, verticalAlign: 'text-top' }}>已禁用</Tag>}
+              <div style={{ marginBottom: 8 }}>
+                <Typography.Text strong style={{ fontSize: 14 }}>{item.name}</Typography.Text>
+                {!item.enabled && <Tag color="red" style={{ marginLeft: 6, fontSize: 11 }}>禁用</Tag>}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13, color: '#71717a' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13, color: '#5f6368' }}>
                 <div>
-                  <span style={{ color: '#999', marginRight: 6 }}>层次</span>
-                  {item.degree_level || '通用'}
-                  <span style={{ margin: '0 8px', color: '#e5e5e5' }}>|</span>
-                  <span style={{ color: '#999', marginRight: 6 }}>专业</span>
-                  {item.discipline || '通用'}
+                  {item.degree_level || '通用'} · {item.discipline || '通用'}
                 </div>
-                {item.citation_style && (
-                  <div>
-                    <span style={{ color: '#999', marginRight: 6 }}>引用</span>
-                    {item.citation_style}
-                  </div>
-                )}
+                {item.citation_style && <div>引用：{item.citation_style}</div>}
                 {(item.word_count_min || item.word_count_max) && (
                   <div style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    <span style={{ color: '#999', marginRight: 6 }}>字数</span>
-                    {item.word_count_min ?? '—'} – {item.word_count_max ?? '—'}
+                    字数：{item.word_count_min ?? '—'} – {item.word_count_max ?? '—'}
                   </div>
                 )}
                 {item.formatting_rules && (
                   <div style={{ marginTop: 4 }}>
-                    <Tag icon={<FileTextOutlined />} color="blue">已配置格式规则</Tag>
+                    <Tag icon={<FileTextOutlined />}>已配置格式规则</Tag>
                   </div>
                 )}
               </div>
@@ -221,62 +240,64 @@ export function Schools() {
       </Row>
 
       <Modal
-        title={editing ? `编辑 — ${editing.name}` : '新增模板'}
+        title={editing ? `编辑模板` : '新增模板'}
         open={modalOpen}
         onCancel={closeModal}
         onOk={handleSave}
         okText={editing ? '保存' : '创建'}
         cancelText="取消"
         confirmLoading={saveMut.isPending}
-        width={540}
+        width={480}
         destroyOnClose
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px 0 4px' }}>
-          <F label="模板名称" required>
-            <Input size="large" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="例如 清华大学 MBA" />
-          </F>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
+          <div>
+            <Label text="学校/模板名称" required />
+            <Input
+              value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              placeholder="搜索或输入学校名称"
+              size="large"
+            />
+          </div>
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}>
-              <F label="层次">
-                <Input value={form.degreeLevel} onChange={e => setForm(f => ({ ...f, degreeLevel: e.target.value }))} placeholder="master" />
-              </F>
+              <Label text="层次" />
+              <Input value={form.degreeLevel} onChange={e => setForm(f => ({ ...f, degreeLevel: e.target.value }))} placeholder="master" />
             </div>
             <div style={{ flex: 1 }}>
-              <F label="专业/方向">
-                <Input value={form.discipline} onChange={e => setForm(f => ({ ...f, discipline: e.target.value }))} />
-              </F>
+              <Label text="专业/方向" />
+              <Input value={form.discipline} onChange={e => setForm(f => ({ ...f, discipline: e.target.value }))} />
             </div>
           </div>
-          <F label="引用格式">
+          <div>
+            <Label text="引用格式" />
             <Input value={form.citationStyle} onChange={e => setForm(f => ({ ...f, citationStyle: e.target.value }))} placeholder="GB/T 7714" />
-          </F>
+          </div>
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}>
-              <F label="最少字数">
-                <InputNumber style={{ width: '100%' }} value={form.minWords !== '' ? Number(form.minWords) : undefined} min={0} onChange={v => setForm(f => ({ ...f, minWords: v ?? '' }))} />
-              </F>
+              <Label text="最少字数" />
+              <InputNumber style={{ width: '100%' }} value={form.minWords !== '' ? Number(form.minWords) : undefined} min={0} onChange={v => setForm(f => ({ ...f, minWords: v ?? '' }))} />
             </div>
             <div style={{ flex: 1 }}>
-              <F label="最多字数">
-                <InputNumber style={{ width: '100%' }} value={form.maxWords !== '' ? Number(form.maxWords) : undefined} min={0} onChange={v => setForm(f => ({ ...f, maxWords: v ?? '' }))} />
-              </F>
+              <Label text="最多字数" />
+              <InputNumber style={{ width: '100%' }} value={form.maxWords !== '' ? Number(form.maxWords) : undefined} min={0} onChange={v => setForm(f => ({ ...f, maxWords: v ?? '' }))} />
             </div>
           </div>
-          <F label="格式规则">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <Upload beforeUpload={handleFileUpload} accept=".txt,.md,.json" showUploadList={false} maxCount={1}>
-                <Button icon={<UploadOutlined />} size="small">上传规则文件（.txt / .md / .json）</Button>
-              </Upload>
-              <Input.TextArea
-                rows={4}
-                value={form.formattingRules}
-                onChange={e => setForm(f => ({ ...f, formattingRules: e.target.value }))}
-                placeholder="直接输入或上传文件后自动填充"
-                style={{ fontSize: 13 }}
-              />
-            </div>
-          </F>
-          {formError && <div className="alert alert--error" style={{ marginBottom: 0 }}>{formError}</div>}
+          <div>
+            <Label text="格式规则" />
+            <Upload beforeUpload={handleFileUpload} accept=".txt,.md,.json" showUploadList={false} maxCount={1}>
+              <Button icon={<UploadOutlined />} size="small" style={{ marginBottom: 8 }}>上传规则文件</Button>
+            </Upload>
+            <Input.TextArea
+              rows={3}
+              value={form.formattingRules}
+              onChange={e => setForm(f => ({ ...f, formattingRules: e.target.value }))}
+              placeholder="直接输入或上传文件后自动填充"
+              style={{ fontSize: 13 }}
+            />
+          </div>
+          {formError && <div className="alert alert--error">{formError}</div>}
         </div>
       </Modal>
     </div>

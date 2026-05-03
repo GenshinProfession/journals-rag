@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Tooltip, message } from 'antd';
+import { Button, Checkbox, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { apiFetch } from '../api/client';
@@ -215,9 +215,9 @@ export function Models() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>模型目录</h2>
-          <p style={{ margin: '4px 0 0', color: '#71717a', fontSize: 13 }}>
-            配置中继模型名、端点类型、单价与可用场景标签。
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>模型目录</h2>
+          <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
+            配置中继模型名、端点类型、单价与可用场景。
           </p>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>新增模型</Button>
@@ -281,14 +281,15 @@ export function Models() {
             </F>
           </div>
           <F label="适用场景">
-            <Select
-              mode="multiple"
-              style={{ width: '100%' }}
+            <Checkbox.Group
               value={form.scenarios}
-              onChange={v => setForm(f => ({ ...f, scenarios: v }))}
-              options={SCENARIO_OPTIONS}
-              placeholder="选择适用场景"
-            />
+              onChange={v => setForm(f => ({ ...f, scenarios: v as string[] }))}
+              style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+            >
+              {SCENARIO_OPTIONS.map(opt => (
+                <Checkbox key={opt.value} value={opt.value}>{opt.label}</Checkbox>
+              ))}
+            </Checkbox.Group>
           </F>
           {formError && <div className="alert alert--error" style={{ marginBottom: 0 }}>{formError}</div>}
         </div>

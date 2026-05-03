@@ -162,8 +162,8 @@ export function Billing() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>计费与流水</h2>
-          <p style={{ margin: '4px 0 0', color: '#71717a', fontSize: 13 }}>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>计费与流水</h2>
+          <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
             钱包余额、流水记录与 AI 调用明细。充值 / 调整请在「代写账号」页面操作。
           </p>
         </div>
@@ -185,13 +185,13 @@ export function Billing() {
         </div>
       )}
 
-      <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 600 }}>钱包快照</h3>
+      <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 500 }}>钱包快照</h3>
       <Table<WalletRow> rowKey="user_id" size="middle" loading={walletsQ.isLoading} columns={walletColumns} dataSource={walletsQ.data ?? []} pagination={false} style={{ borderRadius: 8, marginBottom: 24 }} />
 
-      <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 600 }}>钱包流水（最近 100 条）</h3>
+      <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 500 }}>钱包流水（最近 100 条）</h3>
       <Table<LedgerRow> rowKey="id" size="middle" loading={ledgerQ.isLoading} columns={ledgerColumns} dataSource={ledgerQ.data ?? []} pagination={false} style={{ borderRadius: 8, marginBottom: 24 }} />
 
-      <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 600 }}>AI 调用记录（最近 100 条）</h3>
+      <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 500 }}>AI 调用记录（最近 100 条）</h3>
       <Table<UsageRow> rowKey="id" size="middle" loading={usageQ.isLoading} columns={usageColumns} dataSource={usageQ.data ?? []} pagination={false} style={{ borderRadius: 8 }} />
 
       <Modal

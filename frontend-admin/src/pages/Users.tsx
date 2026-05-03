@@ -164,8 +164,8 @@ export function Users() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>代写账号</h2>
-          <p style={{ margin: '4px 0 0', color: '#71717a', fontSize: 13 }}>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>代写账号</h2>
+          <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
             管理 writer 账号，直接在操作列中充值或调整余额。
           </p>
         </div>
