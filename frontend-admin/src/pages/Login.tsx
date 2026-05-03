@@ -1,4 +1,4 @@
-import { FormEvent, useId, useState } from 'react';
+import { FormEvent, useEffect, useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api/client';
 
@@ -9,6 +9,11 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add('admin-login-active');
+    return () => document.body.classList.remove('admin-login-active');
+  }, []);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,44 +30,29 @@ export function Login() {
   };
 
   return (
-    <div className="login-shell login-shell--admin">
-      <aside className="login-shell__aside" aria-hidden="true">
-        <div className="login-shell__aside-inner">
-          <div className="login-shell__brand-mark" aria-hidden="true">
+    <div className="google-login-page">
+      <main className="google-login-page__inner">
+        <div className="google-card google-card--admin">
+          <div className="google-card__logo google-card__logo--admin" aria-hidden="true">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="4" y="8" width="32" height="24" rx="5" stroke="currentColor" strokeWidth="2" />
               <path d="M14 18h12M14 22h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
-          <p className="login-shell__eyebrow">Journals RAG</p>
-          <h2 className="login-shell__aside-title">管理员控制台</h2>
-          <p className="login-shell__aside-lead">
-            用户、充值、模型与计费在一处管理。登录后仅管理员可访问。
+          <h1 className="google-card__title">登录</h1>
+          <p className="google-card__subtitle">
+            使用您的 <strong>Journals RAG</strong> 管理员账号。写作者请前往代写工作台。
           </p>
-          <ul className="login-shell__aside-list">
-            <li>学校模板与写作者账号</li>
-            <li>中继模型与内部成本核算</li>
-            <li>钱包与账单流水</li>
-          </ul>
-        </div>
-      </aside>
+          <p className="google-card__hint">
+            本地开发可使用 Bootstrap 账号 <span className="google-card__kbd">admin</span>。
+          </p>
 
-      <main className="login-shell__main">
-        <div className="login-panel">
-          <header className="login-panel__head">
-            <h1 className="login-panel__title">欢迎回来</h1>
-            <p className="login-panel__subtitle">
-              使用 Bootstrap 或数据库中的 <span className="login-panel__kbd">admin</span> 账号登录。写作者请前往
-              代写工作台。
-            </p>
-          </header>
-
-          <form id={formId} className="login-form" onSubmit={onSubmit} noValidate>
-            <div className="login-field">
-              <label htmlFor={`${formId}-user`}>用户名</label>
+          <form className="google-card__form" onSubmit={onSubmit} noValidate>
+            <div className="google-field">
+              <label htmlFor={`${formId}-user`}>用户名或电子邮件</label>
               <input
                 id={`${formId}-user`}
-                className="login-field__input"
+                className="google-field__input"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
@@ -71,11 +61,11 @@ export function Login() {
                 spellCheck={false}
               />
             </div>
-            <div className="login-field">
-              <label htmlFor={`${formId}-pass`}>密码</label>
+            <div className="google-field">
+              <label htmlFor={`${formId}-pass`}>输入您的密码</label>
               <input
                 id={`${formId}-pass`}
-                className="login-field__input"
+                className="google-field__input"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -83,25 +73,19 @@ export function Login() {
                 required
               />
             </div>
-
             {error ? (
-              <div className="login-alert login-alert--error" role="alert">
+              <p className="google-card__error" role="alert">
                 {error}
-              </div>
+              </p>
             ) : null}
-
-            <button className="login-submit" type="submit" disabled={loading} aria-busy={loading}>
-              {loading ? (
-                <>
-                  <span className="login-submit__spinner" aria-hidden="true" />
-                  <span>登录中…</span>
-                </>
-              ) : (
-                '进入控制台'
-              )}
-            </button>
+            <div className="google-card__actions google-card__actions--admin">
+              <button className="google-btn google-btn--primary google-btn--blue" type="submit" disabled={loading} aria-busy={loading}>
+                {loading ? '请稍候…' : '登录'}
+              </button>
+            </div>
           </form>
         </div>
+        <p className="google-login-page__footer muted">管理员控制台 · 安全登录</p>
       </main>
     </div>
   );
