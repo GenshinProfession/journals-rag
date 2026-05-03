@@ -28,26 +28,63 @@ export function Dashboard() {
   });
 
   return (
-    <section>
-      <h2>后台概览</h2>
-      {isLoading && <p>加载中…</p>}
-      {me && (
-        <p>
-          当前登录：<strong>{me.username}</strong>（{me.role}）
+    <div className="panel stack">
+      <div>
+        <h2>后台概览</h2>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          左侧导航管理代写账号、人工充值、模型目录与学校模板。
         </p>
-      )}
-      <p>左侧菜单可管理代写账号、人工充值与模型目录。</p>
-      {overviewQ.data && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
-          <div className="notice">Writer：{overviewQ.data.active_writer_count}/{overviewQ.data.writer_count}</div>
-          <div className="notice">启用模型：{overviewQ.data.enabled_model_count}</div>
-          <div className="notice">AI 调用：{overviewQ.data.usage_count}</div>
-          <div className="notice">余额：¥{yuan(overviewQ.data.balance_cents)}</div>
-          <div className="notice">冻结：¥{yuan(overviewQ.data.frozen_cents)}</div>
-          <div className="notice">累计充值：¥{yuan(overviewQ.data.recharged_cents)}</div>
-          <div className="notice">累计消费：¥{yuan(overviewQ.data.consumed_cents)}</div>
+      </div>
+
+      {isLoading && (
+        <div className="alert" style={{ marginBottom: 0 }}>
+          正在加载账号信息…
         </div>
       )}
-    </section>
+
+      {me && (
+        <div className="alert" style={{ marginBottom: 0 }}>
+          当前登录：<strong>{me.username}</strong>
+          <span className="badge" style={{ marginLeft: 10 }}>
+            {me.role}
+          </span>
+        </div>
+      )}
+
+      {overviewQ.data && (
+        <div className="stat-grid">
+          <div className="stat-tile">
+            <div className="stat-tile__label">Writer 活跃 / 总数</div>
+            <div className="stat-tile__value">
+              {overviewQ.data.active_writer_count}/{overviewQ.data.writer_count}
+            </div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__label">启用模型</div>
+            <div className="stat-tile__value">{overviewQ.data.enabled_model_count}</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__label">AI 调用累计</div>
+            <div className="stat-tile__value">{overviewQ.data.usage_count}</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__label">余额（元）</div>
+            <div className="stat-tile__value">¥{yuan(overviewQ.data.balance_cents)}</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__label">冻结（元）</div>
+            <div className="stat-tile__value">¥{yuan(overviewQ.data.frozen_cents)}</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__label">累计充值</div>
+            <div className="stat-tile__value">¥{yuan(overviewQ.data.recharged_cents)}</div>
+          </div>
+          <div className="stat-tile">
+            <div className="stat-tile__label">累计消费</div>
+            <div className="stat-tile__value">¥{yuan(overviewQ.data.consumed_cents)}</div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -69,26 +69,31 @@ export function Projects() {
   };
 
   return (
-    <section>
-      <h1>项目列表</h1>
+    <div className="panel stack">
+      <div>
+        <h1>项目列表</h1>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          新建项目后进入论文向导，完成参考论文审核与 RAG 入库。
+        </p>
+      </div>
 
-      <form onSubmit={onCreate} style={{ marginBottom: '2rem', maxWidth: 480 }}>
-        <h2 style={{ fontSize: '1.1rem' }}>新建项目</h2>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          层次
-          <select style={{ width: '100%', marginTop: 4 }} value={degreeLevel} onChange={(e) => setDegreeLevel(e.target.value)}>
+      <form className="form-stack" style={{ maxWidth: 520 }} onSubmit={onCreate}>
+        <h2>新建项目</h2>
+        <div className="field">
+          <label htmlFor="proj-degree">层次</label>
+          <select id="proj-degree" value={degreeLevel} onChange={(e) => setDegreeLevel(e.target.value)}>
             <option value="bachelor">本科</option>
             <option value="master">硕士</option>
             <option value="doctor">博士</option>
           </select>
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          学科 / 方向
-          <input style={{ width: '100%', marginTop: 4 }} value={discipline} onChange={(e) => setDiscipline(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          学校模板（可选）
-          <select style={{ width: '100%', marginTop: 4 }} value={schoolId} onChange={(e) => setSchoolId(e.target.value)}>
+        </div>
+        <div className="field">
+          <label htmlFor="proj-disc">学科 / 方向</label>
+          <input id="proj-disc" value={discipline} onChange={(e) => setDiscipline(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="proj-school">学校模板（可选）</label>
+          <select id="proj-school" value={schoolId} onChange={(e) => setSchoolId(e.target.value)}>
             <option value="">不使用模板</option>
             {schoolsQ.data?.map((tpl) => (
               <option key={tpl.id} value={tpl.id}>
@@ -96,44 +101,42 @@ export function Projects() {
               </option>
             ))}
           </select>
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          论文题目（可选）
-          <input style={{ width: '100%', marginTop: 4 }} value={title} onChange={(e) => setTitle(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          主题说明（可选）
-          <textarea style={{ width: '100%', marginTop: 4 }} rows={3} value={topic} onChange={(e) => setTopic(e.target.value)} />
-        </label>
-        {error && <p style={{ color: 'crimson' }}>{error}</p>}
-        <button type="submit" disabled={createMut.isPending}>
+        </div>
+        <div className="field">
+          <label htmlFor="proj-title">论文题目（可选）</label>
+          <input id="proj-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="proj-topic">主题说明（可选）</label>
+          <textarea id="proj-topic" rows={3} value={topic} onChange={(e) => setTopic(e.target.value)} />
+        </div>
+        {error && <div className="alert alert--error">{error}</div>}
+        <button className="btn btn--primary" type="submit" disabled={createMut.isPending}>
           {createMut.isPending ? '创建中…' : '创建项目'}
         </button>
       </form>
 
-      {listQ.isLoading && <p>加载项目…</p>}
-      {listQ.error && <p style={{ color: 'crimson' }}>{(listQ.error as Error).message}</p>}
+      {listQ.isLoading && <p className="muted">加载项目…</p>}
+      {listQ.error && <div className="alert alert--error">{(listQ.error as Error).message}</div>}
       {listQ.data && (
-        <ul style={{ padding: 0, listStyle: 'none' }}>
+        <ul className="project-list">
           {listQ.data.map((p) => (
-            <li key={p.id} style={{ borderBottom: '1px solid #eee', padding: '12px 0' }}>
-              <div>
-                <strong>{p.discipline}</strong>{' '}
-                <span style={{ opacity: 0.85 }}>
-                  ({p.degree_level}) · {p.status}
-                </span>
+            <li key={p.id} className="project-card">
+              <div className="project-card__title">{p.discipline}</div>
+              <div className="project-card__meta">
+                {p.degree_level} · {p.status}
               </div>
-              {p.title && <div>{p.title}</div>}
-              <div style={{ fontSize: 12, marginTop: 4 }}>
+              {p.title && <div style={{ marginTop: 8, color: 'var(--ink-muted)', fontSize: '0.92rem' }}>{p.title}</div>}
+              <div className="project-card__sub">
                 <code>{p.id}</code> · 字数快照 {p.word_count_total}
               </div>
-              <Link to={`/wizard/${p.id}`} style={{ fontSize: 14 }}>
+              <Link className="project-card__link" to={`/wizard/${p.id}`}>
                 进入论文向导
               </Link>
             </li>
           ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }

@@ -89,10 +89,7 @@ export function Wizard() {
   });
 
   const [projectId, setProjectId] = useState(params.projectId ?? '');
-  const project = useMemo(
-    () => projectsQ.data?.find((p) => p.id === projectId),
-    [projectId, projectsQ.data]
-  );
+  const project = useMemo(() => projectsQ.data?.find((p) => p.id === projectId), [projectId, projectsQ.data]);
 
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
@@ -108,8 +105,7 @@ export function Wizard() {
 
   const literatureQ = useQuery({
     queryKey: ['writer', 'literature', projectId],
-    queryFn: () =>
-      apiFetch(`/api/projects/${projectId}/literature`) as Promise<{ items: LiteratureRow[] }>,
+    queryFn: () => apiFetch(`/api/projects/${projectId}/literature`) as Promise<{ items: LiteratureRow[] }>,
     enabled: Boolean(projectId)
   });
 
@@ -333,13 +329,18 @@ export function Wizard() {
   };
 
   return (
-    <section>
-      <h1>论文生成向导</h1>
+    <div className="panel panel--wizard stack">
+      <div>
+        <h1>论文生成向导</h1>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          按顺序完成参考论文、审核入库、检索大纲与章节写作。
+        </p>
+      </div>
 
-      <label style={{ display: 'block', marginBottom: 16 }}>
-        当前项目
+      <div className="field" style={{ marginBottom: 0 }}>
+        <label htmlFor="wiz-project">当前项目</label>
         <select
-          style={{ width: '100%', marginTop: 4 }}
+          id="wiz-project"
           value={projectId}
           onChange={(e) => {
             setProjectId(e.target.value);
@@ -356,56 +357,55 @@ export function Wizard() {
             </option>
           ))}
         </select>
-      </label>
+      </div>
 
       {project && (
-        <div className="notice">
+        <div className="alert" style={{ marginBottom: 0 }}>
           {project.title || project.discipline}：先保存标准参考论文，再审核，审核通过后才能 RAG 入库。
         </div>
       )}
 
-      <form onSubmit={onSaveLiterature} style={{ marginTop: 24 }}>
-        <h2>1. 标准参考论文</h2>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          文献标题
-          <input style={{ width: '100%', marginTop: 4 }} value={title} onChange={(e) => setTitle(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          正文 / 摘要文本（本地联调用，可先粘贴 PDF 抽取文本）
-          <textarea
-            style={{ width: '100%', marginTop: 4 }}
-            rows={8}
-            value={bodyText}
-            onChange={(e) => setBodyText(e.target.value)}
-          />
-        </label>
-        <button type="submit" disabled={createLiterature.isPending}>
-          保存参考论文
-        </button>
-      </form>
+      <div className="wizard-step wizard-step--first">
+        <form className="stack" style={{ gap: '1rem' }} onSubmit={onSaveLiterature}>
+          <h2 style={{ marginTop: 0 }}>1. 标准参考论文</h2>
+          <div className="field">
+            <label htmlFor="lit-title">文献标题</label>
+            <input id="lit-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="lit-body">正文 / 摘要文本（本地联调用，可先粘贴 PDF 抽取文本）</label>
+            <textarea id="lit-body" rows={8} value={bodyText} onChange={(e) => setBodyText(e.target.value)} />
+          </div>
+          <button className="btn btn--primary" type="submit" disabled={createLiterature.isPending}>
+            保存参考论文
+          </button>
+        </form>
 
-      <div style={{ marginTop: 16 }}>
-        <h3>或上传 PDF / 文本文件</h3>
-        <input
-          type="file"
-          accept=".pdf,.txt,.md,.text"
-          onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
-        />
-        <button
-          type="button"
-          style={{ marginLeft: 8 }}
-          disabled={!projectId || !uploadFile || uploadLiterature.isPending}
-          onClick={() => uploadLiterature.mutate()}
-        >
-          上传并创建文献
-        </button>
+        <div style={{ marginTop: '1.25rem' }}>
+          <h3>或上传 PDF / 文本文件</h3>
+          <div className="btn-row" style={{ alignItems: 'center' }}>
+            <input
+              type="file"
+              accept=".pdf,.txt,.md,.text"
+              onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+            />
+            <button
+              type="button"
+              className="btn btn--ghost btn--sm"
+              disabled={!projectId || !uploadFile || uploadLiterature.isPending}
+              onClick={() => uploadLiterature.mutate()}
+            >
+              上传并创建文献
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div style={{ marginTop: 24 }}>
+      <div className="wizard-step">
         <h2>2. 审核与入库</h2>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          选择已保存文献
-          <select style={{ width: '100%', marginTop: 4 }} value={literatureId} onChange={(e) => setLiteratureId(e.target.value)}>
+        <div className="field">
+          <label htmlFor="lit-pick">选择已保存文献</label>
+          <select id="lit-pick" value={literatureId} onChange={(e) => setLiteratureId(e.target.value)}>
             <option value="">请选择文献</option>
             {literatureQ.data?.items?.map((lit) => (
               <option key={lit.id} value={lit.id}>
@@ -413,13 +413,14 @@ export function Wizard() {
               </option>
             ))}
           </select>
-        </label>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button type="button" disabled={!literatureId || review.isPending} onClick={() => review.mutate()}>
+        </div>
+        <div className="btn-row">
+          <button type="button" className="btn btn--ghost btn--sm" disabled={!literatureId || review.isPending} onClick={() => review.mutate()}>
             AI 审核参考论文
           </button>
           <button
             type="button"
+            className="btn btn--ghost btn--sm"
             disabled={!literatureId || selectedLiterature?.rag_status !== 'review_passed' || chunk.isPending}
             onClick={() => chunk.mutate()}
           >
@@ -427,6 +428,7 @@ export function Wizard() {
           </button>
           <button
             type="button"
+            className="btn btn--primary btn--sm"
             disabled={!documentId || selectedChunkIds.length === 0 || confirm.isPending}
             onClick={() => confirm.mutate()}
           >
@@ -436,12 +438,12 @@ export function Wizard() {
       </div>
 
       {chunkPreview.length > 0 && (
-        <div style={{ marginTop: 24 }}>
+        <div className="wizard-step">
           <h3>切块预览（前 20 个）</h3>
-          <ol>
+          <ol className="chunk-list">
             {chunkPreview.map((c) => (
               <li key={c.id}>
-                <label>
+                <label style={{ cursor: 'pointer', display: 'block' }}>
                   <input
                     type="checkbox"
                     checked={selectedChunkIds.includes(c.id)}
@@ -459,34 +461,38 @@ export function Wizard() {
               </li>
             ))}
           </ol>
-          <p>
+          <p className="muted" style={{ marginBottom: 12 }}>
             已选择 {selectedChunkIds.length}/{chunkPreview.length} 个 chunk。
-            <button type="button" style={{ marginLeft: 8 }} onClick={() => setSelectedChunkIds(chunkPreview.map((c) => c.id))}>
+          </p>
+          <div className="btn-row">
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => setSelectedChunkIds(chunkPreview.map((c) => c.id))}>
               全选
             </button>
-            <button type="button" style={{ marginLeft: 8 }} onClick={() => setSelectedChunkIds([])}>
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => setSelectedChunkIds([])}>
               清空
             </button>
-          </p>
+          </div>
         </div>
       )}
 
-      <div style={{ marginTop: 24 }}>
+      <div className="wizard-step">
         <h2>3. 检索与大纲</h2>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          RAG 检索问题
-          <input style={{ width: '100%', marginTop: 4 }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-        </label>
-        <button type="button" disabled={!projectId || !searchQuery || search.isPending} onClick={() => search.mutate()}>
-          检索
-        </button>
-        <button type="button" style={{ marginLeft: 8 }} disabled={!projectId || outline.isPending} onClick={() => outline.mutate()}>
-          生成大纲
-        </button>
+        <div className="field">
+          <label htmlFor="rag-q">RAG 检索问题</label>
+          <input id="rag-q" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+        </div>
+        <div className="btn-row">
+          <button type="button" className="btn btn--ghost btn--sm" disabled={!projectId || !searchQuery || search.isPending} onClick={() => search.mutate()}>
+            检索
+          </button>
+          <button type="button" className="btn btn--primary btn--sm" disabled={!projectId || outline.isPending} onClick={() => outline.mutate()}>
+            生成大纲
+          </button>
+        </div>
       </div>
 
       {searchItems.length > 0 && (
-        <ul>
+        <ul className="search-hits">
           {searchItems.map((item) => (
             <li key={item.id}>{item.text}</li>
           ))}
@@ -494,66 +500,63 @@ export function Wizard() {
       )}
 
       {chaptersQ.data && chaptersQ.data.length > 0 && (
-        <div style={{ marginTop: 24 }}>
+        <div className="wizard-step">
           <h2>章节草稿</h2>
-          <ol>
+          <ol className="chapter-list">
             {chaptersQ.data.map((ch) => (
-              <li key={ch.id}>
+              <li key={ch.id} className="chapter-item">
                 <strong>{ch.title}</strong>
+                <div className="chapter-item__actions">
+                  <button type="button" className="btn btn--ghost btn--sm" disabled={generateChapter.isPending} onClick={() => generateChapter.mutate(ch.id)}>
+                    生成正文
+                  </button>
+                  <button type="button" className="btn btn--ghost btn--sm" disabled={reviewChapter.isPending} onClick={() => reviewChapter.mutate(ch.id)}>
+                    审校
+                  </button>
+                  <button type="button" className="btn btn--ghost btn--sm" disabled={rewriteChapter.isPending} onClick={() => rewriteChapter.mutate(ch.id)}>
+                    降重改写
+                  </button>
+                </div>
+                <div className="field">
+                  <label htmlFor={`ch-${ch.id}`}>正文</label>
+                  <textarea
+                    id={`ch-${ch.id}`}
+                    rows={8}
+                    value={chapterDrafts[ch.id] ?? ch.content ?? ''}
+                    onChange={(e) => setChapterDrafts((prev) => ({ ...prev, [ch.id]: e.target.value }))}
+                  />
+                </div>
                 <button
                   type="button"
-                  style={{ marginLeft: 8 }}
-                  disabled={generateChapter.isPending}
-                  onClick={() => generateChapter.mutate(ch.id)}
-                >
-                  生成正文
-                </button>
-                <button
-                  type="button"
-                  style={{ marginLeft: 8 }}
-                  disabled={reviewChapter.isPending}
-                  onClick={() => reviewChapter.mutate(ch.id)}
-                >
-                  审校
-                </button>
-                <button
-                  type="button"
-                  style={{ marginLeft: 8 }}
-                  disabled={rewriteChapter.isPending}
-                  onClick={() => rewriteChapter.mutate(ch.id)}
-                >
-                  降重改写
-                </button>
-                <textarea
-                  style={{ width: '100%', marginTop: 8 }}
-                  rows={8}
-                  value={chapterDrafts[ch.id] ?? ch.content ?? ''}
-                  onChange={(e) => setChapterDrafts((prev) => ({ ...prev, [ch.id]: e.target.value }))}
-                />
-                <button
-                  type="button"
+                  className="btn btn--primary btn--sm"
                   disabled={saveChapter.isPending}
                   onClick={() => saveChapter.mutate({ id: ch.id, content: chapterDrafts[ch.id] ?? ch.content ?? '' })}
                 >
                   保存本章
                 </button>
-                {ch.feedback && <p className="notice">审校意见：{ch.feedback}</p>}
+                {ch.feedback && (
+                  <div className="alert" style={{ marginTop: 12, marginBottom: 0 }}>
+                    审校意见：{ch.feedback}
+                  </div>
+                )}
               </li>
             ))}
           </ol>
-          <p>
-            <button type="button" onClick={() => exportDoc.mutate('markdown')}>导出 Markdown</button>
-            <button type="button" style={{ marginLeft: 8 }} onClick={() => exportDoc.mutate('latex')}>
+          <div className="btn-row" style={{ marginTop: '1rem' }}>
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => exportDoc.mutate('markdown')}>
+              导出 Markdown
+            </button>
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => exportDoc.mutate('latex')}>
               导出 LaTeX
             </button>
-            <button type="button" style={{ marginLeft: 8 }} onClick={() => exportDoc.mutate('docx')}>
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => exportDoc.mutate('docx')}>
               导出 Word
             </button>
-          </p>
+          </div>
         </div>
       )}
 
-      {message && <div className="notice">{message}</div>}
-    </section>
+      {message && <div className="alert">{message}</div>}
+    </div>
   );
 }

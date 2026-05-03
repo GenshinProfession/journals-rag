@@ -1,5 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button, Card, Table, Typography } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { apiFetch } from '../api/client';
 
 type WalletRow = {
@@ -106,7 +108,9 @@ export function Billing() {
       apiFetch('/api/admin/billing/gateway-balance', {
         method: 'POST',
         body: JSON.stringify({ api_key: api_key || null })
-      }) as Promise<{ items: Array<{ name: string; masked_key: string; ok: boolean; balance: string | null; error: string | null }> }>,
+      }) as Promise<{
+        items: Array<{ name: string; masked_key: string; ok: boolean; balance: string | null; error: string | null }>;
+      }>,
     onSuccess: (res) => {
       setGatewayBalanceResult(
         res.items.map((x) => `${x.name}(${x.masked_key}): ${x.ok ? x.balance || '查询成功' : x.error}`).join('\n')
@@ -158,168 +162,246 @@ export function Billing() {
     });
   };
 
-  return (
-    <section>
-      <h2>充值与流水</h2>
+  const walletColumns: ColumnsType<WalletRow> = [
+    { title: '用户名', dataIndex: 'username', width: 120, ellipsis: true },
+    {
+      title: '余额',
+      dataIndex: 'balance_cents',
+      width: 100,
+      align: 'right',
+      render: (c: number) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>¥{centsToYuan(c)}</span>
+    },
+    {
+      title: '冻结',
+      dataIndex: 'frozen_cents',
+      width: 100,
+      align: 'right',
+      render: (c: number) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>¥{centsToYuan(c)}</span>
+    },
+    {
+      title: '累计充值',
+      dataIndex: 'total_recharged_cents',
+      width: 110,
+      align: 'right',
+      render: (c: number) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>¥{centsToYuan(c)}</span>
+    },
+    {
+      title: '累计消费',
+      dataIndex: 'total_consumed_cents',
+      width: 110,
+      align: 'right',
+      render: (c: number) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>¥{centsToYuan(c)}</span>
+    },
+    {
+      title: '操作',
+      key: 'pick',
+      width: 88,
+      align: 'center',
+      render: (_: unknown, w: WalletRow) => (
+        <Button size="small" type="link" style={{ padding: 0 }} onClick={() => pickWriter(w.user_id)}>
+          选择
+        </Button>
+      )
+    }
+  ];
 
-      <form onSubmit={onRecharge} style={{ marginBottom: '2rem', maxWidth: 480 }}>
-        <h3>人工充值（仅 writer）</h3>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          Writer 用户 ID
-          <input style={{ width: '100%', marginTop: 4 }} value={userId} onChange={(e) => setUserId(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          金额（元）
-          <input style={{ width: '100%', marginTop: 4 }} value={amountYuan} onChange={(e) => setAmountYuan(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          备注（可选）
-          <input style={{ width: '100%', marginTop: 4 }} value={note} onChange={(e) => setNote(e.target.value)} />
-        </label>
-        {rechargeError && <p style={{ color: 'crimson' }}>{rechargeError}</p>}
-        <button type="submit" disabled={rechargeMut.isPending}>
+  const ledgerColumns: ColumnsType<LedgerRow> = [
+    { title: '类型', dataIndex: 'type', width: 120, ellipsis: true },
+    {
+      title: '金额（分）',
+      dataIndex: 'amount_cents',
+      width: 110,
+      align: 'right',
+      render: (v: number) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{v}</span>
+    },
+    {
+      title: '余额后（分）',
+      dataIndex: 'balance_after_cents',
+      width: 120,
+      align: 'right',
+      render: (v: number) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{v}</span>
+    },
+    {
+      title: '备注',
+      dataIndex: 'note',
+      ellipsis: true,
+      render: (n: string | null) => n ?? '—'
+    }
+  ];
+
+  const usageColumns: ColumnsType<UsageRow> = [
+    {
+      title: '用户',
+      dataIndex: 'user_id',
+      width: 120,
+      render: (id: string) => (
+        <Typography.Text copyable={{ text: id }} style={{ fontSize: 12 }} code>
+          {id.slice(0, 8)}…
+        </Typography.Text>
+      )
+    },
+    {
+      title: '场景',
+      key: 'sc',
+      width: 160,
+      ellipsis: true,
+      render: (_: unknown, u: UsageRow) => `${u.agent_name}/${u.scenario}`
+    },
+    {
+      title: 'tokens',
+      key: 'tok',
+      width: 150,
+      render: (_: unknown, u: UsageRow) => (
+        <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13 }}>
+          in {u.input_tokens} / out {u.output_tokens}
+        </span>
+      )
+    },
+    {
+      title: '费用',
+      dataIndex: 'cost_cents',
+      width: 88,
+      align: 'right',
+      render: (c: number) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>¥{centsToYuan(c)}</span>
+    },
+    { title: '状态', dataIndex: 'status', width: 96, ellipsis: true }
+  ];
+
+  return (
+    <div className="panel stack">
+      <div>
+        <h2>充值与流水</h2>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          人工入账、账务调整、钱包快照与用量对账集中在这一页。
+        </p>
+      </div>
+
+      <form className="form-stack form-stack--wide" onSubmit={onRecharge}>
+        <h3 style={{ marginTop: 0 }}>人工充值（仅 writer）</h3>
+        <div className="field">
+          <label htmlFor="bill-user-id">Writer 用户 ID</label>
+          <input id="bill-user-id" value={userId} onChange={(e) => setUserId(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="bill-amount">金额（元）</label>
+          <input id="bill-amount" value={amountYuan} onChange={(e) => setAmountYuan(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="bill-note">备注（可选）</label>
+          <input id="bill-note" value={note} onChange={(e) => setNote(e.target.value)} />
+        </div>
+        {rechargeError && <div className="alert alert--error">{rechargeError}</div>}
+        <button className="btn btn--primary" type="submit" disabled={rechargeMut.isPending}>
           {rechargeMut.isPending ? '提交中…' : '确认充值'}
         </button>
       </form>
 
-      <form onSubmit={onAdjust} style={{ marginBottom: '2rem', maxWidth: 480 }}>
+      <form className="form-stack form-stack--wide" onSubmit={onAdjust}>
         <h3>账务调整（可正可负）</h3>
-        <p style={{ opacity: 0.8 }}>用于对账修正；正数加余额，负数扣余额，必须写备注。</p>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          调整金额（元）
-          <input style={{ width: '100%', marginTop: 4 }} value={adjustYuan} onChange={(e) => setAdjustYuan(e.target.value)} placeholder="例如 10 或 -3.5" />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          调整备注
-          <input style={{ width: '100%', marginTop: 4 }} value={adjustNote} onChange={(e) => setAdjustNote(e.target.value)} />
-        </label>
-        <button type="submit" disabled={adjustMut.isPending}>
+        <p className="muted">用于对账修正；正数加余额，负数扣余额，必须写备注。</p>
+        <div className="field">
+          <label htmlFor="bill-adjust">调整金额（元）</label>
+          <input
+            id="bill-adjust"
+            value={adjustYuan}
+            onChange={(e) => setAdjustYuan(e.target.value)}
+            placeholder="例如 10 或 -3.5"
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="bill-adjust-note">调整备注</label>
+          <input id="bill-adjust-note" value={adjustNote} onChange={(e) => setAdjustNote(e.target.value)} />
+        </div>
+        <button className="btn btn--ghost" type="submit" disabled={adjustMut.isPending}>
           {adjustMut.isPending ? '提交中…' : '确认调整'}
         </button>
       </form>
 
       <h3>钱包快照</h3>
-      {walletsQ.isLoading && <p>加载钱包…</p>}
-      {walletsQ.error && <p style={{ color: 'crimson' }}>{(walletsQ.error as Error).message}</p>}
-      {walletsQ.data && (
-        <table style={{ borderCollapse: 'collapse', width: '100%', maxWidth: 900, marginBottom: '2rem' }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>用户名</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>余额</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>冻结</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>累计充值</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>累计消费</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {walletsQ.data.map((w) => (
-              <tr key={w.user_id}>
-                <td style={{ padding: '6px 0' }}>{w.username}</td>
-                <td>¥{centsToYuan(w.balance_cents)}</td>
-                <td>¥{centsToYuan(w.frozen_cents)}</td>
-                <td>¥{centsToYuan(w.total_recharged_cents)}</td>
-                <td>¥{centsToYuan(w.total_consumed_cents)}</td>
-                <td>
-                  <button type="button" onClick={() => pickWriter(w.user_id)}>
-                    选择
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {walletsQ.error && <div className="alert alert--error">{(walletsQ.error as Error).message}</div>}
+      <Card size="small" styles={{ body: { padding: 0 } }} className="antd-table-card">
+        <Table<WalletRow>
+          rowKey="user_id"
+          size="middle"
+          loading={walletsQ.isLoading}
+          columns={walletColumns}
+          dataSource={walletsQ.data ?? []}
+          pagination={false}
+          scroll={{ x: 720 }}
+        />
+      </Card>
 
       <h3>钱包流水（最近 100 条）</h3>
-      {ledgerQ.isLoading && <p>加载流水…</p>}
-      {ledgerQ.data && (
-        <table style={{ borderCollapse: 'collapse', width: '100%', maxWidth: 900, marginBottom: '2rem', fontSize: 14 }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>类型</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>金额（分）</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>余额后（分）</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>备注</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ledgerQ.data.map((r) => (
-              <tr key={r.id}>
-                <td>{r.type}</td>
-                <td>{r.amount_cents}</td>
-                <td>{r.balance_after_cents}</td>
-                <td>{r.note ?? '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <Card size="small" styles={{ body: { padding: 0 } }} className="antd-table-card">
+        <Table<LedgerRow>
+          rowKey="id"
+          size="middle"
+          loading={ledgerQ.isLoading}
+          columns={ledgerColumns}
+          dataSource={ledgerQ.data ?? []}
+          pagination={false}
+          scroll={{ x: 640 }}
+        />
+      </Card>
 
       <h3>AI 调用记录（最近 100 条）</h3>
-      <div style={{ marginBottom: 16 }}>
-        <h4>中转站 API Key 额度查询</h4>
-        <p style={{ opacity: 0.8 }}>默认查询已配置的 key；也可临时输入一个 key 查询，不会保存。</p>
-        <input
-          style={{ width: '100%', maxWidth: 520 }}
-          value={manualApiKey}
-          onChange={(e) => setManualApiKey(e.target.value)}
-          placeholder="可选：临时输入 API Key"
-        />
-        <p>
-          <button type="button" disabled={gatewayBalanceMut.isPending} onClick={() => gatewayBalanceMut.mutate(undefined)}>
+      <div className="stack" style={{ gap: '0.75rem' }}>
+        <h4 style={{ margin: 0, fontSize: '0.95rem' }}>中转站 API Key 额度查询</h4>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          默认查询已配置的 key；也可临时输入一个 key 查询，不会保存。
+        </p>
+        <div className="field">
+          <label htmlFor="manual-key">临时 API Key（可选）</label>
+          <input
+            id="manual-key"
+            value={manualApiKey}
+            onChange={(e) => setManualApiKey(e.target.value)}
+            placeholder="可选：临时输入 API Key"
+          />
+        </div>
+        <div className="btn-row">
+          <button
+            type="button"
+            className="btn btn--ghost btn--sm"
+            disabled={gatewayBalanceMut.isPending}
+            onClick={() => gatewayBalanceMut.mutate(undefined)}
+          >
             查询已配置 Key
           </button>
           <button
             type="button"
-            style={{ marginLeft: 8 }}
+            className="btn btn--ghost btn--sm"
             disabled={gatewayBalanceMut.isPending || !manualApiKey.trim()}
             onClick={() => gatewayBalanceMut.mutate(manualApiKey.trim())}
           >
             查询输入 Key
           </button>
-        </p>
-        {gatewayBalanceResult && <pre style={{ whiteSpace: 'pre-wrap' }}>{gatewayBalanceResult}</pre>}
+        </div>
+        {gatewayBalanceResult && <pre className="pre-block">{gatewayBalanceResult}</pre>}
       </div>
-      <p>
-        <button type="button" disabled={reconcileMut.isPending} onClick={() => reconcileMut.mutate(true)}>
+
+      <div className="btn-row">
+        <button type="button" className="btn btn--ghost btn--sm" disabled={reconcileMut.isPending} onClick={() => reconcileMut.mutate(true)}>
           Usage 对账预览
         </button>
-        <button type="button" style={{ marginLeft: 8 }} disabled={reconcileMut.isPending} onClick={() => reconcileMut.mutate(false)}>
+        <button type="button" className="btn btn--ghost btn--sm" disabled={reconcileMut.isPending} onClick={() => reconcileMut.mutate(false)}>
           写回 Usage
         </button>
-        {reconcileResult && <span style={{ marginLeft: 8 }}>{reconcileResult}</span>}
-      </p>
-      {usageQ.isLoading && <p>加载用量…</p>}
-      {usageQ.data && (
-        <table style={{ borderCollapse: 'collapse', width: '100%', maxWidth: 900, fontSize: 14 }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>用户</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>场景</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>tokens</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>费用</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>状态</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usageQ.data.map((u) => (
-              <tr key={u.id}>
-                <td>
-                  <code style={{ fontSize: 11 }}>{u.user_id.slice(0, 8)}…</code>
-                </td>
-                <td>{u.agent_name}/{u.scenario}</td>
-                <td>
-                  in {u.input_tokens} / out {u.output_tokens}
-                </td>
-                <td>¥{centsToYuan(u.cost_cents)}</td>
-                <td>{u.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </section>
+        {reconcileResult && <span className="badge">{reconcileResult}</span>}
+      </div>
+
+      {usageQ.error && <div className="alert alert--error">{(usageQ.error as Error).message}</div>}
+      <Card size="small" styles={{ body: { padding: 0 } }} className="antd-table-card">
+        <Table<UsageRow>
+          rowKey="id"
+          size="middle"
+          loading={usageQ.isLoading}
+          columns={usageColumns}
+          dataSource={usageQ.data ?? []}
+          pagination={false}
+          scroll={{ x: 700 }}
+        />
+      </Card>
+    </div>
   );
 }

@@ -1,5 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button, Card, Space, Table, Tag } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { apiFetch } from '../api/client';
 
 type ModelRow = {
@@ -108,118 +110,170 @@ export function Models() {
     });
   };
 
-  return (
-    <section>
-      <h2>模型目录</h2>
+  const columns: ColumnsType<ModelRow> = [
+    {
+      title: '名称',
+      dataIndex: 'display_name',
+      width: 160,
+      ellipsis: true,
+      render: (name: string, m: ModelRow) => (
+        <span>
+          {name}
+          {!m.enabled && (
+            <Tag color="red" style={{ marginLeft: 8 }}>
+              已禁用
+            </Tag>
+          )}
+        </span>
+      )
+    },
+    {
+      title: '中继',
+      dataIndex: 'provider_model',
+      width: 160,
+      ellipsis: true,
+      render: (v: string) => <code style={{ fontSize: 12 }}>{v}</code>
+    },
+    {
+      title: '端点',
+      dataIndex: 'endpoint_type',
+      width: 150,
+      ellipsis: true,
+      render: (v: string) => <code style={{ fontSize: 11 }}>{v}</code>
+    },
+    {
+      title: 'Key',
+      dataIndex: 'api_key_name',
+      width: 120,
+      ellipsis: true,
+      render: (v: string | null) => v || '默认'
+    },
+    {
+      title: '价格 in/out',
+      key: 'prices',
+      width: 120,
+      render: (_: unknown, m) => (
+        <span style={{ fontVariantNumeric: 'tabular-nums', fontSize: 13 }}>
+          {m.input_price_per_1k_cents}/{m.output_price_per_1k_cents}
+        </span>
+      )
+    },
+    {
+      title: '场景',
+      dataIndex: 'allowed_scenarios',
+      width: 140,
+      ellipsis: true,
+      render: (sc: string[]) => sc?.join(', ') || '—'
+    },
+    {
+      title: '操作',
+      key: 'actions',
+      width: 220,
+      align: 'center',
+      fixed: 'right',
+      render: (_: unknown, m) => (
+        <Space size={4} wrap>
+          <Button type="primary" danger size="small" disabled={deleteMut.isPending} onClick={() => deleteMut.mutate(m.id)}>
+            删除
+          </Button>
+          <Button size="small" disabled={toggleMut.isPending} onClick={() => toggleMut.mutate(m)}>
+            {m.enabled ? '禁用' : '启用'}
+          </Button>
+          <Button size="small" onClick={() => startEdit(m)}>
+            编辑
+          </Button>
+        </Space>
+      )
+    }
+  ];
 
-      <form onSubmit={onCreate} style={{ marginBottom: '2rem', maxWidth: 520 }}>
-        <h3>{editing ? `编辑模型：${editing.display_name}` : '新增模型'}</h3>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          展示名称
-          <input style={{ width: '100%', marginTop: 4 }} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          provider_model（中继模型名）
-          <input style={{ width: '100%', marginTop: 4 }} value={providerModel} onChange={(e) => setProviderModel(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          endpoint_type
-          <select style={{ width: '100%', marginTop: 4 }} value={endpointType} onChange={(e) => setEndpointType(e.target.value)}>
+  return (
+    <div className="panel stack">
+      <div>
+        <h2>模型目录</h2>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          配置中继模型名、端点类型、单价与可用场景标签。
+        </p>
+      </div>
+
+      <form className="form-stack form-stack--wide" onSubmit={onCreate}>
+        <h3 style={{ marginTop: 0 }}>{editing ? `编辑模型：${editing.display_name}` : '新增模型'}</h3>
+        <div className="field">
+          <label htmlFor="m-display">展示名称</label>
+          <input id="m-display" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="m-provider">provider_model（中继模型名）</label>
+          <input id="m-provider" value={providerModel} onChange={(e) => setProviderModel(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="m-endpoint">endpoint_type</label>
+          <select id="m-endpoint" value={endpointType} onChange={(e) => setEndpointType(e.target.value)}>
             <option value="openai_chat">openai_chat (/v1/chat/completions)</option>
             <option value="openai_responses">openai_responses (/v1/responses)</option>
             <option value="gemini_generate_content">gemini_generate_content (/v1beta/models/...:generateContent)</option>
             <option value="anthropic_messages">anthropic_messages (/v1/messages)</option>
           </select>
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          api_key_name（可空）
-          <input style={{ width: '100%', marginTop: 4 }} value={apiKeyName} onChange={(e) => setApiKeyName(e.target.value)} placeholder="例如 yunwu-chat-a" />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          Input 美分/千 token
-          <input style={{ width: '100%', marginTop: 4 }} value={inputPrice} onChange={(e) => setInputPrice(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          Output 美分/千 token
-          <input style={{ width: '100%', marginTop: 4 }} value={outputPrice} onChange={(e) => setOutputPrice(e.target.value)} />
-        </label>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          适用场景标签（逗号分隔，可空）
-          <input style={{ width: '100%', marginTop: 4 }} value={scenarios} onChange={(e) => setScenarios(e.target.value)} placeholder="outline, rag" />
-        </label>
-        {formError && <p style={{ color: 'crimson' }}>{formError}</p>}
-        <button type="submit" disabled={saveMut.isPending}>
-          {saveMut.isPending ? '保存中…' : '保存模型'}
-        </button>
-        {editing && (
-          <button
-            type="button"
-            style={{ marginLeft: 8 }}
-            onClick={() => {
-              setEditing(null);
-              setDisplayName('');
-              setProviderModel('');
-              setEndpointType('openai_chat');
-              setApiKeyName('');
-              setInputPrice('');
-              setOutputPrice('');
-              setScenarios('');
-            }}
-          >
-            取消编辑
+        </div>
+        <div className="field">
+          <label htmlFor="m-key">api_key_name（可空）</label>
+          <input
+            id="m-key"
+            value={apiKeyName}
+            onChange={(e) => setApiKeyName(e.target.value)}
+            placeholder="例如 yunwu-chat-a"
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="m-in">Input 美分/千 token</label>
+          <input id="m-in" value={inputPrice} onChange={(e) => setInputPrice(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="m-out">Output 美分/千 token</label>
+          <input id="m-out" value={outputPrice} onChange={(e) => setOutputPrice(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="m-sc">适用场景标签（逗号分隔，可空）</label>
+          <input id="m-sc" value={scenarios} onChange={(e) => setScenarios(e.target.value)} placeholder="outline, rag" />
+        </div>
+        {formError && <div className="alert alert--error">{formError}</div>}
+        <div className="btn-row">
+          <button className="btn btn--primary" type="submit" disabled={saveMut.isPending}>
+            {saveMut.isPending ? '保存中…' : '保存模型'}
           </button>
-        )}
+          {editing && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => {
+                setEditing(null);
+                setDisplayName('');
+                setProviderModel('');
+                setEndpointType('openai_chat');
+                setApiKeyName('');
+                setInputPrice('');
+                setOutputPrice('');
+                setScenarios('');
+              }}
+            >
+              取消编辑
+            </button>
+          )}
+        </div>
       </form>
 
-      {listQ.isLoading && <p>加载模型…</p>}
-      {listQ.error && <p style={{ color: 'crimson' }}>{(listQ.error as Error).message}</p>}
-      {listQ.data && (
-        <table style={{ borderCollapse: 'collapse', width: '100%', maxWidth: 1000, fontSize: 14 }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>名称</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>中继</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>端点</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>Key</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>价格 in/out</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>场景</th>
-              <th style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {listQ.data.map((m) => (
-              <tr key={m.id}>
-                <td style={{ padding: '6px 0' }}>
-                  {m.display_name}
-                  {!m.enabled && <span style={{ opacity: 0.6 }}>（禁用）</span>}
-                </td>
-                <td>
-                  <code>{m.provider_model}</code>
-                </td>
-                <td>
-                  <code>{m.endpoint_type}</code>
-                </td>
-                <td>{m.api_key_name || '默认'}</td>
-                <td>
-                  {m.input_price_per_1k_cents}/{m.output_price_per_1k_cents}
-                </td>
-                <td>{m.allowed_scenarios?.join(', ') || '—'}</td>
-                <td>
-                  <button type="button" disabled={deleteMut.isPending} onClick={() => deleteMut.mutate(m.id)}>
-                    删除
-                  </button>
-                  <button type="button" disabled={toggleMut.isPending} onClick={() => toggleMut.mutate(m)} style={{ marginLeft: 6 }}>
-                    {m.enabled ? '禁用' : '启用'}
-                  </button>
-                  <button type="button" onClick={() => startEdit(m)} style={{ marginLeft: 6 }}>
-                    编辑
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </section>
+      {listQ.error && <div className="alert alert--error">{(listQ.error as Error).message}</div>}
+      <Card size="small" styles={{ body: { padding: 0 } }} className="antd-table-card">
+        <Table<ModelRow>
+          rowKey="id"
+          size="middle"
+          loading={listQ.isLoading}
+          columns={columns}
+          dataSource={listQ.data ?? []}
+          pagination={false}
+          scroll={{ x: 1100 }}
+        />
+      </Card>
+    </div>
   );
 }

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, NavLink, Route, Routes, useNavigate } from 'react-router-dom';
+import { ConfigProvider, theme } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
 import { authMe, clearToken, getToken } from './api/client';
 import { Billing } from './pages/Billing';
 import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
+import { PRODUCT_NAME, ADMIN_CONSOLE_TAGLINE } from './brand';
 import { Models } from './pages/Models';
 import { Schools } from './pages/Schools';
 import { Users } from './pages/Users';
@@ -48,7 +51,14 @@ function RequireAdmin({ children }: { children: React.ReactElement }) {
   }, [nav]);
 
   if (!ready) {
-    return <div style={{ padding: '2rem' }}>校验会话…</div>;
+    return (
+      <div className="session-gate">
+        <div className="session-gate__card">
+          <div className="spinner" aria-hidden />
+          <span className="muted">校验会话…</span>
+        </div>
+      </div>
+    );
   }
   return children;
 }
@@ -62,20 +72,41 @@ function Layout() {
 
   return (
     <div className="shell">
-      <aside>
-        <h1>Admin</h1>
-        <Link to="/">概览</Link>
-        <Link to="/users">代写账号</Link>
-        <Link to="/billing">充值计费</Link>
-        <Link to="/models">模型目录</Link>
-        <Link to="/schools">学校模板</Link>
-        <div style={{ marginTop: '1rem' }}>
-          <button type="button" onClick={logout}>
+      <div className="shell__bg" aria-hidden />
+      <aside className="sidebar">
+        <div className="sidebar__brand">
+          <h1 className="sidebar__title">{PRODUCT_NAME}</h1>
+          <span className="sidebar__badge">{ADMIN_CONSOLE_TAGLINE}</span>
+        </div>
+        <nav className="sidebar__nav">
+          <NavLink to="/" end className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            概览
+          </NavLink>
+          <NavLink to="/users" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            代写账号
+          </NavLink>
+          <NavLink to="/billing" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            充值计费
+          </NavLink>
+          <NavLink to="/models" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            模型目录
+          </NavLink>
+          <NavLink to="/schools" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            学校模板
+          </NavLink>
+        </nav>
+        <div className="sidebar__footer">
+          <button type="button" className="btn btn--ghost btn--sm" onClick={logout}>
             退出登录
           </button>
         </div>
       </aside>
-      <main>
+      <main className="main-area">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
@@ -106,10 +137,22 @@ function AppRoutes() {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        algorithm: theme.defaultAlgorithm,
+        token: {
+          colorPrimary: '#0f766e',
+          colorLink: '#0d9488',
+          borderRadius: 8
+        }
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ConfigProvider>
   </React.StrictMode>
 );
