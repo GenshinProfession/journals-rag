@@ -29,6 +29,7 @@ from app.schemas.schools import (
     StructurePayload,
     StructureResponse,
     TemplateGroupCreate,
+    TemplateGroupDetail,
     TemplateGroupResponse,
     TemplateGroupUpdate,
 )
@@ -136,6 +137,19 @@ def list_template_groups(_admin: AdminUserDep, db: DbSessionDep, school_id: UUID
     )
     groups = list(db.scalars(stmt).all())
     return [_enrich_group(g) for g in groups]
+
+
+@router.get("/groups/{group_id}", response_model=TemplateGroupDetail)
+def get_template_group(_admin: AdminUserDep, db: DbSessionDep, group_id: UUID) -> TemplateGroupDetail:
+    group = db.get(SchoolTemplateGroup, group_id)
+    if group is None:
+        raise HTTPException(status_code=404, detail="Template group not found")
+    school = db.get(School, group.school_id)
+    enriched = _enrich_group(group)
+    return TemplateGroupDetail(
+        **enriched.model_dump(),
+        school_name=school.name if school else "",
+    )
 
 
 @router.post("/groups", response_model=TemplateGroupResponse, status_code=201)

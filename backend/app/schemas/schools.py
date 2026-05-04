@@ -52,6 +52,11 @@ class TemplateGroupResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class TemplateGroupDetail(TemplateGroupResponse):
+    """Extended group response with school name for editor header."""
+    school_name: str = ""
+
+
 # ── Template Content (third layer) ───────────────────────────────────────────
 
 class StructurePayload(BaseModel):

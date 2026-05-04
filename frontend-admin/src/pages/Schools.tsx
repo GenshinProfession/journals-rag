@@ -1,15 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Badge, Button, Card, Col, Empty, Input, List, message, Modal,
-  Popconfirm, Row, Select, Space, Tag, Tooltip, Typography, InputNumber
+  Button, Card, Col, Empty, Input, InputNumber, List, message, Modal,
+  Popconfirm, Row, Space, Tag, Tooltip, Typography
 } from 'antd';
 import {
-  PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined,
-  CheckCircleOutlined, StopOutlined, RightOutlined, SettingOutlined
+  PlusOutlined, DeleteOutlined, SearchOutlined,
+  CheckCircleOutlined, StopOutlined, SettingOutlined,
+  ArrowLeftOutlined, RightOutlined, BookOutlined,
+  ReadOutlined, ExperimentOutlined
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiFetch } from '../api/client';
+
+/* ── types ──────────────────────────────────────────────────────────── */
 
 type School = {
   id: string; name: string; country: string | null;
@@ -23,27 +27,76 @@ type TemplateGroup = {
   has_structure: boolean; has_format_rules: boolean; has_citation_rules: boolean;
 };
 
-const DEGREE_OPTIONS = [
-  { value: 'bachelor', label: '本科 Bachelor' },
-  { value: 'master', label: '硕士 Master' },
-  { value: 'doctor', label: '博士 Doctor' },
+/* ── constants ──────────────────────────────────────────────────────── */
+
+const DEGREES = [
+  { key: 'bachelor', label: '本科', sub: 'Bachelor', icon: <BookOutlined style={{ fontSize: 22, color: '#34a853' }} /> },
+  { key: 'master', label: '硕士', sub: 'Master', icon: <ReadOutlined style={{ fontSize: 22, color: '#1a73e8' }} /> },
+  { key: 'doctor', label: '博士', sub: 'Doctor', icon: <ExperimentOutlined style={{ fontSize: 22, color: '#7b1fa2' }} /> },
 ];
+
+const degreeLabel = (v: string) => DEGREES.find(d => d.key === v)?.label ?? v;
+
+/* ── breadcrumb nav state ───────────────────────────────────────────── */
+
+type DrillLevel = 'degrees' | 'disciplines' | 'years';
 
 export function Schools() {
   const qc = useQueryClient();
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Left panel
   const [search, setSearch] = useState('');
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [newGroup, setNewGroup] = useState({
-    degree_level: 'master', discipline: '', year: new Date().getFullYear(), citation_style: 'GB/T 7714'
-  });
 
-  // ── Queries ──────────────────────────────────────────────────────────────
+  // Right panel drill-down
+  const [drillLevel, setDrillLevel] = useState<DrillLevel>('degrees');
+  const [selectedDegree, setSelectedDegree] = useState<string | null>(null);
+  const [selectedDiscipline, setSelectedDiscipline] = useState<string | null>(null);
+
+  // URL-param restoration flag
+  const [restored, setRestored] = useState(false);
+
+  // Modals
+  const [addDisciplineOpen, setAddDisciplineOpen] = useState(false);
+  const [newDiscipline, setNewDiscipline] = useState('');
+  const [addYearOpen, setAddYearOpen] = useState(false);
+  const [newYear, setNewYear] = useState(new Date().getFullYear());
+
+  /* ── queries ────────────────────────────────────────────────────── */
+
   const schoolsQ = useQuery({
     queryKey: ['admin', 'schools'],
-    queryFn: () => apiFetch('/api/admin/schools/schools') as Promise<School[]>
+    queryFn: () => apiFetch('/api/admin/schools/schools') as Promise<School[]>,
   });
+
+  // Restore drill-down from URL params (set by TemplateEditor back-nav)
+  useEffect(() => {
+    if (restored || !schoolsQ.data) return;
+    const pSchool = searchParams.get('school');
+    const pDegree = searchParams.get('degree');
+    const pDisc = searchParams.get('discipline');
+    if (pSchool) {
+      const found = schoolsQ.data.find(s => s.id === pSchool);
+      if (found) {
+        setSelectedSchool(found);
+        if (pDegree) {
+          setSelectedDegree(pDegree);
+          if (pDisc) {
+            setSelectedDiscipline(pDisc);
+            setDrillLevel('years');
+          } else {
+            setDrillLevel('disciplines');
+          }
+        } else {
+          setDrillLevel('degrees');
+        }
+      }
+      setSearchParams({}, { replace: true });
+    }
+    setRestored(true);
+  }, [schoolsQ.data, restored, searchParams, setSearchParams]);
 
   const groupsQ = useQuery({
     queryKey: ['admin', 'groups', selectedSchool?.id],
@@ -51,7 +104,8 @@ export function Schools() {
     enabled: !!selectedSchool,
   });
 
-  // ── Mutations ────────────────────────────────────────────────────────────
+  /* ── mutations ──────────────────────────────────────────────────── */
+
   const bootstrapMut = useMutation({
     mutationFn: () => apiFetch('/api/admin/schools/bootstrap-schools', { method: 'POST' }),
     onSuccess: (data: any) => {
@@ -72,8 +126,7 @@ export function Schools() {
       apiFetch('/api/admin/schools/groups', { method: 'POST', body: JSON.stringify(payload) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'groups', selectedSchool?.id] });
-      message.success('模板目录已创建');
-      setCreateOpen(false);
+      message.success('已创建');
     },
     onError: (e: Error) => message.error(e.message),
   });
@@ -93,26 +146,100 @@ export function Schools() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'groups', selectedSchool?.id] }),
   });
 
-  // ── Filtered list ────────────────────────────────────────────────────────
+  /* ── derived data ───────────────────────────────────────────────── */
+
+  const allGroups = groupsQ.data ?? [];
+
   const filteredSchools = useMemo(() => {
     const all = schoolsQ.data ?? [];
     const q = search.trim().toLowerCase();
     return q ? all.filter(s => s.name.toLowerCase().includes(q)) : all;
   }, [schoolsQ.data, search]);
 
-  // ── Create group ─────────────────────────────────────────────────────────
-  const handleCreateGroup = () => {
-    if (!selectedSchool) return;
+  // Unique disciplines for selected degree
+  const disciplines = useMemo(() => {
+    if (!selectedDegree) return [];
+    const set = new Set<string>();
+    allGroups
+      .filter(g => g.degree_level === selectedDegree)
+      .forEach(g => { if (g.discipline) set.add(g.discipline); });
+    return Array.from(set).sort();
+  }, [allGroups, selectedDegree]);
+
+  // Year-level groups for selected degree + discipline
+  const yearGroups = useMemo(() => {
+    if (!selectedDegree || !selectedDiscipline) return [];
+    return allGroups
+      .filter(g => g.degree_level === selectedDegree && g.discipline === selectedDiscipline)
+      .sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+  }, [allGroups, selectedDegree, selectedDiscipline]);
+
+  // Count groups per degree for badges
+  const degreeCount = (degree: string) => allGroups.filter(g => g.degree_level === degree).length;
+
+  // Count year-templates per discipline
+  const disciplineCount = (disc: string) =>
+    allGroups.filter(g => g.degree_level === selectedDegree && g.discipline === disc).length;
+
+  /* ── drill navigation helpers ───────────────────────────────────── */
+
+  const selectSchool = (s: School) => {
+    setSelectedSchool(s);
+    setDrillLevel('degrees');
+    setSelectedDegree(null);
+    setSelectedDiscipline(null);
+  };
+
+  const enterDegree = (degree: string) => {
+    setSelectedDegree(degree);
+    setSelectedDiscipline(null);
+    setDrillLevel('disciplines');
+  };
+
+  const enterDiscipline = (disc: string) => {
+    setSelectedDiscipline(disc);
+    setDrillLevel('years');
+  };
+
+  const goBack = () => {
+    if (drillLevel === 'years') { setSelectedDiscipline(null); setDrillLevel('disciplines'); }
+    else if (drillLevel === 'disciplines') { setSelectedDegree(null); setDrillLevel('degrees'); }
+  };
+
+  /* ── add discipline ─────────────────────────────────────────────── */
+
+  const handleAddDiscipline = () => {
+    if (!newDiscipline.trim() || !selectedSchool || !selectedDegree) return;
     createGroupMut.mutate({
       school_id: selectedSchool.id,
-      degree_level: newGroup.degree_level,
-      discipline: newGroup.discipline.trim() || null,
-      year: newGroup.year || null,
-      citation_style: newGroup.citation_style.trim() || null,
+      degree_level: selectedDegree,
+      discipline: newDiscipline.trim(),
+      year: new Date().getFullYear(),
+    }, {
+      onSuccess: () => {
+        setAddDisciplineOpen(false);
+        setNewDiscipline('');
+        enterDiscipline(newDiscipline.trim());
+      },
     });
   };
 
-  // ── Completeness badge ───────────────────────────────────────────────────
+  /* ── add year template ──────────────────────────────────────────── */
+
+  const handleAddYear = () => {
+    if (!selectedSchool || !selectedDegree || !selectedDiscipline) return;
+    createGroupMut.mutate({
+      school_id: selectedSchool.id,
+      degree_level: selectedDegree,
+      discipline: selectedDiscipline,
+      year: newYear,
+    }, {
+      onSuccess: () => { setAddYearOpen(false); },
+    });
+  };
+
+  /* ── completeness ───────────────────────────────────────────────── */
+
   const completeness = (g: TemplateGroup) => {
     const count = [g.has_structure, g.has_format_rules, g.has_citation_rules].filter(Boolean).length;
     if (count === 3) return <Tag color="green">完整</Tag>;
@@ -120,20 +247,54 @@ export function Schools() {
     return <Tag color="red">空</Tag>;
   };
 
-  const degreeLabel = (v: string) => DEGREE_OPTIONS.find(o => o.value === v)?.label ?? v;
+  /* ── breadcrumb ─────────────────────────────────────────────────── */
+
+  const breadcrumb = () => {
+    const parts: { label: string; onClick?: () => void }[] = [
+      { label: selectedSchool?.name ?? '', onClick: () => { setDrillLevel('degrees'); setSelectedDegree(null); setSelectedDiscipline(null); } },
+    ];
+    if (selectedDegree) {
+      parts.push({
+        label: degreeLabel(selectedDegree),
+        onClick: drillLevel === 'years' ? () => { setDrillLevel('disciplines'); setSelectedDiscipline(null); } : undefined,
+      });
+    }
+    if (selectedDiscipline) {
+      parts.push({ label: selectedDiscipline });
+    }
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: '#5f6368', marginBottom: 16 }}>
+        {drillLevel !== 'degrees' && (
+          <Button type="text" size="small" icon={<ArrowLeftOutlined />} onClick={goBack} style={{ marginRight: 4 }} />
+        )}
+        {parts.map((p, i) => (
+          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {i > 0 && <RightOutlined style={{ fontSize: 10, color: '#bdc1c6' }} />}
+            {p.onClick ? (
+              <a onClick={p.onClick} style={{ cursor: 'pointer', color: '#1a73e8' }}>{p.label}</a>
+            ) : (
+              <span style={{ fontWeight: 500, color: '#202124' }}>{p.label}</span>
+            )}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  /* ── render ─────────────────────────────────────────────────────── */
 
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>学校模板管理</h2>
         <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
-          左侧选择学校 → 右侧管理模板目录 → 点击编辑进入模板详情
+          选学校 → 选学位层级 → 选专业 → 管理年份模板
         </p>
       </div>
 
       <Row gutter={20} style={{ minHeight: 'calc(100vh - 180px)' }}>
-        {/* ── LEFT: School list ─────────────────────────────────────── */}
-        <Col span={8} style={{ borderRight: '1px solid #e8eaed', paddingRight: 16 }}>
+        {/* ══ LEFT: School list ═══════════════════════════════════════ */}
+        <Col span={7} style={{ borderRight: '1px solid #e8eaed', paddingRight: 16 }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             <Input
               prefix={<SearchOutlined style={{ color: '#9aa0a6' }} />}
@@ -141,8 +302,8 @@ export function Schools() {
               value={search} onChange={e => setSearch(e.target.value)}
               allowClear style={{ borderRadius: 20, height: 36 }}
             />
-            <Tooltip title="从预置列表初始化学校（幂等操作）">
-              <Button onClick={() => bootstrapMut.mutate()} loading={bootstrapMut.isPending}>
+            <Tooltip title="从预置列表初始化学校（幂等）">
+              <Button onClick={() => bootstrapMut.mutate()} loading={bootstrapMut.isPending} size="small" style={{ height: 36 }}>
                 初始化
               </Button>
             </Tooltip>
@@ -153,16 +314,15 @@ export function Schools() {
           <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto' }}>
             <List
               dataSource={filteredSchools}
-              locale={{ emptyText: <Empty description="暂无学校数据，请先初始化" /> }}
+              locale={{ emptyText: <Empty description="暂无学校，请先初始化" /> }}
               renderItem={s => (
                 <List.Item
                   key={s.id}
-                  onClick={() => setSelectedSchool(s)}
+                  onClick={() => selectSchool(s)}
                   style={{
                     cursor: 'pointer', padding: '10px 12px', borderRadius: 6,
                     background: selectedSchool?.id === s.id ? '#e8f0fe' : 'transparent',
-                    opacity: s.enabled ? 1 : 0.5,
-                    marginBottom: 2,
+                    opacity: s.enabled ? 1 : 0.5, marginBottom: 2,
                   }}
                   extra={
                     <Tooltip title={s.enabled ? '禁用' : '启用'}>
@@ -174,88 +334,156 @@ export function Schools() {
                     </Tooltip>
                   }
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 14, fontWeight: selectedSchool?.id === s.id ? 500 : 400 }}>{s.name}</span>
-                    {!s.enabled && <Tag color="red" style={{ fontSize: 11 }}>禁用</Tag>}
-                  </div>
+                  <span style={{ fontSize: 14, fontWeight: selectedSchool?.id === s.id ? 500 : 400 }}>
+                    {s.name}
+                  </span>
                 </List.Item>
               )}
             />
           </div>
         </Col>
 
-        {/* ── RIGHT: Template groups ───────────────────────────────── */}
-        <Col span={16} style={{ paddingLeft: 16 }}>
+        {/* ══ RIGHT: Drill-down panel ════════════════════════════════ */}
+        <Col span={17} style={{ paddingLeft: 20 }}>
           {!selectedSchool && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9aa0a6' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
               <Typography.Text type="secondary" style={{ fontSize: 16 }}>
                 ← 请先从左侧选择一所学校
               </Typography.Text>
             </div>
           )}
 
-          {selectedSchool && (
+          {selectedSchool && groupsQ.isLoading && <Card loading style={{ borderRadius: 8 }} />}
+
+          {/* ── Level 1: Degree (固定三个) ─────────────────────────── */}
+          {selectedSchool && !groupsQ.isLoading && drillLevel === 'degrees' && (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <div>
-                  <Typography.Title level={4} style={{ margin: 0, fontWeight: 500 }}>
-                    {selectedSchool.name}
-                  </Typography.Title>
-                  <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                    模板目录 · 每条对应一个学位层级×专业×年份组合
-                  </Typography.Text>
-                </div>
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
-                  新增模板目录
+              {breadcrumb()}
+              <Typography.Title level={4} style={{ margin: '0 0 20px', fontWeight: 500 }}>
+                选择学位层级
+              </Typography.Title>
+              <Row gutter={[16, 16]}>
+                {DEGREES.map(d => (
+                  <Col span={8} key={d.key}>
+                    <Card
+                      hoverable
+                      onClick={() => enterDegree(d.key)}
+                      style={{ borderRadius: 10, textAlign: 'center', border: '1px solid #e8eaed', cursor: 'pointer' }}
+                      styles={{ body: { padding: '28px 16px' } }}
+                    >
+                      <div style={{ marginBottom: 12 }}>{d.icon}</div>
+                      <Typography.Title level={4} style={{ margin: '0 0 4px', fontWeight: 500 }}>{d.label}</Typography.Title>
+                      <Typography.Text type="secondary" style={{ fontSize: 13 }}>{d.sub}</Typography.Text>
+                      <div style={{ marginTop: 12 }}>
+                        <Tag color={degreeCount(d.key) > 0 ? 'blue' : 'default'}>
+                          {degreeCount(d.key)} 个模板
+                        </Tag>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </>
+          )}
+
+          {/* ── Level 2: Disciplines ──────────────────────────────── */}
+          {selectedSchool && !groupsQ.isLoading && drillLevel === 'disciplines' && selectedDegree && (
+            <>
+              {breadcrumb()}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <Typography.Title level={4} style={{ margin: 0, fontWeight: 500 }}>
+                  专业 / 方向
+                </Typography.Title>
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => { setNewDiscipline(''); setAddDisciplineOpen(true); }}>
+                  新增专业
                 </Button>
               </div>
 
-              {groupsQ.isLoading && <Card loading style={{ borderRadius: 8 }} />}
+              {disciplines.length === 0 && (
+                <Empty description="暂无专业，请先新增" style={{ padding: 60 }}>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={() => { setNewDiscipline(''); setAddDisciplineOpen(true); }}>
+                    新增专业
+                  </Button>
+                </Empty>
+              )}
 
-              {!groupsQ.isLoading && (groupsQ.data ?? []).length === 0 && (
-                <Empty description="该学校暂无模板目录" style={{ padding: 60 }}>
-                  <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
-                    创建第一个模板目录
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {disciplines.map(disc => (
+                  <Card
+                    key={disc}
+                    hoverable
+                    onClick={() => enterDiscipline(disc)}
+                    style={{ borderRadius: 8, border: '1px solid #e8eaed', cursor: 'pointer', boxShadow: 'none' }}
+                    styles={{ body: { padding: '14px 18px' } }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Typography.Text strong style={{ fontSize: 15 }}>{disc}</Typography.Text>
+                        <Tag color="blue">{disciplineCount(disc)} 个年份模板</Tag>
+                      </div>
+                      <RightOutlined style={{ color: '#bdc1c6' }} />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* ── Level 3: Year templates ───────────────────────────── */}
+          {selectedSchool && !groupsQ.isLoading && drillLevel === 'years' && selectedDegree && selectedDiscipline && (
+            <>
+              {breadcrumb()}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <Typography.Title level={4} style={{ margin: 0, fontWeight: 500 }}>
+                  年份模板
+                </Typography.Title>
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => { setNewYear(new Date().getFullYear()); setAddYearOpen(true); }}>
+                  新增年份
+                </Button>
+              </div>
+
+              {yearGroups.length === 0 && (
+                <Empty description="暂无模板，请新增年份" style={{ padding: 60 }}>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={() => { setNewYear(new Date().getFullYear()); setAddYearOpen(true); }}>
+                    新增年份
                   </Button>
                 </Empty>
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {(groupsQ.data ?? []).map(g => (
+                {yearGroups.map(g => (
                   <Card
                     key={g.id}
                     hoverable
                     style={{ borderRadius: 8, opacity: g.enabled ? 1 : 0.55, border: '1px solid #e8eaed', boxShadow: 'none' }}
-                    styles={{ body: { padding: '12px 16px' } }}
+                    styles={{ body: { padding: '14px 18px' } }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <Typography.Text strong style={{ fontSize: 14 }}>
-                          {degreeLabel(g.degree_level)}
+                        <Typography.Text strong style={{ fontSize: 16 }}>
+                          {g.year ?? '通用'}
                         </Typography.Text>
-                        {g.discipline && <Tag>{g.discipline}</Tag>}
-                        {g.year && <Tag color="blue">{g.year}</Tag>}
-                        {g.citation_style && <Typography.Text type="secondary" style={{ fontSize: 12 }}>引用: {g.citation_style}</Typography.Text>}
+                        {g.citation_style && (
+                          <Tag>{g.citation_style}</Tag>
+                        )}
                         {completeness(g)}
                         {!g.enabled && <Tag color="red">禁用</Tag>}
                       </div>
                       <Space>
-                        <Tooltip title="编辑模板内容">
-                          <Button
-                            type="primary" ghost size="small"
-                            icon={<SettingOutlined />}
-                            onClick={() => nav(`/schools/edit/${g.id}`)}
-                          >
-                            编辑
-                          </Button>
-                        </Tooltip>
+                        <Button
+                          type="primary" ghost size="small"
+                          icon={<SettingOutlined />}
+                          onClick={() => nav(`/schools/edit/${g.id}`)}
+                        >
+                          编辑模板
+                        </Button>
                         <Tooltip title={g.enabled ? '禁用' : '启用'}>
                           <Button type="text" size="small"
                             icon={g.enabled ? <StopOutlined style={{ color: '#f9ab00' }} /> : <CheckCircleOutlined style={{ color: '#34a853' }} />}
                             onClick={() => toggleGroupMut.mutate(g)}
                           />
                         </Tooltip>
-                        <Popconfirm title="确认删除此模板目录？所有关联内容将被删除。" onConfirm={() => deleteGroupMut.mutate(g.id)}>
+                        <Popconfirm title="确认删除？关联的结构、格式和引用模板将全部删除。" onConfirm={() => deleteGroupMut.mutate(g.id)}>
                           <Button type="text" size="small" danger icon={<DeleteOutlined />} />
                         </Popconfirm>
                       </Space>
@@ -268,46 +496,50 @@ export function Schools() {
         </Col>
       </Row>
 
-      {/* ── Create group modal (Step 1 only) ───────────────────────── */}
+      {/* ── Modal: Add Discipline ─────────────────────────────────── */}
       <Modal
-        title="新增模板目录"
-        open={createOpen} onCancel={() => setCreateOpen(false)} onOk={handleCreateGroup}
-        okText="下一步：编辑模板内容" cancelText="取消"
-        confirmLoading={createGroupMut.isPending} width={420} destroyOnClose
+        title={`新增专业 — ${selectedSchool?.name} · ${degreeLabel(selectedDegree ?? '')}`}
+        open={addDisciplineOpen}
+        onCancel={() => setAddDisciplineOpen(false)}
+        onOk={handleAddDiscipline}
+        okText="创建" cancelText="取消"
+        confirmLoading={createGroupMut.isPending}
+        width={380} destroyOnClose
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
-          <div>
-            <div style={{ fontSize: 13, marginBottom: 6, fontWeight: 500 }}>学位层级 <span style={{ color: '#d93025' }}>*</span></div>
-            <Select
-              style={{ width: '100%' }} options={DEGREE_OPTIONS}
-              value={newGroup.degree_level} onChange={v => setNewGroup(p => ({ ...p, degree_level: v }))}
-            />
-          </div>
-          <div>
-            <div style={{ fontSize: 13, marginBottom: 6, fontWeight: 500 }}>专业/方向</div>
-            <Input
-              value={newGroup.discipline}
-              onChange={e => setNewGroup(p => ({ ...p, discipline: e.target.value }))}
-              placeholder="如：设计学、美术学"
-            />
-          </div>
-          <div>
-            <div style={{ fontSize: 13, marginBottom: 6, fontWeight: 500 }}>年份</div>
-            <InputNumber
-              style={{ width: '100%' }}
-              value={newGroup.year}
-              onChange={v => setNewGroup(p => ({ ...p, year: v ?? new Date().getFullYear() }))}
-              min={2000} max={2099}
-            />
-          </div>
-          <div>
-            <div style={{ fontSize: 13, marginBottom: 6, fontWeight: 500 }}>引用格式</div>
-            <Input
-              value={newGroup.citation_style}
-              onChange={e => setNewGroup(p => ({ ...p, citation_style: e.target.value }))}
-              placeholder="GB/T 7714"
-            />
-          </div>
+        <div style={{ padding: '12px 0' }}>
+          <div style={{ fontSize: 13, marginBottom: 6, fontWeight: 500 }}>专业名称</div>
+          <Input
+            value={newDiscipline}
+            onChange={e => setNewDiscipline(e.target.value)}
+            placeholder="如：设计学、美术学、艺术学理论"
+            autoFocus
+            onPressEnter={handleAddDiscipline}
+          />
+          <Typography.Text type="secondary" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>
+            创建后会自动生成当前年份的模板条目，可进入后继续添加其他年份
+          </Typography.Text>
+        </div>
+      </Modal>
+
+      {/* ── Modal: Add Year ───────────────────────────────────────── */}
+      <Modal
+        title={`新增年份模板 — ${selectedDiscipline}`}
+        open={addYearOpen}
+        onCancel={() => setAddYearOpen(false)}
+        onOk={handleAddYear}
+        okText="创建" cancelText="取消"
+        confirmLoading={createGroupMut.isPending}
+        width={340} destroyOnClose
+      >
+        <div style={{ padding: '12px 0' }}>
+          <div style={{ fontSize: 13, marginBottom: 6, fontWeight: 500 }}>年份</div>
+          <InputNumber
+            style={{ width: '100%' }}
+            value={newYear}
+            onChange={v => setNewYear(v ?? new Date().getFullYear())}
+            min={2000} max={2099}
+            autoFocus
+          />
         </div>
       </Modal>
     </div>
