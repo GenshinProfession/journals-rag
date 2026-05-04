@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,6 +18,8 @@ class School(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     country: Mapped[str | None] = mapped_column(String(10))
     logo_url: Mapped[str | None] = mapped_column(String(500))
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    is_pinned: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    pinned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     template_groups: Mapped[list["SchoolTemplateGroup"]] = relationship(
         back_populates="school", cascade="all, delete-orphan"

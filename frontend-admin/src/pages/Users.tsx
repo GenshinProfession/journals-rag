@@ -5,8 +5,8 @@ import {
   Typography, message
 } from 'antd';
 import {
-  PlusOutlined, KeyOutlined, StopOutlined, CheckCircleOutlined,
-  DollarOutlined, ToolOutlined, CopyOutlined
+  PlusOutlined, StopOutlined, CheckCircleOutlined,
+  DollarOutlined, ToolOutlined, CopyOutlined, ReloadOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { apiFetch } from '../api/client';
@@ -27,6 +27,9 @@ export function Users() {
   const [adjustYuan, setAdjustYuan] = useState<number | null>(null);
   const [note, setNote] = useState('');
   const [adjustNote, setAdjustNote] = useState('');
+  const [regenKeyOpen, setRegenKeyOpen] = useState(false);
+  const [regenKey, setRegenKey] = useState<string | null>(null);
+  const [regenUser, setRegenUser] = useState<UserRow | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'users'],
@@ -79,6 +82,16 @@ export function Users() {
     onError: (e: Error) => message.error(e.message)
   });
 
+  const regenMut = useMutation({
+    mutationFn: (userId: string) =>
+      apiFetch(`/api/admin/users/${userId}/regenerate-key`, { method: 'POST' }) as Promise<{ secret_key: string }>,
+    onSuccess: (res) => { setRegenKey(res.secret_key); },
+    onError: (e: Error) => message.error(e.message)
+  });
+
+  const openRegen = (u: UserRow) => { setRegenUser(u); setRegenKey(null); setRegenKeyOpen(true); };
+  const closeRegen = () => { setRegenKeyOpen(false); setRegenKey(null); setRegenUser(null); };
+
   const handleCreate = () => {
     const u = username.trim();
     if (!u) { message.warning('用户名不能为空'); return; }
@@ -125,10 +138,7 @@ export function Users() {
         <Space size={4}>
           <Tooltip title="充值"><Button size="small" type="text" icon={<DollarOutlined style={{ color: '#34a853' }} />} onClick={() => openRecharge(u)} /></Tooltip>
           <Tooltip title="调整"><Button size="small" type="text" icon={<ToolOutlined />} onClick={() => openAdjust(u)} /></Tooltip>
-          <Tooltip title="重置密码"><Button size="small" type="text" icon={<KeyOutlined />} onClick={() => {
-            const pwd = window.prompt(`为 ${u.username} 设置新密码`);
-            if (pwd) updateMut.mutate({ id: u.id, password: pwd });
-          }} /></Tooltip>
+          <Tooltip title="重新生成密钥"><Button size="small" type="text" icon={<ReloadOutlined style={{ color: '#1a73e8' }} />} onClick={() => openRegen(u)} /></Tooltip>
           <Popconfirm title={`确认${u.is_active ? '停用' : '启用'}？`} onConfirm={() => updateMut.mutate({ id: u.id, is_active: !u.is_active })}>
             <Tooltip title={u.is_active ? '停用' : '启用'}>
               <Button size="small" type="text" icon={u.is_active ? <StopOutlined style={{ color: '#f9ab00' }} /> : <CheckCircleOutlined style={{ color: '#34a853' }} />} />
@@ -235,6 +245,43 @@ export function Users() {
             <Input value={adjustNote} onChange={e => setAdjustNote(e.target.value)} placeholder="对账修正原因" />
           </Label>
         </div>
+      </Modal>
+      {/* Regenerate key */}
+      <Modal
+        title={`重新生成密钥 — ${regenUser?.nickname || regenUser?.username || ''}`}
+        open={regenKeyOpen}
+        onCancel={closeRegen}
+        footer={regenKey ? (
+          <Button type="primary" onClick={closeRegen}>关闭</Button>
+        ) : undefined}
+        onOk={regenKey ? undefined : () => { if (regenUser) regenMut.mutate(regenUser.id); }}
+        okText="确认重新生成"
+        cancelText="取消"
+        confirmLoading={regenMut.isPending}
+        width={460}
+        destroyOnClose
+      >
+        {regenKey ? (
+          <div style={{ padding: '16px 0' }}>
+            <div style={{ marginBottom: 12, color: '#34a853', fontWeight: 500 }}>密钥已重新生成</div>
+            <div style={{ marginBottom: 16, fontSize: 13, color: '#5f6368' }}>
+              以下新密钥仅显示一次，旧密钥已失效。请立即复制：
+            </div>
+            <div style={{
+              padding: '12px 16px', borderRadius: 8, background: '#f8f9fa', border: '1px solid #e8eaed',
+              fontFamily: 'var(--font-mono)', fontSize: 15, letterSpacing: '0.05em',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <span>{regenKey}</span>
+              <Button type="text" icon={<CopyOutlined />} onClick={() => { navigator.clipboard.writeText(regenKey); message.success('已复制'); }} />
+            </div>
+          </div>
+        ) : (
+          <div style={{ padding: '12px 0', color: '#5f6368', fontSize: 14 }}>
+            确认后将为 <strong>{regenUser?.username}</strong> 重新生成登录密钥。<br />
+            旧密钥将立即失效，该用户需要使用新密钥登录。
+          </div>
+        )}
       </Modal>
     </div>
   );

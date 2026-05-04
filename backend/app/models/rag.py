@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -72,5 +72,20 @@ class RAGChunk(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     page_end: Mapped[int | None] = mapped_column(Integer)
     token_count: Mapped[int | None] = mapped_column(Integer)
     keywords: Mapped[list[str] | None] = mapped_column(JSONB)
+    topic_summary: Mapped[str | None] = mapped_column(String(500))
     status: Mapped[str] = mapped_column(String(30), default="draft")
     version: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class GenerationRAGHit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Audit trail: which RAG chunks were fed to the LLM for a chapter generation."""
+    __tablename__ = "generation_rag_hits"
+
+    chapter_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("chapters.id"), index=True)
+    chunk_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("rag_chunks.id"), index=True)
+    literature_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("literature.id"))
+    similarity_score: Mapped[float | None] = mapped_column(Float)
+    chunk_content_preview: Mapped[str | None] = mapped_column(Text)
+    source: Mapped[str] = mapped_column(String(30), default="auto")
+    generation_version: Mapped[int] = mapped_column(Integer, default=1)
+    accepted: Mapped[bool | None] = mapped_column(Boolean, nullable=True)

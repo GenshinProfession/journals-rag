@@ -1,87 +1,113 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import {
-  Alert, Button, Card, Checkbox, Collapse, Divider, Form, Input, List,
-  Select, Space, Steps, Tag, message as antMsg,
+  Alert, Badge, Button, Card, Checkbox, Collapse, Divider,
+  Dropdown, Empty, Form, Input, List, Modal, Popconfirm, Progress,
+  Select, Space, Steps, Table, Tag, Tooltip, Tree, Typography,
+  message as antMsg,
 } from 'antd';
+import type { TreeDataNode } from 'antd';
 import {
   UploadOutlined, CheckCircleOutlined, SearchOutlined, FileTextOutlined,
   EditOutlined, SyncOutlined, DownloadOutlined, ExperimentOutlined,
-  OrderedListOutlined, SaveOutlined,
+  OrderedListOutlined, SaveOutlined, DeleteOutlined, SafetyCertificateOutlined,
+  ThunderboltOutlined, PlusOutlined,
+  FileWordOutlined,
 } from '@ant-design/icons';
 import { apiFetch } from '../api/client';
 
-type ProjectRow = { id: string; discipline: string; title: string | null; topic: string | null; status: string };
+const { Text, Title } = Typography;
+
+/* ── Types ──────────────────────────────────────────────────────────── */
+type ProjectRow = { id: string; discipline: string; title: string | null; topic: string | null; status: string; school_id: string | null; abstract: string | null };
 type ModelRow = { id: string; display_name: string; provider_model: string; allowed_scenarios: string[] };
-type LiteratureRow = { id: string; title: string; rag_status: string };
+type LiteratureRow = {
+  id: string; title: string; authors: string | null; year: number | null;
+  journal: string | null; doi: string | null; abstract: string | null;
+  rag_status: string; source: string; folder: string | null; is_cited: boolean;
+};
+type LitListResponse = { project_id: string; total: number; min_required: number; can_start_writing: boolean; items: LiteratureRow[] };
 type ChunkPreview = { id: string; chunk_index: number; preview: string };
 type ChunkResponse = { document_id: string; literature_id: string; chunk_count: number; preview: ChunkPreview[] };
-type ChapterRow = { id: string; title: string; order_index: number; content: string | null; feedback: string | null; status: string };
+type ChapterRow = {
+  id: string; title: string; order_index: number; content: string | null;
+  feedback: string | null; status: string; level: number; parent_id: string | null;
+  word_count: number; version: number;
+};
+type WritingReadiness = { literature_count: number; indexed_count: number; min_required: number; ready: boolean; message: string };
+type SearchResult = { title: string; authors: string; year: number; journal: string; abstract: string; doi: string };
 
-function firstModelFor(models: ModelRow[] | undefined, scenario: string): string {
+/* ── Helpers ─────────────────────────────────────────────────────────── */
+function requireModel(models: ModelRow[] | undefined, scenario: string): string {
   const found = (models ?? []).find(m => {
     const a = m.allowed_scenarios ?? [];
     return a.length === 0 || a.includes(scenario);
   });
-  return found?.id ?? '';
-}
-
-function requireModel(models: ModelRow[] | undefined, scenario: string): string {
-  const id = firstModelFor(models, scenario);
-  if (!id) throw new Error(`没有可用于 ${scenario} 的模型，请先让管理员配置模型目录。`);
-  return id;
+  if (!found?.id) throw new Error(`没有可用于 ${scenario} 的模型，请先让管理员配置模型目录。`);
+  return found.id;
 }
 
 function downloadBlob(filename: string, data: BlobPart, type: string) {
   const blob = new Blob([data], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
+  a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
 }
 
+const STATUS_TAG: Record<string, { color: string; label: string }> = {
+  draft: { color: 'default', label: '草稿' },
+  generated: { color: 'cyan', label: '已生成' },
+  pending_accept: { color: 'processing', label: '待确认' },
+  reviewed: { color: 'orange', label: '已审校' },
+  rewritten: { color: 'blue', label: '已改写' },
+  rejected: { color: 'red', label: '已拒绝' },
+};
+
+function buildTree(chapters: ChapterRow[]): TreeDataNode[] {
+  const map = new Map<string, TreeDataNode & { _level: number; _order: number }>();
+  const roots: (TreeDataNode & { _level: number; _order: number })[] = [];
+  for (const ch of chapters) {
+    map.set(ch.id, {
+      key: ch.id,
+      title: ch.title,
+      children: [],
+      _level: ch.level,
+      _order: ch.order_index,
+    });
+  }
+  for (const ch of chapters) {
+    const node = map.get(ch.id)!;
+    if (ch.parent_id && map.has(ch.parent_id)) {
+      map.get(ch.parent_id)!.children!.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  const sortFn = (a: { _order: number }, b: { _order: number }) => a._order - b._order;
+  roots.sort(sortFn);
+  map.forEach(n => (n.children as typeof roots).sort(sortFn));
+  return roots;
+}
+
+/* ── Tabs for the left panel ─────────────────────────────────────────── */
+type PanelTab = 'literature' | 'writing';
+
+/* ══════════════════════════════════════════════════════════════════════ */
 export function Wizard() {
   const { projectId: projectIdParam } = useParams<{ projectId: string }>();
   const nav = useNavigate();
   const qc = useQueryClient();
   const [msgApi, ctxHolder] = antMsg.useMessage();
-
   const projectId = projectIdParam ?? '';
+
+  /* ── Queries ─────────────────────────────────────────────────────── */
   const projectsQ = useQuery({ queryKey: ['writer', 'projects'], queryFn: () => apiFetch('/api/projects') as Promise<ProjectRow[]> });
   const modelsQ = useQuery({ queryKey: ['writer', 'models'], queryFn: () => apiFetch('/api/models') as Promise<ModelRow[]> });
-
-  const project = useMemo(() => projectsQ.data?.find(p => p.id === projectId), [projectId, projectsQ.data]);
-
-  const [title, setTitle] = useState('');
-  const [bodyText, setBodyText] = useState('');
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [literatureId, setLiteratureId] = useState('');
-  const [documentId, setDocumentId] = useState('');
-  const [chunkPreview, setChunkPreview] = useState<ChunkPreview[]>([]);
-  const [selectedChunkIds, setSelectedChunkIds] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchItems, setSearchItems] = useState<Array<{ id: string; text: string }>>([]);
-  const [chapterDrafts, setChapterDrafts] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    setTitle('');
-    setBodyText('');
-    setUploadFile(null);
-    setLiteratureId('');
-    setDocumentId('');
-    setChunkPreview([]);
-    setSelectedChunkIds([]);
-    setSearchQuery('');
-    setSearchItems([]);
-    setChapterDrafts({});
-  }, [projectId]);
-
   const literatureQ = useQuery({
     queryKey: ['writer', 'literature', projectId],
-    queryFn: () => apiFetch(`/api/projects/${projectId}/literature`) as Promise<{ items: LiteratureRow[] }>,
+    queryFn: () => apiFetch(`/api/projects/${projectId}/literature`) as Promise<LitListResponse>,
     enabled: Boolean(projectId),
   });
   const chaptersQ = useQuery({
@@ -89,33 +115,106 @@ export function Wizard() {
     queryFn: () => apiFetch(`/api/projects/${projectId}/chapters`) as Promise<ChapterRow[]>,
     enabled: Boolean(projectId),
   });
+  const readinessQ = useQuery({
+    queryKey: ['writer', 'readiness', projectId],
+    queryFn: () => apiFetch(`/api/projects/${projectId}/writing-readiness`) as Promise<WritingReadiness>,
+    enabled: Boolean(projectId),
+  });
+  const project = useMemo(() => projectsQ.data?.find(p => p.id === projectId), [projectId, projectsQ.data]);
+
+  /* ── Local state ─────────────────────────────────────────────────── */
+  const [panelTab, setPanelTab] = useState<PanelTab>('literature');
+  const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
+  const [chapterDrafts, setChapterDrafts] = useState<Record<string, string>>({});
+  const [addChapterTitle, setAddChapterTitle] = useState('');
+  const [addChapterLevel, setAddChapterLevel] = useState(1);
+  const [showAddChapter, setShowAddChapter] = useState(false);
+
+  // Literature state
+  const [litTitle, setLitTitle] = useState('');
+  const [bodyText, setBodyText] = useState('');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [literatureId, setLiteratureId] = useState('');
+  const [documentId, setDocumentId] = useState('');
+  const [chunkPreview, setChunkPreview] = useState<ChunkPreview[]>([]);
+  const [selectedChunkIds, setSelectedChunkIds] = useState<string[]>([]);
+  const [litSearchQuery, setLitSearchQuery] = useState('');
+  const [litSearchResults, setLitSearchResults] = useState<SearchResult[]>([]);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setActiveChapterId(null); setChapterDrafts({});
+    setLitTitle(''); setBodyText(''); setUploadFile(null); setLiteratureId('');
+    setDocumentId(''); setChunkPreview([]); setSelectedChunkIds([]);
+    setLitSearchQuery(''); setLitSearchResults([]);
+  }, [projectId]);
+
+  // Auto-select first chapter when chapters load
+  useEffect(() => {
+    if (!activeChapterId && chaptersQ.data?.length) {
+      setActiveChapterId(chaptersQ.data[0].id);
+      setPanelTab('writing');
+    }
+  }, [chaptersQ.data, activeChapterId]);
 
   const ok = (text: string) => msgApi.success(text);
   const fail = (e: Error) => msgApi.error(e.message);
+  const refreshLit = () => { qc.invalidateQueries({ queryKey: ['writer', 'literature', projectId] }); qc.invalidateQueries({ queryKey: ['writer', 'readiness', projectId] }); };
+  const refreshChapters = () => qc.invalidateQueries({ queryKey: ['writer', 'chapters', projectId] });
 
+  /* ── Derived ─────────────────────────────────────────────────────── */
+  const litData = literatureQ.data;
+  const litCount = litData?.total ?? 0;
+  const minRequired = litData?.min_required ?? 10;
+  const canStartWriting = litData?.can_start_writing ?? false;
+  const chapters = chaptersQ.data ?? [];
+  const activeChapter = chapters.find(c => c.id === activeChapterId) ?? null;
+  const treeData = useMemo(() => buildTree(chapters), [chapters]);
+  const selectedLiterature = litData?.items?.find(x => x.id === literatureId);
+
+  /* ── Mutations ───────────────────────────────────────────────────── */
   const createLiterature = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/literature`, {
-      method: 'POST', body: JSON.stringify({ title, body_text: bodyText, abstract: bodyText.slice(0, 2000) }),
+      method: 'POST', body: JSON.stringify({ title: litTitle, body_text: bodyText, abstract: bodyText.slice(0, 2000) }),
     }) as Promise<{ id: string }>,
-    onSuccess: (res) => { setLiteratureId(res.id); ok('参考论文已保存'); qc.invalidateQueries({ queryKey: ['writer', 'literature', projectId] }); },
+    onSuccess: (res) => { setLiteratureId(res.id); ok('参考论文已保存'); refreshLit(); },
     onError: fail,
   });
+
   const uploadLiterature = useMutation({
     mutationFn: () => {
       if (!uploadFile) throw new Error('请先选择文件');
-      const fd = new FormData(); fd.set('title', title.trim() || uploadFile.name); fd.set('file', uploadFile);
-      return apiFetch(`/api/projects/${projectId}/literature/upload`, { method: 'POST', body: fd }) as Promise<{ id: string; file_path: string }>;
+      const fd = new FormData(); fd.set('title', litTitle.trim() || uploadFile.name); fd.set('file', uploadFile);
+      return apiFetch(`/api/projects/${projectId}/literature/upload`, { method: 'POST', body: fd }) as Promise<{ id: string }>;
     },
-    onSuccess: (res) => { setLiteratureId(res.id); ok(`文件已上传：${res.file_path}`); qc.invalidateQueries({ queryKey: ['writer', 'literature', projectId] }); },
+    onSuccess: (res) => { setLiteratureId(res.id); ok('文件已上传'); refreshLit(); },
     onError: fail,
   });
+
+  const deleteLit = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/projects/${projectId}/literature/${id}`, { method: 'DELETE' }),
+    onSuccess: () => { ok('已删除'); refreshLit(); },
+    onError: fail,
+  });
+
+  const checkRelevance = useMutation({
+    mutationFn: (litId: string) => apiFetch(`/api/projects/${projectId}/literature/relevance-check`, {
+      method: 'POST', body: JSON.stringify({ literature_id: litId }),
+    }) as Promise<{ score: number; reason: string; should_add_to_library: boolean }>,
+    onSuccess: (res) => { msgApi.info(`相关性 ${res.score}/100 — ${res.should_add_to_library ? '推荐入库' : '不推荐'}：${res.reason}`); },
+    onError: fail,
+  });
+
   const review = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/reference/review`, {
       method: 'POST', body: JSON.stringify({ literature_id: literatureId, model_id: requireModel(modelsQ.data, 'reference_review') }),
-    }) as Promise<{ passed: boolean; overall_score: number; report: string }>,
-    onSuccess: (res) => ok(`审核${res.passed ? '通过' : '未通过'}，总分 ${res.overall_score}`),
+    }) as Promise<{ passed: boolean; overall_score: number }>,
+    onSuccess: (res) => { ok(`审核${res.passed ? '通过' : '未通过'}，总分 ${res.overall_score}`); refreshLit(); },
     onError: fail,
   });
+
   const chunk = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/rag/documents/${literatureId}/chunk`, {
       method: 'POST', body: JSON.stringify({ literature_id: literatureId, model_id: requireModel(modelsQ.data, 'rag'), text_override: bodyText || undefined }),
@@ -123,55 +222,68 @@ export function Wizard() {
     onSuccess: (res) => { setDocumentId(res.document_id); setChunkPreview(res.preview); setSelectedChunkIds(res.preview.map(c => c.id)); ok(`已生成 ${res.chunk_count} 个预切块`); },
     onError: fail,
   });
+
   const confirmMut = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/rag/documents/${documentId}/confirm`, {
       method: 'POST', body: JSON.stringify({ chunk_ids: selectedChunkIds }),
     }),
-    onSuccess: () => { ok('已确认切块并写入向量索引'); qc.invalidateQueries({ queryKey: ['writer', 'literature', projectId] }); },
+    onSuccess: () => { ok('已确认切块并写入向量索引'); refreshLit(); },
     onError: fail,
   });
-  const search = useMutation({
-    mutationFn: () => apiFetch(`/api/projects/${projectId}/rag/search`, {
-      method: 'POST', body: JSON.stringify({ query: searchQuery, limit: 5 }),
-    }) as Promise<{ items: Array<{ id: string; text: string }> }>,
-    onSuccess: (res) => { setSearchItems(res.items); ok(`检索到 ${res.items.length} 条片段`); },
-    onError: fail,
-  });
+
   const outline = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/outline/generate`, {
       method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'outline') }),
     }),
-    onSuccess: () => { ok('大纲已生成'); qc.invalidateQueries({ queryKey: ['writer', 'chapters', projectId] }); qc.invalidateQueries({ queryKey: ['writer', 'projects'] }); },
+    onSuccess: () => { ok('大纲已生成'); refreshChapters(); qc.invalidateQueries({ queryKey: ['writer', 'projects'] }); },
     onError: fail,
   });
+
+  const addChapter = useMutation({
+    mutationFn: (body: { title: string; level: number; parent_id?: string }) =>
+      apiFetch(`/api/projects/${projectId}/chapters`, { method: 'POST', body: JSON.stringify(body) }) as Promise<ChapterRow>,
+    onSuccess: (ch) => { ok('已添加'); refreshChapters(); setActiveChapterId(ch.id); setShowAddChapter(false); setAddChapterTitle(''); },
+    onError: fail,
+  });
+
+  const deleteChapter = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/projects/${projectId}/chapters/${id}`, { method: 'DELETE' }),
+    onSuccess: () => { ok('已删除'); refreshChapters(); if (activeChapterId && chapters.length > 1) { const next = chapters.find(c => c.id !== activeChapterId); setActiveChapterId(next?.id ?? null); } },
+    onError: fail,
+  });
+
   const generateChapter = useMutation({
     mutationFn: (chapterId: string) => apiFetch(`/api/projects/${projectId}/chapters/${chapterId}/generate`, {
       method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'chapter_write'), target_words: 1200 }),
     }),
-    onSuccess: () => { ok('章节正文已生成'); qc.invalidateQueries({ queryKey: ['writer', 'chapters', projectId] }); },
+    onSuccess: () => { ok('章节正文已生成'); refreshChapters(); },
     onError: fail,
   });
+
   const saveChapter = useMutation({
     mutationFn: (body: { id: string; content: string }) => apiFetch(`/api/projects/${projectId}/chapters/${body.id}`, {
       method: 'PATCH', body: JSON.stringify({ content: body.content }),
     }),
-    onSuccess: () => { ok('已保存'); qc.invalidateQueries({ queryKey: ['writer', 'chapters', projectId] }); },
+    onSuccess: () => { ok('已保存'); refreshChapters(); },
     onError: fail,
   });
+
   const reviewChapter = useMutation({
-    mutationFn: (chapterId: string) => apiFetch(`/api/projects/${projectId}/chapters/${chapterId}/review`, {
+    mutationFn: (id: string) => apiFetch(`/api/projects/${projectId}/chapters/${id}/review`, {
       method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'chapter_review') }),
     }),
-    onSuccess: () => { ok('审校完成'); qc.invalidateQueries({ queryKey: ['writer', 'chapters', projectId] }); },
+    onSuccess: () => { ok('审校完成'); refreshChapters(); },
     onError: fail,
   });
+
   const rewriteChapter = useMutation({
-    mutationFn: (chapterId: string) => apiFetch(`/api/projects/${projectId}/chapters/${chapterId}/rewrite`, {
+    mutationFn: (id: string) => apiFetch(`/api/projects/${projectId}/chapters/${id}/rewrite`, {
       method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'chapter_rewrite') }),
     }),
-    onSuccess: () => { ok('已按审校意见改写'); qc.invalidateQueries({ queryKey: ['writer', 'chapters', projectId] }); },
+    onSuccess: () => { ok('已改写'); refreshChapters(); },
     onError: fail,
   });
+
   const exportDoc = useMutation({
     mutationFn: async (format: 'markdown' | 'latex' | 'docx') => {
       if (format === 'docx') {
@@ -190,183 +302,337 @@ export function Wizard() {
     onError: fail,
   });
 
-  const selectedLiterature = literatureQ.data?.items?.find(x => x.id === literatureId);
+  const litSearch = useMutation({
+    mutationFn: () => apiFetch(`/api/projects/${projectId}/literature/search`, {
+      method: 'POST', body: JSON.stringify({ query: litSearchQuery, max_results: 10 }),
+    }) as Promise<{ results: SearchResult[] }>,
+    onSuccess: (res) => { setLitSearchResults(res.results); },
+    onError: fail,
+  });
 
-  if (!projectId) {
-    return <Navigate to="/" replace />;
-  }
+  const addSearchResult = useMutation({
+    mutationFn: (item: SearchResult) => apiFetch(`/api/projects/${projectId}/literature`, {
+      method: 'POST', body: JSON.stringify({ title: item.title, authors: item.authors, year: item.year, journal: item.journal, doi: item.doi, abstract: item.abstract }),
+    }) as Promise<{ id: string }>,
+    onSuccess: () => { ok('已添加到文献库'); refreshLit(); },
+    onError: fail,
+  });
+
+  if (!projectId) return <Navigate to="/" replace />;
 
   const currentStep = (() => {
-    if (!literatureQ.data?.items?.length) return 0;
-    const hasReviewed = literatureQ.data.items.some(l => l.rag_status === 'review_passed' || l.rag_status === 'indexed');
-    if (!hasReviewed) return 0;
-    const hasIndexed = literatureQ.data.items.some(l => l.rag_status === 'indexed');
+    if (litCount < minRequired) return 0;
+    const hasIndexed = litData?.items?.some(l => l.rag_status === 'indexed');
     if (!hasIndexed) return 1;
-    if (!chaptersQ.data?.length) return 2;
+    if (!chapters.length) return 2;
     return 3;
   })();
 
+  const activeContent = activeChapter ? (chapterDrafts[activeChapter.id] ?? activeChapter.content ?? '') : '';
+  const setActiveContent = (v: string) => { if (activeChapter) setChapterDrafts(prev => ({ ...prev, [activeChapter.id]: v })); };
+
+  /* ── Column defs for literature table ─────────────────────────────── */
+  const litTableCols = [
+    { title: '标题', dataIndex: 'title', key: 'title', ellipsis: true },
+    { title: '作者', dataIndex: 'authors', key: 'authors', width: 120, ellipsis: true, render: (v: string | null) => v || '-' },
+    { title: '年', dataIndex: 'year', key: 'year', width: 50, render: (v: number | null) => v || '-' },
+    {
+      title: '状态', dataIndex: 'rag_status', key: 'status', width: 90,
+      render: (v: string) => <Tag color={v === 'indexed' ? 'green' : v === 'review_passed' ? 'blue' : v === 'review_failed' ? 'red' : 'default'}>{v}</Tag>,
+    },
+    {
+      title: '操作', key: 'actions', width: 160,
+      render: (_: unknown, row: LiteratureRow) => (
+        <Space size="small">
+          <Tooltip title="AI相关性检测"><Button size="small" icon={<SafetyCertificateOutlined />} loading={checkRelevance.isPending} onClick={() => checkRelevance.mutate(row.id)} /></Tooltip>
+          <Button size="small" type="link" onClick={() => setLiteratureId(row.id)}>选中</Button>
+          <Button size="small" type="link" danger icon={<DeleteOutlined />} onClick={() => deleteLit.mutate(row.id)} />
+        </Space>
+      ),
+    },
+  ];
+
+  /* ══════════════════════════════════════════════════════════════════ */
+  /* RENDER                                                            */
+  /* ══════════════════════════════════════════════════════════════════ */
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 96px)' }}>
       {ctxHolder}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 500, color: '#202124' }}>
-            {project?.title || project?.discipline || '论文向导'}
-          </h2>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#5f6368' }}>
-            按顺序完成参考论文、审核入库、检索大纲与章节写作。
-          </p>
+
+      {/* ── Top bar ──────────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 12px', borderBottom: '1px solid #e8eaed', marginBottom: 0, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Button size="small" onClick={() => nav('/', { replace: true })}>← 工作台</Button>
+          <Title level={5} style={{ margin: 0 }}>{project?.title || project?.discipline || '论文项目'}</Title>
+          <Tag>{project?.status ?? ''}</Tag>
         </div>
-        <Button size="small" onClick={() => nav('/', { replace: true })}>返回工作台</Button>
+        <Space size="small">
+          <Dropdown menu={{ items: [
+            { key: 'md', label: 'Markdown', icon: <DownloadOutlined />, onClick: () => exportDoc.mutate('markdown') },
+            { key: 'tex', label: 'LaTeX', icon: <DownloadOutlined />, onClick: () => exportDoc.mutate('latex') },
+            { key: 'docx', label: 'Word (.docx)', icon: <FileWordOutlined />, onClick: () => exportDoc.mutate('docx') },
+          ]}}>
+            <Button icon={<DownloadOutlined />} loading={exportDoc.isPending}>导出</Button>
+          </Dropdown>
+        </Space>
       </div>
 
-      <Steps current={currentStep} size="small" style={{ marginBottom: 28 }} items={[
-        { title: '添加参考文献' },
-        { title: '审核与入库' },
-        { title: '大纲生成' },
-        { title: '章节写作' },
-      ]} />
+      {/* ── Steps bar ────────────────────────────────────────────────── */}
+      <div style={{ padding: '12px 0', flexShrink: 0 }}>
+        <Steps current={currentStep} size="small" items={[
+          { title: `文献 (${litCount}/${minRequired})` },
+          { title: '审核入库' },
+          { title: '大纲' },
+          { title: '写作' },
+        ]} />
+      </div>
 
-      {/* Step 1: Literature */}
-      <Card title="1. 标准参考论文" style={{ marginBottom: 16, borderColor: '#e8eaed' }}>
-        <Form layout="vertical" onFinish={() => {
-          if (!title.trim() || !bodyText.trim()) { msgApi.warning('请填写文献标题和正文'); return; }
-          createLiterature.mutate();
-        }}>
-          <Form.Item label="文献标题">
-            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="参考论文标题" />
-          </Form.Item>
-          <Form.Item label="正文 / 摘要文本">
-            <Input.TextArea rows={6} value={bodyText} onChange={e => setBodyText(e.target.value)} placeholder="粘贴 PDF 抽取文本或摘要" />
-          </Form.Item>
-          <Space>
-            <Button type="primary" htmlType="submit" loading={createLiterature.isPending} icon={<FileTextOutlined />}>
-              保存参考论文
-            </Button>
-          </Space>
-        </Form>
-        <Divider style={{ margin: '16px 0' }} />
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <span style={{ fontSize: 13, color: '#5f6368' }}>或上传 PDF / 文本文件：</span>
-          <Space>
-            <input type="file" accept=".pdf,.txt,.md,.text" onChange={e => setUploadFile(e.target.files?.[0] ?? null)} />
-            <Button icon={<UploadOutlined />} disabled={!uploadFile} loading={uploadLiterature.isPending} onClick={() => uploadLiterature.mutate()}>
-              上传并创建文献
-            </Button>
-          </Space>
-        </Space>
-      </Card>
+      {/* ── Main split panel ─────────────────────────────────────────── */}
+      <div style={{ display: 'flex', flex: 1, gap: 0, overflow: 'hidden', border: '1px solid #e8eaed', borderRadius: 8 }}>
 
-      {/* Step 2: Review & Chunk */}
-      <Card title="2. 审核与入库" style={{ marginBottom: 16, borderColor: '#e8eaed' }}>
-        <Form.Item label="选择已保存文献" style={{ marginBottom: 16 }}>
-          <Select value={literatureId || undefined} onChange={setLiteratureId} placeholder="请选择文献" allowClear style={{ width: '100%' }}>
-            {literatureQ.data?.items?.map(lit => (
-              <Select.Option key={lit.id} value={lit.id}>
-                {lit.title} · <Tag style={{ marginLeft: 4 }}>{lit.rag_status}</Tag>
-              </Select.Option>
+        {/* LEFT: Editor / Literature */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e8eaed' }}>
+          {/* Tab bar */}
+          <div style={{ display: 'flex', borderBottom: '1px solid #e8eaed', flexShrink: 0 }}>
+            {(['literature', 'writing'] as PanelTab[]).map(t => (
+              <button
+                key={t}
+                onClick={() => setPanelTab(t)}
+                style={{
+                  flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+                  background: panelTab === t ? '#fff' : '#f8f9fa',
+                  color: panelTab === t ? '#1a73e8' : '#5f6368',
+                  borderBottom: panelTab === t ? '2px solid #1a73e8' : '2px solid transparent',
+                }}
+              >
+                {t === 'literature' ? `文献准备 (${litCount})` : '章节编辑'}
+              </button>
             ))}
-          </Select>
-        </Form.Item>
-        <Space wrap>
-          <Button icon={<ExperimentOutlined />} disabled={!literatureId} loading={review.isPending} onClick={() => review.mutate()}>
-            AI 审核
-          </Button>
-          <Button disabled={!literatureId || selectedLiterature?.rag_status !== 'review_passed'} loading={chunk.isPending} onClick={() => chunk.mutate()}>
-            预切块
-          </Button>
-          <Button type="primary" icon={<CheckCircleOutlined />} disabled={!documentId || selectedChunkIds.length === 0} loading={confirmMut.isPending} onClick={() => confirmMut.mutate()}>
-            确认入库
-          </Button>
-        </Space>
-        {chunkPreview.length > 0 && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 13, color: '#5f6368' }}>已选 {selectedChunkIds.length}/{chunkPreview.length} 个 chunk</span>
-              <Space size="small">
-                <Button size="small" type="link" onClick={() => setSelectedChunkIds(chunkPreview.map(c => c.id))}>全选</Button>
-                <Button size="small" type="link" onClick={() => setSelectedChunkIds([])}>清空</Button>
-              </Space>
-            </div>
-            <div style={{ maxHeight: 300, overflow: 'auto', border: '1px solid #e8eaed', borderRadius: 4, padding: 8 }}>
-              {chunkPreview.map(c => (
-                <label key={c.id} style={{ display: 'flex', gap: 8, padding: '6px 0', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontSize: 13 }}>
-                  <Checkbox
-                    checked={selectedChunkIds.includes(c.id)}
-                    onChange={e => setSelectedChunkIds(prev => e.target.checked ? [...prev, c.id] : prev.filter(id => id !== c.id))}
-                  />
-                  <span><strong>#{c.chunk_index}</strong> {c.preview}</span>
-                </label>
-              ))}
-            </div>
           </div>
-        )}
-      </Card>
 
-      {/* Step 3: Search & Outline */}
-      <Card title="3. 检索与大纲" style={{ marginBottom: 16, borderColor: '#e8eaed' }}>
-        <Space.Compact style={{ width: '100%', marginBottom: 12 }}>
-          <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="输入检索问题" style={{ flex: 1 }} />
-          <Button icon={<SearchOutlined />} disabled={!searchQuery} loading={search.isPending} onClick={() => search.mutate()}>检索</Button>
-        </Space.Compact>
-        <Button type="primary" icon={<OrderedListOutlined />} loading={outline.isPending} onClick={() => outline.mutate()}>
-          生成大纲
-        </Button>
-        {searchItems.length > 0 && (
-          <List
-            size="small"
-            style={{ marginTop: 12 }}
-            bordered
-            dataSource={searchItems}
-            renderItem={item => <List.Item style={{ fontSize: 13 }}>{item.text}</List.Item>}
-          />
-        )}
-      </Card>
+          {/* Content area */}
+          <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
 
-      {/* Step 4: Chapters */}
-      {chaptersQ.data && chaptersQ.data.length > 0 && (
-        <Card title="章节草稿" style={{ marginBottom: 16, borderColor: '#e8eaed' }}>
-          <Collapse
-            accordion
-            items={chaptersQ.data.map(ch => ({
-              key: ch.id,
-              label: (
-                <span>
-                  {ch.title}
-                  <Tag style={{ marginLeft: 8 }}>{ch.status}</Tag>
-                </span>
-              ),
-              children: (
-                <div>
-                  <Input.TextArea
-                    rows={10}
-                    value={chapterDrafts[ch.id] ?? ch.content ?? ''}
-                    onChange={e => setChapterDrafts(prev => ({ ...prev, [ch.id]: e.target.value }))}
-                    style={{ marginBottom: 12 }}
+            {/* ── LITERATURE TAB ─────────────────────────────────────── */}
+            {panelTab === 'literature' && (
+              <>
+                {!canStartWriting && (
+                  <Alert type="warning" showIcon style={{ marginBottom: 12 }}
+                    message={`至少需要 ${minRequired} 篇文献`}
+                    description={<Progress percent={Math.round((litCount / minRequired) * 100)} size="small" style={{ maxWidth: 260 }} />}
                   />
-                  <Space wrap>
-                    <Button icon={<EditOutlined />} loading={generateChapter.isPending} onClick={() => generateChapter.mutate(ch.id)}>生成正文</Button>
-                    <Button icon={<ExperimentOutlined />} loading={reviewChapter.isPending} onClick={() => reviewChapter.mutate(ch.id)}>审校</Button>
-                    <Button icon={<SyncOutlined />} loading={rewriteChapter.isPending} onClick={() => rewriteChapter.mutate(ch.id)}>降重改写</Button>
-                    <Button type="primary" icon={<SaveOutlined />} loading={saveChapter.isPending}
-                      onClick={() => saveChapter.mutate({ id: ch.id, content: chapterDrafts[ch.id] ?? ch.content ?? '' })}>
-                      保存本章
-                    </Button>
-                  </Space>
-                  {ch.feedback && <Alert style={{ marginTop: 12 }} type="info" message={`审校意见：${ch.feedback}`} />}
+                )}
+
+                <Collapse size="small" style={{ marginBottom: 12 }} items={[{
+                  key: 'add', label: '手动添加文献',
+                  children: (
+                    <Form layout="vertical" onFinish={() => { if (!litTitle.trim()) { msgApi.warning('请填写文献标题'); return; } createLiterature.mutate(); }}>
+                      <Form.Item label="文献标题"><Input value={litTitle} onChange={e => setLitTitle(e.target.value)} placeholder="参考论文标题" /></Form.Item>
+                      <Form.Item label="正文 / 摘要"><Input.TextArea rows={3} value={bodyText} onChange={e => setBodyText(e.target.value)} placeholder="粘贴 PDF 抽取文本或摘要" /></Form.Item>
+                      <Space>
+                        <Button type="primary" htmlType="submit" loading={createLiterature.isPending} icon={<FileTextOutlined />}>保存</Button>
+                      </Space>
+                      <Divider plain style={{ margin: '12px 0 8px' }}>或上传文件</Divider>
+                      <Space>
+                        <input type="file" accept=".pdf,.txt,.md,.text" onChange={e => setUploadFile(e.target.files?.[0] ?? null)} />
+                        <Button icon={<UploadOutlined />} disabled={!uploadFile} loading={uploadLiterature.isPending} onClick={() => uploadLiterature.mutate()}>上传</Button>
+                      </Space>
+                    </Form>
+                  ),
+                }]} />
+
+                <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button size="small" type="primary" icon={<ThunderboltOutlined />} onClick={() => setShowSearchModal(true)}>AI 文献搜索</Button>
                 </div>
-              ),
-            }))}
-          />
-          <Divider />
-          <Space>
-            <Button icon={<DownloadOutlined />} onClick={() => exportDoc.mutate('markdown')}>Markdown</Button>
-            <Button icon={<DownloadOutlined />} onClick={() => exportDoc.mutate('latex')}>LaTeX</Button>
-            <Button icon={<DownloadOutlined />} onClick={() => exportDoc.mutate('docx')}>Word</Button>
-          </Space>
-        </Card>
-      )}
+
+                <Table dataSource={litData?.items ?? []} columns={litTableCols} rowKey="id" size="small" pagination={false}
+                  locale={{ emptyText: <Empty description="暂无文献" /> }} scroll={{ y: 300 }}
+                />
+
+                {/* Review & chunk */}
+                <Card size="small" title="审核与入库" style={{ marginTop: 12 }}>
+                  <Select value={literatureId || undefined} onChange={setLiteratureId} placeholder="选择文献" allowClear style={{ width: '100%', marginBottom: 8 }}>
+                    {litData?.items?.map(lit => <Select.Option key={lit.id} value={lit.id}>{lit.title} · <Tag>{lit.rag_status}</Tag></Select.Option>)}
+                  </Select>
+                  <Space wrap size="small">
+                    <Button size="small" icon={<ExperimentOutlined />} disabled={!literatureId} loading={review.isPending} onClick={() => review.mutate()}>审核</Button>
+                    <Button size="small" disabled={!literatureId || selectedLiterature?.rag_status !== 'review_passed'} loading={chunk.isPending} onClick={() => chunk.mutate()}>切块</Button>
+                    <Button size="small" type="primary" icon={<CheckCircleOutlined />} disabled={!documentId || !selectedChunkIds.length} loading={confirmMut.isPending} onClick={() => confirmMut.mutate()}>确认入库</Button>
+                  </Space>
+                  {chunkPreview.length > 0 && (
+                    <div style={{ marginTop: 8, maxHeight: 200, overflow: 'auto', border: '1px solid #f0f0f0', borderRadius: 4, padding: 6, fontSize: 12 }}>
+                      {chunkPreview.map(c => (
+                        <label key={c.id} style={{ display: 'flex', gap: 6, padding: '4px 0', cursor: 'pointer', borderBottom: '1px solid #f0f0f0' }}>
+                          <Checkbox checked={selectedChunkIds.includes(c.id)} onChange={e => setSelectedChunkIds(prev => e.target.checked ? [...prev, c.id] : prev.filter(id => id !== c.id))} />
+                          <span><strong>#{c.chunk_index}</strong> {c.preview}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              </>
+            )}
+
+            {/* ── WRITING TAB ────────────────────────────────────────── */}
+            {panelTab === 'writing' && (
+              <>
+                {!activeChapter ? (
+                  <div style={{ textAlign: 'center', paddingTop: 60 }}>
+                    <Empty description="请从右侧大纲选择章节，或先生成大纲">
+                      <Button type="primary" icon={<OrderedListOutlined />} loading={outline.isPending} disabled={!canStartWriting} onClick={() => outline.mutate()}>
+                        生成大纲
+                      </Button>
+                    </Empty>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    {/* Chapter header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexShrink: 0 }}>
+                      <div>
+                        <span style={{ fontSize: 16, fontWeight: 600 }}>
+                          {'#'.repeat(activeChapter.level)} {activeChapter.title}
+                        </span>
+                        <Tag style={{ marginLeft: 8 }} color={(STATUS_TAG[activeChapter.status] ?? STATUS_TAG.draft).color}>
+                          {(STATUS_TAG[activeChapter.status] ?? STATUS_TAG.draft).label}
+                        </Tag>
+                        <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                          {activeContent.length} 字 · v{activeChapter.version}
+                        </Text>
+                      </div>
+                    </div>
+
+                    {/* Toolbar */}
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+                      <Button size="small" icon={<EditOutlined />} loading={generateChapter.isPending} disabled={!canStartWriting}
+                        onClick={() => generateChapter.mutate(activeChapter.id)}>AI 生成</Button>
+                      <Button size="small" icon={<ExperimentOutlined />} loading={reviewChapter.isPending} disabled={!activeChapter.content}
+                        onClick={() => reviewChapter.mutate(activeChapter.id)}>审校</Button>
+                      <Button size="small" icon={<SyncOutlined />} loading={rewriteChapter.isPending} disabled={!activeChapter.content}
+                        onClick={() => rewriteChapter.mutate(activeChapter.id)}>降重改写</Button>
+                      <Button size="small" type="primary" icon={<SaveOutlined />} loading={saveChapter.isPending}
+                        onClick={() => saveChapter.mutate({ id: activeChapter.id, content: activeContent })}>保存</Button>
+                    </div>
+
+                    {/* Feedback */}
+                    {activeChapter.feedback && (
+                      <Alert type="info" showIcon style={{ marginBottom: 8, flexShrink: 0 }} message={`审校意见：${activeChapter.feedback}`} closable />
+                    )}
+
+                    {/* Editor */}
+                    <textarea
+                      ref={editorRef}
+                      value={activeContent}
+                      onChange={e => setActiveContent(e.target.value)}
+                      placeholder="在此编辑章节内容，或点击「AI 生成」自动填写…"
+                      style={{
+                        flex: 1, width: '100%', resize: 'none', border: '1px solid #dadce0', borderRadius: 6,
+                        padding: 14, fontSize: 14, lineHeight: 1.8, fontFamily: '"Noto Serif SC", serif',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT: Outline tree ─────────────────────────────────────── */}
+        <div style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#fafbfc' }}>
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid #e8eaed', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <span style={{ fontWeight: 600, fontSize: 13, color: '#202124' }}>大纲目录</span>
+            <Space size={4}>
+              <Tooltip title="生成大纲"><Button size="small" type="text" icon={<OrderedListOutlined />} loading={outline.isPending} disabled={!canStartWriting} onClick={() => outline.mutate()} /></Tooltip>
+              <Tooltip title="添加章节"><Button size="small" type="text" icon={<PlusOutlined />} onClick={() => { setAddChapterTitle(''); setAddChapterLevel(1); setShowAddChapter(true); }} /></Tooltip>
+            </Space>
+          </div>
+
+          <div style={{ flex: 1, overflow: 'auto', padding: '8px 4px' }}>
+            {chapters.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 12px', color: '#9aa0a6', fontSize: 13 }}>
+                暂无章节<br />请先生成大纲或手动添加
+              </div>
+            ) : (
+              <Tree
+                treeData={treeData}
+                selectedKeys={activeChapterId ? [activeChapterId] : []}
+                onSelect={(keys) => {
+                  if (keys[0]) { setActiveChapterId(keys[0] as string); setPanelTab('writing'); }
+                }}
+                defaultExpandAll
+                blockNode
+                titleRender={(node) => {
+                  const ch = chapters.find(c => c.id === node.key);
+                  if (!ch) return <span>{String(node.title)}</span>;
+                  const st = STATUS_TAG[ch.status] ?? STATUS_TAG.draft;
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '2px 0' }}>
+                      <span style={{ fontSize: 13, fontWeight: ch.level === 1 ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                        {ch.title}
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                        <Badge color={st.color === 'default' ? '#d9d9d9' : undefined} status={st.color === 'processing' ? 'processing' : undefined} />
+                        <Popconfirm title="删除此章节？" onConfirm={(e) => { e?.stopPropagation(); deleteChapter.mutate(ch.id); }}>
+                          <DeleteOutlined style={{ fontSize: 11, color: '#bbb', cursor: 'pointer' }} onClick={e => e.stopPropagation()} />
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+            )}
+          </div>
+
+          {/* Word count summary */}
+          <div style={{ padding: '8px 12px', borderTop: '1px solid #e8eaed', fontSize: 12, color: '#5f6368', flexShrink: 0 }}>
+            共 {chapters.length} 节 · {chapters.reduce((s, c) => s + (c.word_count || 0), 0).toLocaleString()} 字
+          </div>
+        </div>
+      </div>
+
+      {/* ── Add chapter modal ────────────────────────────────────────── */}
+      <Modal title="添加章节" open={showAddChapter} onCancel={() => setShowAddChapter(false)} width={400} destroyOnClose
+        onOk={() => {
+          if (!addChapterTitle.trim()) { msgApi.warning('请输入标题'); return; }
+          addChapter.mutate({ title: addChapterTitle.trim(), level: addChapterLevel, parent_id: addChapterLevel > 1 && activeChapterId ? activeChapterId : undefined });
+        }}
+        okText="添加" cancelText="取消" confirmLoading={addChapter.isPending}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '8px 0' }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>标题</div>
+            <Input value={addChapterTitle} onChange={e => setAddChapterTitle(e.target.value)} placeholder="如：第一章 绪论" autoFocus />
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>级别</div>
+            <Select value={addChapterLevel} onChange={setAddChapterLevel} style={{ width: '100%' }}
+              options={[
+                { value: 1, label: '一级标题（章）' },
+                { value: 2, label: '二级标题（节）' },
+                { value: 3, label: '三级标题（小节）' },
+              ]}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── Paid Literature Search Modal ──────────────────────────────── */}
+      <Modal open={showSearchModal} title="AI 文献搜索（付费服务）" width={800} onCancel={() => setShowSearchModal(false)} footer={null}>
+        <Alert type="info" showIcon style={{ marginBottom: 16 }} message="此功能将消耗 AI 调用额度。" />
+        <Space.Compact style={{ width: '100%', marginBottom: 16 }}>
+          <Input value={litSearchQuery} onChange={e => setLitSearchQuery(e.target.value)} placeholder="搜索关键词" onPressEnter={() => litSearch.mutate()} />
+          <Button type="primary" icon={<SearchOutlined />} loading={litSearch.isPending} onClick={() => litSearch.mutate()}>搜索</Button>
+        </Space.Compact>
+        {litSearchResults.length > 0 && (
+          <List dataSource={litSearchResults} renderItem={item => (
+            <List.Item actions={[<Button size="small" type="primary" onClick={() => addSearchResult.mutate(item)} loading={addSearchResult.isPending}>添加</Button>]}>
+              <List.Item.Meta title={<Text strong>{item.title}</Text>}
+                description={<div style={{ fontSize: 12, color: '#5f6368' }}>{item.authors} ({item.year}) · {item.journal}{item.abstract && <div style={{ marginTop: 4 }}>{item.abstract.slice(0, 200)}...</div>}</div>} />
+            </List.Item>
+          )} />
+        )}
+        {litSearch.isSuccess && litSearchResults.length === 0 && <Empty description="未找到相关文献" />}
+      </Modal>
     </div>
   );
 }

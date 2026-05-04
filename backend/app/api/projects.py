@@ -3,29 +3,40 @@ from io import BytesIO
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Response
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.deps import DbSessionDep, EmbeddingServiceDep, LLMServiceDep, SettingsDep, WriterUserDep
 from app.models.ai_usage import AIUsageRecord
 from app.models.model_catalog import ModelCatalog
 from app.models.project import Chapter, Project
-from app.models.rag import Literature, ReferenceReview
+from app.models.rag import GenerationRAGHit, Literature, RAGChunk, ReferenceReview
 from app.models.school import School, SchoolTemplateGroup
 from app.models.user import User
 from app.schemas.projects import (
+    ChapterAcceptRequest,
+    ChapterCreate,
     ChapterGenerateRequest,
+    ChapterGenerateResponse,
     ChapterResponse,
     ChapterReviewRequest,
     ChapterRewriteRequest,
+    ChaptersReorderRequest,
     ChapterUpdate,
     OutlineGenerateRequest,
     ProjectCreate,
     ProjectResponse,
+    ProjectUpdate,
+    RAGHitItem,
 )
 from app.schemas.rag import ReferenceReviewRequest
+from app.services.citation_service import CitationService
+from app.services.docx_service import DocxService
+from app.services.latex_service import LatexService
 from app.services.literature_text import resolve_literature_text
 from app.services.vector_store import VectorStore
+
+MIN_LITERATURE_FOR_WRITING = 10
 
 router = APIRouter()
 
@@ -89,6 +100,7 @@ def _latest_usage_id(db: Session, user_id: UUID) -> UUID | None:
 
 
 def _school_context(db: Session, project: Project) -> str:
+    """Translate school template DSLs into human-readable writing instructions for LLM."""
     if project.school_id is None:
         return "未选择学校模板。"
     group = db.get(SchoolTemplateGroup, project.school_id)
@@ -103,16 +115,117 @@ def _school_context(db: Session, project: Project) -> str:
         f"年份：{group.year or '通用'}",
         f"引用格式：{group.citation_style or '未指定'}",
     ]
+
     if group.structure and group.structure.structure_json:
-        parts.append(f"结构DSL：{json.dumps(group.structure.structure_json, ensure_ascii=False)}")
+        struct = group.structure.structure_json
+        sections = struct.get("sections", [])
+        if sections:
+            sec_names = [s.get("type", "") for s in sections if isinstance(s, dict)]
+            parts.append(f"论文结构顺序：{' → '.join(sec_names)}")
+
     if group.format_rules and group.format_rules.rules_json:
-        parts.append(f"格式DSL：{json.dumps(group.format_rules.rules_json, ensure_ascii=False)}")
+        r = group.format_rules.rules_json
+        _append_format_instructions(parts, r)
+
     if group.citation_rules:
-        if group.citation_rules.citation_json:
-            parts.append(f"引用DSL：{json.dumps(group.citation_rules.citation_json, ensure_ascii=False)}")
+        cj = group.citation_rules.citation_json or {}
+        cite_type = cj.get("citationType") or cj.get("type", group.citation_style or "")
+        if cite_type:
+            parts.append(f"参考文献引用标准：{cite_type}")
+        examples = cj.get("citationExamples", cj.get("examples", []))
+        if examples:
+            parts.append("引用格式示例：")
+            for ex in examples[:5]:
+                parts.append(f"  {ex}")
+        rules_list = cj.get("citationRules", cj.get("rules", []))
+        if rules_list:
+            parts.append("引用规则：")
+            for rule in rules_list[:8]:
+                parts.append(f"  · {rule}")
         if group.citation_rules.citation_text:
-            parts.append(f"引用模板：\n{group.citation_rules.citation_text}")
+            parts.append(f"引用模板全文：\n{group.citation_rules.citation_text[:2000]}")
+
     return "\n".join(parts)
+
+
+def _append_format_instructions(parts: list[str], r: dict):
+    """Extract human-readable formatting instructions from the format DSL."""
+    fonts = r.get("fonts", {})
+    spacing = r.get("spacing", {})
+    numbering = r.get("numbering", {})
+    abstract_cfg = r.get("abstract", {})
+    word_count = r.get("word_count", {})
+    margin = r.get("margin", {})
+
+    if margin:
+        parts.append(
+            f"页边距(cm)：上{margin.get('top', 2.5)} 下{margin.get('bottom', 2.0)} "
+            f"左{margin.get('left', 2.5)} 右{margin.get('right', 2.0)}"
+        )
+
+    font_lines: list[str] = []
+    for key, label in [
+        ("chapter_title", "章标题"), ("section_l1", "一级节标题"), ("section_l2", "二级节标题"),
+        ("body", "正文"), ("abstract_body", "摘要正文"), ("abstract_en_body", "英文摘要"),
+    ]:
+        cfg = fonts.get(key, {})
+        if cfg:
+            family = cfg.get("family", "")
+            size = cfg.get("size_name") or f"{cfg.get('size_pt', '')}pt"
+            bold = "加粗" if cfg.get("bold") else ""
+            align = cfg.get("align", "")
+            font_lines.append(f"  {label}：{family} {size} {bold} {align}".strip())
+    if font_lines:
+        parts.append("字体规范：")
+        parts.extend(font_lines)
+
+    if spacing:
+        parts.append(
+            f"段落格式：行距{spacing.get('line', 1.5)}倍，首行缩进{spacing.get('first_line_indent', 2)}字符，"
+            f"段后{spacing.get('paragraph_after', 0)}pt"
+        )
+
+    if numbering:
+        examples = numbering.get("examples", [])
+        if examples:
+            parts.append(f"章节编号体系：{'  →  '.join(examples)}")
+        alt = numbering.get("alt_examples", [])
+        if alt:
+            parts.append(f"备选编号体系：{'  →  '.join(alt)}")
+
+    if abstract_cfg:
+        cn_range = ""
+        if abstract_cfg.get("cn_min_chars") or abstract_cfg.get("cn_max_chars"):
+            cn_range = f"{abstract_cfg.get('cn_min_chars', 300)}-{abstract_cfg.get('cn_max_chars', 600)}字"
+        en_range = ""
+        if abstract_cfg.get("en_min_words") or abstract_cfg.get("en_max_words"):
+            en_range = f"{abstract_cfg.get('en_min_words', 250)}-{abstract_cfg.get('en_max_words', 350)}词"
+        kw_range = ""
+        if abstract_cfg.get("keywords_min") or abstract_cfg.get("keywords_max"):
+            kw_range = f"{abstract_cfg.get('keywords_min', 3)}-{abstract_cfg.get('keywords_max', 8)}个"
+        if cn_range or en_range:
+            parts.append(f"摘要要求：中文{cn_range}，英文{en_range}，关键词{kw_range}")
+
+    if word_count:
+        wc_min = word_count.get("min")
+        wc_max = word_count.get("max")
+        note = word_count.get("note", "")
+        if wc_min:
+            parts.append(f"全文字数要求：≥{wc_min}字" + (f"（{note}）" if note else ""))
+
+
+def _load_template_data(db: Session, project: Project) -> tuple[dict, dict, dict, str]:
+    """Load format_rules, structure, citation DSLs and citation_style from the template group."""
+    if project.school_id is None:
+        return {}, {}, {}, ""
+    group = db.get(SchoolTemplateGroup, project.school_id)
+    if group is None:
+        return {}, {}, {}, ""
+    rules_json = (group.format_rules.rules_json if group.format_rules else None) or {}
+    struct_json = (group.structure.structure_json if group.structure else None) or {}
+    cite_json = (group.citation_rules.citation_json if group.citation_rules else None) or {}
+    cite_style = group.citation_style or ""
+    return rules_json, struct_json, cite_json, cite_style
 
 
 def _reference_lines(db: Session, project_id: UUID) -> list[str]:
@@ -329,6 +442,90 @@ def list_chapters(writer: WriterUserDep, db: DbSessionDep, project_id: UUID) -> 
     return list(db.scalars(stmt).all())
 
 
+@router.patch("/{project_id}", response_model=ProjectResponse)
+def update_project(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+    payload: ProjectUpdate,
+) -> Project:
+    """Update project title / topic / abstract after creation."""
+    project = _writer_project(db, writer, project_id)
+    for key, val in payload.model_dump(exclude_unset=True).items():
+        setattr(project, key, val)
+    db.commit()
+    db.refresh(project)
+    return project
+
+
+@router.post("/{project_id}/chapters", response_model=ChapterResponse, status_code=201)
+def create_chapter(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+    payload: ChapterCreate,
+) -> Chapter:
+    """Manually add a chapter / section to the outline."""
+    project = _writer_project(db, writer, project_id)
+    if payload.order_index is not None:
+        order_idx = payload.order_index
+    else:
+        max_idx = db.scalar(
+            select(func.max(Chapter.order_index)).where(Chapter.project_id == project.id)
+        )
+        order_idx = (max_idx or 0) + 1
+    chapter = Chapter(
+        project_id=project.id,
+        title=payload.title,
+        order_index=order_idx,
+        level=payload.level,
+        parent_id=payload.parent_id,
+        status="draft",
+    )
+    db.add(chapter)
+    db.commit()
+    db.refresh(chapter)
+    return chapter
+
+
+@router.delete("/{project_id}/chapters/{chapter_id}", status_code=204)
+def delete_chapter(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+    chapter_id: UUID,
+) -> None:
+    """Remove a chapter from the outline."""
+    project = _writer_project(db, writer, project_id)
+    chapter = db.get(Chapter, chapter_id)
+    if chapter is None or chapter.project_id != project.id:
+        return
+    db.execute(delete(GenerationRAGHit).where(GenerationRAGHit.chapter_id == chapter.id))
+    db.delete(chapter)
+    db.commit()
+
+
+@router.put("/{project_id}/chapters/reorder")
+def reorder_chapters(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+    payload: ChaptersReorderRequest,
+) -> dict[str, str]:
+    """Batch-update chapter order_index by the ordered list of IDs."""
+    project = _writer_project(db, writer, project_id)
+    chapters = {
+        ch.id: ch
+        for ch in db.scalars(select(Chapter).where(Chapter.project_id == project.id))
+    }
+    for idx, cid in enumerate(payload.order):
+        ch = chapters.get(cid)
+        if ch is not None:
+            ch.order_index = idx
+    db.commit()
+    return {"status": "ok"}
+
+
 @router.patch("/{project_id}/chapters/{chapter_id}", response_model=ChapterResponse)
 def update_chapter(
     writer: WriterUserDep,
@@ -353,7 +550,35 @@ def update_chapter(
     return chapter
 
 
-@router.post("/{project_id}/chapters/{chapter_id}/generate", response_model=ChapterResponse)
+@router.get("/{project_id}/writing-readiness")
+def check_writing_readiness(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+) -> dict[str, object]:
+    """Pre-flight check: does this project have enough literature to start writing?"""
+    project = _writer_project(db, writer, project_id)
+    lit_count = db.scalar(
+        select(func.count(Literature.id)).where(Literature.project_id == project.id)
+    ) or 0
+    indexed_count = db.scalar(
+        select(func.count(Literature.id)).where(
+            Literature.project_id == project.id,
+            Literature.rag_status.in_(["review_passed", "indexed"]),
+        )
+    ) or 0
+    ready = lit_count >= MIN_LITERATURE_FOR_WRITING
+    return {
+        "project_id": str(project.id),
+        "literature_count": lit_count,
+        "indexed_count": indexed_count,
+        "min_required": MIN_LITERATURE_FOR_WRITING,
+        "ready": ready,
+        "message": "" if ready else f"至少需要 {MIN_LITERATURE_FOR_WRITING} 篇文献才能开始代写，当前仅 {lit_count} 篇。",
+    }
+
+
+@router.post("/{project_id}/chapters/{chapter_id}/generate", response_model=ChapterGenerateResponse)
 async def generate_chapter(
     writer: WriterUserDep,
     db: DbSessionDep,
@@ -362,16 +587,54 @@ async def generate_chapter(
     project_id: UUID,
     chapter_id: UUID,
     payload: ChapterGenerateRequest,
-) -> Chapter:
+) -> dict[str, object]:
     project = _writer_project(db, writer, project_id)
+
+    lit_count = db.scalar(
+        select(func.count(Literature.id)).where(Literature.project_id == project.id)
+    ) or 0
+    if lit_count < MIN_LITERATURE_FOR_WRITING:
+        raise HTTPException(
+            status_code=400,
+            detail=f"至少需要 {MIN_LITERATURE_FOR_WRITING} 篇文献才能开始代写，当前仅 {lit_count} 篇。请先上传更多参考文献。",
+        )
+
     chapter = db.get(Chapter, chapter_id)
     if chapter is None or chapter.project_id != project.id:
         raise HTTPException(status_code=404, detail="Chapter not found")
 
     model = _enabled_model_for_scenario(db, payload.model_id, project, "chapter_write")
-    vectors = await embedding.embed_many([f"{project.title or project.topic or project.discipline}\n{chapter.title}"])
-    chunks = VectorStore(db).search(project.id, vectors[0], limit=8) if vectors else []
-    context = "\n\n".join([f"[参考片段 {idx + 1}]\n{c.content[:1200]}" for idx, c in enumerate(chunks)])
+    store = VectorStore(db)
+
+    # --- Resolve RAG chunks: manual selection or auto-search ---
+    scored_chunks: list[tuple[RAGChunk, float, str]] = []  # (chunk, score, source)
+
+    if payload.selected_chunk_ids:
+        manual_chunks = store.fetch_by_ids(project.id, payload.selected_chunk_ids)
+        if not manual_chunks:
+            raise HTTPException(status_code=400, detail="selected_chunk_ids 中没有找到已确认的有效片段")
+        for ch in manual_chunks:
+            scored_chunks.append((ch, 1.0, "manual"))
+    else:
+        vectors = await embedding.embed_many(
+            [f"{project.title or project.topic or project.discipline}\n{chapter.title}"]
+        )
+        if vectors:
+            auto_results = store.search_with_scores(
+                project.id, vectors[0], limit=payload.auto_search_limit
+            )
+            for ch, score in auto_results:
+                scored_chunks.append((ch, score, "auto"))
+
+    # --- Build LLM context from resolved chunks ---
+    context_parts: list[str] = []
+    for idx, (c, score, _src) in enumerate(scored_chunks):
+        lit = db.get(Literature, c.literature_id) if c.literature_id else None
+        lit_label = f" (来源: {lit.title})" if lit else ""
+        context_parts.append(
+            f"[参考片段 {idx + 1}]{lit_label} [相似度: {score:.2f}]\n{c.content[:1200]}"
+        )
+    context = "\n\n".join(context_parts)
 
     content = await llm.call(
         user_id=writer.id,
@@ -405,17 +668,67 @@ async def generate_chapter(
     if not content.strip():
         content = (
             f"{chapter.title}\n\n"
-            f"本节围绕“{project.title or project.topic or project.discipline}”展开。"
+            f"本节围绕\u201c{project.title or project.topic or project.discipline}\u201d展开。"
             "当前为开发模式占位正文；接入 AI 中转站后将根据已确认 RAG 片段生成完整章节。"
         )
+
     chapter.content = content
     chapter.word_count = len(content)
-    chapter.status = "generated"
+    chapter.status = "pending_accept"
     chapter.version += 1
     db.add(chapter)
+    db.flush()
+
+    # --- Record RAG hits audit trail ---
+    db.execute(
+        delete(GenerationRAGHit).where(
+            GenerationRAGHit.chapter_id == chapter.id,
+            GenerationRAGHit.generation_version == chapter.version,
+        )
+    )
+
+    hit_items: list[RAGHitItem] = []
+    for c, score, src in scored_chunks:
+        lit = db.get(Literature, c.literature_id) if c.literature_id else None
+        hit = GenerationRAGHit(
+            chapter_id=chapter.id,
+            chunk_id=c.id,
+            literature_id=c.literature_id,
+            similarity_score=score,
+            chunk_content_preview=c.content[:500],
+            source=src,
+            generation_version=chapter.version,
+            accepted=None,
+        )
+        db.add(hit)
+        db.flush()
+        hit_items.append(RAGHitItem(
+            hit_id=hit.id,
+            chunk_id=c.id,
+            literature_id=c.literature_id,
+            literature_title=lit.title if lit else None,
+            topic_summary=c.topic_summary,
+            similarity_score=score,
+            source=src,
+            content_preview=c.content[:500],
+            accepted=None,
+        ))
+
     db.commit()
     db.refresh(chapter)
-    return chapter
+
+    return {
+        "id": chapter.id,
+        "project_id": chapter.project_id,
+        "title": chapter.title,
+        "order_index": chapter.order_index,
+        "content": chapter.content,
+        "word_count": chapter.word_count,
+        "status": chapter.status,
+        "feedback": chapter.feedback,
+        "version": chapter.version,
+        "rag_hits": hit_items,
+    }
 
 
 @router.post("/{project_id}/chapters/{chapter_id}/review", response_model=ChapterResponse)
@@ -519,75 +832,59 @@ def export_project(
     format: str = Query(default="markdown", pattern="^(markdown|latex|docx)$"),
 ) -> Response:
     project = _writer_project(db, writer, project_id)
-    chapters = list(
+    chapters_orm = list(
         db.scalars(select(Chapter).where(Chapter.project_id == project.id).order_by(Chapter.order_index))
     )
     title = project.title or project.topic or f"{project.discipline}论文"
-    school_context = _school_context(db, project)
-    references = _reference_lines(db, project.id)
+    references_raw = _reference_lines(db, project.id)
+    rules_json, struct_json, cite_json, cite_style = _load_template_data(db, project)
 
-    if format == "latex":
-        escaped_school_context = (
-            school_context.replace("\\", "\\textbackslash{}").replace("{", "\\{").replace("}", "\\}")
-        )
-        body = "\n\n".join(
-            [
-                "\\section{" + ch.title.replace("\\", "\\textbackslash{}").replace("{", "\\{").replace("}", "\\}") + "}\n"
-                + (ch.content or "")
-                for ch in chapters
-            ]
-        )
-        refs = "\n".join([f"\\item {ref}" for ref in references]) or "\\item 暂无参考文献"
-        text = (
-            "\\documentclass[UTF8]{ctexart}\n"
-            "\\usepackage{geometry}\n"
-            "\\geometry{a4paper, margin=2.5cm}\n"
-            "\\title{" + title.replace("\\", "\\textbackslash{}").replace("{", "\\{").replace("}", "\\}") + "}\n"
-            "\\begin{document}\n\\maketitle\n"
-            "\\tableofcontents\n\\newpage\n"
-            "\\begin{abstract}\n"
-            f"{project.abstract or project.topic or '摘要待补充。'}\n"
-            "\\end{abstract}\n"
-            "\\section*{格式模板说明}\n"
-            f"{escaped_school_context}\n\n"
-            f"{body}\n"
-            "\\begin{thebibliography}{99}\n"
-            f"{refs}\n"
-            "\\end{thebibliography}\n"
-            "\\end{document}\n"
-        )
-        return Response(content=text, media_type="application/x-tex")
+    lit_rows = list(
+        db.scalars(select(Literature).where(Literature.project_id == project.id).order_by(Literature.year))
+    )
+    lit_dicts = [
+        {"id": str(l.id), "title": l.title, "authors": l.authors or "", "year": l.year, "journal": l.journal or "", "doi": l.doi or ""}
+        for l in lit_rows
+    ]
+
+    cite_svc = CitationService(style=cite_style or "GB/T 7714", literature=lit_dicts, citation_rules=cite_json)
+
+    ch_dicts: list[dict[str, object]] = []
+    for ch in chapters_orm:
+        content = ch.content or ""
+        content = cite_svc.format_text(content)
+        ch_dicts.append({"title": ch.title, "content": content, "level": ch.level or 1})
+
+    formatted_refs = cite_svc.reference_list() or references_raw
 
     if format == "docx":
-        try:
-            from docx import Document
-        except ImportError as err:  # pragma: no cover
-            raise HTTPException(status_code=500, detail="python-docx is not installed") from err
-
-        doc = Document()
-        doc.add_heading(title, level=0)
-        doc.add_paragraph(f"层次：{project.degree_level}")
-        doc.add_paragraph(f"学科：{project.discipline}")
-        doc.add_paragraph("目录：请在 Word 中插入或更新自动目录。")
-        doc.add_page_break()
-        doc.add_heading("摘要", level=1)
-        doc.add_paragraph(project.abstract or project.topic or "摘要待补充。")
-        doc.add_heading("格式模板说明", level=1)
-        for line in school_context.splitlines():
-            doc.add_paragraph(line)
-        for ch in chapters:
-            doc.add_heading(ch.title, level=1)
-            doc.add_paragraph(ch.content or "")
-        doc.add_heading("参考文献", level=1)
-        for ref in references or ["暂无参考文献"]:
-            doc.add_paragraph(ref, style="List Number")
-        buf = BytesIO()
-        doc.save(buf)
+        svc = DocxService(rules_json=rules_json, structure_json=struct_json, citation_json=cite_json)
+        docx_bytes = svc.generate(
+            title=title,
+            degree_level=project.degree_level,
+            discipline=project.discipline,
+            abstract_cn=project.abstract or project.topic or "",
+            chapters=ch_dicts,
+            references=formatted_refs,
+            project_meta={"title": title, "学科门类": project.discipline},
+        )
         return Response(
-            content=buf.getvalue(),
+            content=docx_bytes,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             headers={"Content-Disposition": 'attachment; filename="thesis.docx"'},
         )
+
+    if format == "latex":
+        svc = LatexService(rules_json=rules_json, citation_json=cite_json)
+        tex_text = svc.generate(
+            title=title,
+            degree_level=project.degree_level,
+            discipline=project.discipline,
+            abstract_cn=project.abstract or project.topic or "",
+            chapters=ch_dicts,
+            references=formatted_refs,
+        )
+        return Response(content=tex_text, media_type="application/x-tex")
 
     lines = [
         f"# {title}",
@@ -595,21 +892,111 @@ def export_project(
         f"- 层次：{project.degree_level}",
         f"- 学科：{project.discipline}",
         "",
-        "## 目录",
-        "",
-        "请在最终排版工具中生成自动目录。",
-        "",
         "## 摘要",
         "",
         project.abstract or project.topic or "摘要待补充。",
         "",
     ]
-    lines.extend(["## 格式模板说明", school_context, ""])
-    for ch in chapters:
-        lines.extend([f"## {ch.title}", ch.content or "", ""])
+    for ch in ch_dicts:
+        hashes = "#" * (int(ch["level"]) + 1)  # level 1 → ##, level 2 → ###, etc.
+        lines.extend([f"{hashes} {ch['title']}", str(ch["content"]), ""])
     lines.extend(["## 参考文献", ""])
-    for idx, ref in enumerate(references, start=1):
+    for idx, ref in enumerate(formatted_refs, start=1):
         lines.append(f"{idx}. {ref}")
-    if not references:
+    if not formatted_refs:
         lines.append("暂无参考文献")
     return Response(content="\n".join(lines), media_type="text/markdown; charset=utf-8")
+
+
+@router.get("/{project_id}/chapters/{chapter_id}/rag-hits")
+def list_chapter_rag_hits(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+    chapter_id: UUID,
+    version: int | None = Query(default=None, description="Filter by generation version"),
+) -> dict[str, object]:
+    """View which RAG chunks were used for a chapter generation."""
+    project = _writer_project(db, writer, project_id)
+    chapter = db.get(Chapter, chapter_id)
+    if chapter is None or chapter.project_id != project.id:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+
+    stmt = select(GenerationRAGHit).where(GenerationRAGHit.chapter_id == chapter.id)
+    if version is not None:
+        stmt = stmt.where(GenerationRAGHit.generation_version == version)
+    stmt = stmt.order_by(GenerationRAGHit.similarity_score.desc().nullslast())
+    hits = list(db.scalars(stmt).all())
+
+    items: list[dict[str, object]] = []
+    for h in hits:
+        lit = db.get(Literature, h.literature_id) if h.literature_id else None
+        chunk = db.get(RAGChunk, h.chunk_id)
+        items.append({
+            "hit_id": str(h.id),
+            "chunk_id": str(h.chunk_id),
+            "literature_id": str(h.literature_id) if h.literature_id else None,
+            "literature_title": lit.title if lit else None,
+            "topic_summary": chunk.topic_summary if chunk else None,
+            "similarity_score": h.similarity_score,
+            "source": h.source,
+            "content_preview": h.chunk_content_preview,
+            "generation_version": h.generation_version,
+            "accepted": h.accepted,
+        })
+
+    return {
+        "project_id": str(project_id),
+        "chapter_id": str(chapter_id),
+        "chapter_title": chapter.title,
+        "current_version": chapter.version,
+        "total_hits": len(items),
+        "items": items,
+    }
+
+
+@router.post("/{project_id}/chapters/{chapter_id}/accept")
+def accept_or_reject_chapter(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+    chapter_id: UUID,
+    payload: ChapterAcceptRequest,
+) -> dict[str, object]:
+    """Quality gate: accept or reject a generated chapter and optionally mark bad chunks."""
+    project = _writer_project(db, writer, project_id)
+    chapter = db.get(Chapter, chapter_id)
+    if chapter is None or chapter.project_id != project.id:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+    if chapter.status != "pending_accept":
+        raise HTTPException(status_code=400, detail="章节当前状态不允许审批，需先生成内容")
+
+    # Update hit acceptance flags
+    stmt = select(GenerationRAGHit).where(
+        GenerationRAGHit.chapter_id == chapter.id,
+        GenerationRAGHit.generation_version == chapter.version,
+    )
+    hits = list(db.scalars(stmt).all())
+
+    rejected_ids = set(payload.rejected_chunk_ids or [])
+    for h in hits:
+        if h.chunk_id in rejected_ids:
+            h.accepted = False
+        else:
+            h.accepted = payload.accepted
+
+    if payload.accepted:
+        chapter.status = "generated"
+    else:
+        chapter.status = "rejected"
+
+    db.commit()
+    db.refresh(chapter)
+    return {
+        "project_id": str(project_id),
+        "chapter_id": str(chapter_id),
+        "status": chapter.status,
+        "version": chapter.version,
+        "accepted": payload.accepted,
+        "rejected_chunk_count": len(rejected_ids),
+    }

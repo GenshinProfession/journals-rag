@@ -5,13 +5,15 @@ Layer 2: Template Groups (degree × discipline × year)
 Layer 3: Template Content (structure DSL, format rules DSL, citation rules)
 """
 
+from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import AdminUserDep, DbSessionDep
+from app.models.user import AdminSchoolAssignment, User
 from app.models.school import (
     School,
     SchoolTemplateGroup,
@@ -35,6 +37,30 @@ from app.schemas.schools import (
 )
 
 router = APIRouter()
+
+
+def _can_manage_school(db, admin: User, school_id: UUID) -> bool:
+    """Check if admin can manage the given school (all-access or assigned)."""
+    if admin.manage_all_schools:
+        return True
+    hit = db.scalar(
+        select(AdminSchoolAssignment.id).where(
+            AdminSchoolAssignment.admin_id == admin.id,
+            AdminSchoolAssignment.school_id == school_id,
+        )
+    )
+    return hit is not None
+
+
+def _admin_school_ids(db, admin: User) -> list[UUID] | None:
+    """Return list of school IDs the admin can manage, or None if unrestricted."""
+    if admin.manage_all_schools:
+        return None
+    stmt = select(AdminSchoolAssignment.school_id).where(
+        AdminSchoolAssignment.admin_id == admin.id
+    )
+    return list(db.scalars(stmt).all())
+
 
 # ── Preset university list (for bootstrapping) ──────────────────────────────
 
@@ -90,9 +116,12 @@ def bootstrap_schools(_admin: AdminUserDep, db: DbSessionDep) -> dict[str, int]:
 
 @router.get("/schools", response_model=list[SchoolResponse])
 def list_schools(_admin: AdminUserDep, db: DbSessionDep, q: str | None = None) -> list[School]:
-    stmt = select(School).order_by(School.name)
+    stmt = select(School).order_by(School.is_pinned.desc(), School.pinned_at.desc().nullslast(), School.name)
     if q:
         stmt = stmt.where(School.name.ilike(f"%{q}%"))
+    allowed = _admin_school_ids(db, _admin)
+    if allowed is not None:
+        stmt = stmt.where(School.id.in_(allowed))
     return list(db.scalars(stmt).all())
 
 
@@ -101,11 +130,26 @@ def update_school(_admin: AdminUserDep, db: DbSessionDep, school_id: UUID, paylo
     school = db.get(School, school_id)
     if school is None:
         raise HTTPException(status_code=404, detail="School not found")
+    if not _can_manage_school(db, _admin, school_id):
+        raise HTTPException(status_code=403, detail="No permission to manage this school")
     for k, v in payload.model_dump(exclude_unset=True).items():
         setattr(school, k, v)
     db.commit()
     db.refresh(school)
     return school
+
+
+@router.post("/schools/{school_id}/pin")
+def toggle_pin(_admin: AdminUserDep, db: DbSessionDep, school_id: UUID) -> dict:
+    """Toggle the pinned state of a school for quick access."""
+    school = db.get(School, school_id)
+    if school is None:
+        raise HTTPException(status_code=404, detail="School not found")
+    school.is_pinned = not school.is_pinned
+    school.pinned_at = datetime.now(timezone.utc) if school.is_pinned else None
+    db.commit()
+    db.refresh(school)
+    return {"id": str(school.id), "name": school.name, "is_pinned": school.is_pinned}
 
 
 # ── Layer 2: Template Groups ─────────────────────────────────────────────────
@@ -157,6 +201,8 @@ def create_template_group(_admin: AdminUserDep, db: DbSessionDep, payload: Templ
     school = db.get(School, payload.school_id)
     if school is None:
         raise HTTPException(status_code=404, detail="School not found")
+    if not _can_manage_school(db, _admin, payload.school_id):
+        raise HTTPException(status_code=403, detail="No permission to manage this school")
     group = SchoolTemplateGroup(**payload.model_dump())
     db.add(group)
     try:

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -53,17 +53,80 @@ const DEFAULT_SECTIONS: Section[] = [
   { type: 'acknowledgement' },
 ];
 
-const DEFAULT_FORMAT = {
-  font: {
-    title: { family: '黑体', size: 16, bold: true },
-    subtitle: { family: '黑体', size: 14, bold: true },
-    body: { family: '宋体', size: 12 },
-    header: { family: '宋体', size: 10 },
-    footer: { family: '宋体', size: 10 },
-  },
-  spacing: { line: 1.5, paragraph: 10 },
-  margin: { top: 2.5, bottom: 2.5, left: 2.5, right: 2.0 },
+const DEFAULT_FORMAT: Record<string, any> = {
   page: { size: 'A4', orientation: 'portrait' },
+  margin: { top: 2.5, bottom: 2.0, left: 2.5, right: 2.0 },
+  fonts: {
+    chapter_title:       { family: '黑体', size_name: '三号', size_pt: 16, bold: true, align: 'center' },
+    section_l1:          { family: '黑体', size_name: '小三号', size_pt: 15, bold: true, align: 'center' },
+    section_l2:          { family: '黑体', size_name: '四号', size_pt: 14, bold: true, align: 'left', indent: 2 },
+    section_l3:          { family: '黑体', size_name: '小四号', size_pt: 12, bold: true, align: 'left', indent: 2 },
+    section_l4:          { family: '宋体', size_name: '小四号', size_pt: 12, bold: false, align: 'left', indent: 2 },
+    body:                { family: '宋体', size_name: '小四号', size_pt: 12, bold: false, align: 'justified' },
+    abstract_title:      { family: '黑体', size_name: '三号', size_pt: 16, bold: true, align: 'center' },
+    abstract_body:       { family: '宋体', size_name: '小四号', size_pt: 12, bold: false },
+    abstract_en_body:    { family: 'Times New Roman', size_name: '小四号', size_pt: 12, bold: false },
+    keywords_label:      { family: '宋体', size_name: '四号', size_pt: 14, bold: true },
+    keywords_en_label:   { family: 'Times New Roman', size_name: '四号', size_pt: 14, bold: true },
+    toc_title:           { family: '黑体', size_name: '三号', size_pt: 16, bold: true, align: 'center' },
+    header:              { family: '宋体', size_name: '小五号', size_pt: 9, bold: false },
+    footer:              { family: '宋体', size_name: '小五号', size_pt: 9, bold: false },
+    footnote:            { family: '宋体', size_name: '小五号', size_pt: 9, bold: false },
+    caption:             { family: '宋体', size_name: '五号', size_pt: 10.5, bold: false, align: 'center' },
+  },
+  spacing: {
+    line: 1.5,
+    paragraph_after: 10,
+    paragraph_before: 0,
+    chapter_before_lines: 0,
+    section_l1_before_lines: 2,
+    section_l2_before_lines: 1,
+    first_line_indent: 2,
+  },
+  numbering: {
+    style: 'arabic',
+    separator: '.',
+    chapter_prefix: '',
+    toc_depth: 2,
+    examples: ['1', '1.1', '1.1.1'],
+    alt_style: 'chinese',
+    alt_examples: ['第一章', '第一节', '一、', '（一）', '1.', '（1）'],
+  },
+  pagination: {
+    front_matter: 'roman',
+    body: 'arabic',
+    position_single: 'center_bottom',
+    position_double_odd: 'right_bottom',
+    position_double_even: 'left_bottom',
+  },
+  abstract: {
+    cn_min_chars: 300,
+    cn_max_chars: 600,
+    en_min_words: 250,
+    en_max_words: 350,
+    keywords_min: 3,
+    keywords_max: 8,
+  },
+  word_count: {
+    min: 10000,
+    max: null,
+    note: '史论研究方向三万字左右',
+  },
+  footnote: {
+    style: 'footnote',
+    numbering: 'per_page',
+    format_note: '注释号、文献名、作者名、出版社、日期、页码',
+  },
+  figures: {
+    caption_position: 'below',
+    require_source: true,
+    numbering: 'chapter_seq',
+    note: '图表须加注释，注明原出处及作者',
+  },
+  cover: {
+    fields: ['题名', '副标题', '作者姓名', '学号', '学科门类', '一级学科', '研究方向', '指导教师', '所在院系', '完成日期'],
+    title_max_chars: 25,
+  },
 };
 
 const DEGREE_LABELS: Record<string, string> = { bachelor: '本科', master: '硕士', doctor: '博士' };
@@ -613,6 +676,25 @@ export function TemplateEditor() {
 
 /* ── Format editable preview ─────────────────────────────────────── */
 
+const FONT_NAMES: Record<string, string> = {
+  chapter_title: '章标题', section_l1: '一级节标题', section_l2: '二级节标题',
+  section_l3: '三级节标题', section_l4: '四级节标题', body: '正文',
+  abstract_title: '摘要标题', abstract_body: '中文摘要正文', abstract_en_body: '英文摘要正文',
+  keywords_label: '关键词标签', keywords_en_label: 'Keywords标签',
+  toc_title: '目录标题', header: '页眉', footer: '页脚',
+  footnote: '脚注', caption: '图表标题',
+};
+
+const SIZE_OPTIONS = [
+  '初号', '小初号', '一号', '小一号', '二号', '小二号', '三号', '小三号',
+  '四号', '小四号', '五号', '小五号', '六号', '小六号', '七号', '八号',
+].map(s => ({ value: s, label: s }));
+
+const ALIGN_OPTIONS = [
+  { value: 'left', label: '左对齐' }, { value: 'center', label: '居中' },
+  { value: 'right', label: '右对齐' }, { value: 'justified', label: '两端对齐' },
+];
+
 function FormatEditablePreview({
   data,
   onChange,
@@ -620,93 +702,262 @@ function FormatEditablePreview({
   data: Record<string, any>;
   onChange: (path: string[], value: any) => void;
 }) {
-  const font = data.font ?? {};
-  const spacing = data.spacing ?? {};
-  const margin = data.margin ?? {};
   const page = data.page ?? {};
+  const margin = data.margin ?? {};
+  const fonts = data.fonts ?? {};
+  const spacing = data.spacing ?? {};
+  const numbering = data.numbering ?? {};
+  const pagination = data.pagination ?? {};
+  const abstract = data.abstract ?? {};
+  const wordCount = data.word_count ?? {};
+  const footnote = data.footnote ?? {};
+  const figures = data.figures ?? {};
+  const cover = data.cover ?? {};
 
-  const NumField = ({ label, value, path, unit = '', step = 0.5, min = 0 }: {
-    label: string; value: any; path: string[]; unit?: string; step?: number; min?: number;
+  const Num = ({ label, value, path, unit = '', step = 0.5, min = 0, w = 70 }: {
+    label: string; value: any; path: string[]; unit?: string; step?: number; min?: number; w?: number;
   }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-      <span style={{ width: 80, fontSize: 13, color: '#5f6368' }}>{label}</span>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginRight: 16, marginBottom: 6 }}>
+      <span style={{ fontSize: 12, color: '#5f6368', minWidth: 50 }}>{label}</span>
       <InputNumber
-        size="small" style={{ width: 80 }}
-        value={value} step={step} min={min}
+        size="middle"
+        controls={false}
+        style={{ width: w }}
+        value={value}
+        step={step}
+        min={min}
         onChange={v => onChange(path, v)}
       />
-      {unit && <span style={{ fontSize: 12, color: '#9aa0a6' }}>{unit}</span>}
+      {unit && <span style={{ fontSize: 11, color: '#9aa0a6' }}>{unit}</span>}
     </div>
   );
 
-  const FontRow = ({ name, label, val }: { name: string; label: string; val: any }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-      <Tag style={{ width: 56, textAlign: 'center' }}>{label}</Tag>
-      <Input
-        size="small" style={{ width: 80 }}
-        value={val?.family ?? ''}
-        onChange={e => onChange(['font', name, 'family'], e.target.value)}
-        placeholder="字体"
-      />
-      <InputNumber
-        size="small" style={{ width: 60 }}
-        value={val?.size} min={6} max={72}
-        onChange={v => onChange(['font', name, 'size'], v)}
-      />
-      <span style={{ fontSize: 12, color: '#9aa0a6' }}>pt</span>
-      <Select
-        size="small" style={{ width: 80 }}
-        value={val?.bold ? 'bold' : 'normal'}
-        onChange={v => onChange(['font', name, 'bold'], v === 'bold')}
-        options={[{ value: 'normal', label: '常规' }, { value: 'bold', label: '加粗' }]}
-      />
+  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div style={{ marginBottom: 16, padding: 14, background: '#f8f9fa', borderRadius: 8 }}>
+      <div style={{ fontWeight: 600, marginBottom: 10, fontSize: 14, color: '#202124' }}>{title}</div>
+      {children}
     </div>
   );
 
   return (
-    <div style={{ fontSize: 13, color: '#202124' }}>
-      <div style={{ marginBottom: 16, padding: 14, background: '#f8f9fa', borderRadius: 8 }}>
-        <div style={{ fontWeight: 600, marginBottom: 10 }}>页面设置</div>
-        <div style={{ display: 'flex', gap: 16 }}>
-          <div>
-            <div style={{ fontSize: 12, color: '#5f6368', marginBottom: 4 }}>纸张</div>
-            <Select size="small" style={{ width: 100 }} value={page.size ?? 'A4'}
+    <div
+      className="format-preview-form"
+      style={{ fontSize: 13, color: '#202124', maxHeight: 'calc(100vh - 260px)', overflowY: 'auto', paddingRight: 8 }}
+    >
+
+      {/* ── 1. Page setup ────────────────────────────────────────── */}
+      <Section title="一、页面设置">
+        <div style={{ display: 'flex', gap: 16, marginBottom: 10, alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, color: '#5f6368' }}>纸张</span>
+            <Select size="middle" style={{ width: 88 }} value={page.size ?? 'A4'}
               onChange={v => onChange(['page', 'size'], v)}
-              options={[{ value: 'A4', label: 'A4' }, { value: 'A3', label: 'A3' }, { value: 'B5', label: 'B5' }]}
-            />
+              options={[{ value: 'A4', label: 'A4' }, { value: 'A3', label: 'A3' }, { value: 'B5', label: 'B5' }, { value: '16K', label: '16开' }]} />
           </div>
-          <div>
-            <div style={{ fontSize: 12, color: '#5f6368', marginBottom: 4 }}>方向</div>
-            <Select size="small" style={{ width: 100 }} value={page.orientation ?? 'portrait'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, color: '#5f6368' }}>方向</span>
+            <Select size="middle" style={{ width: 88 }} value={page.orientation ?? 'portrait'}
               onChange={v => onChange(['page', 'orientation'], v)}
-              options={[{ value: 'portrait', label: '纵向' }, { value: 'landscape', label: '横向' }]}
-            />
+              options={[{ value: 'portrait', label: '纵向' }, { value: 'landscape', label: '横向' }]} />
           </div>
         </div>
-        <Divider style={{ margin: '10px 0' }} />
-        <div style={{ fontWeight: 500, marginBottom: 6 }}>页边距 (cm)</div>
-        <div style={{ display: 'flex', gap: 16 }}>
-          <NumField label="上" value={margin.top} path={['margin', 'top']} unit="cm" />
-          <NumField label="下" value={margin.bottom} path={['margin', 'bottom']} unit="cm" />
-          <NumField label="左" value={margin.left} path={['margin', 'left']} unit="cm" />
-          <NumField label="右" value={margin.right} path={['margin', 'right']} unit="cm" />
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Num label="上(天头)" value={margin.top} path={['margin', 'top']} unit="cm" />
+          <Num label="下(地角)" value={margin.bottom} path={['margin', 'bottom']} unit="cm" />
+          <Num label="左(订口)" value={margin.left} path={['margin', 'left']} unit="cm" />
+          <Num label="右(切口)" value={margin.right} path={['margin', 'right']} unit="cm" />
         </div>
-      </div>
+      </Section>
 
-      <div style={{ marginBottom: 16, padding: 14, background: '#f8f9fa', borderRadius: 8 }}>
-        <div style={{ fontWeight: 600, marginBottom: 10 }}>字体设置</div>
-        {Object.entries(font).map(([key, val]) => (
-          <FontRow key={key} name={key} label={
-            ({ title: '标题', subtitle: '副标题', body: '正文', header: '页眉', footer: '页脚' } as Record<string, string>)[key] ?? key
-          } val={val} />
-        ))}
-      </div>
+      {/* ── 2. Fonts by role ─────────────────────────────────────── */}
+      <Section title="二、字体规则（按层级）">
+        <div
+          className="format-font-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(100px, 1.1fr) minmax(72px, 0.9fr) minmax(88px, 0.95fr) 56px minmax(72px, 0.85fr) minmax(88px, 0.95fr)',
+            gap: '8px 10px',
+            alignItems: 'center',
+            fontSize: 12,
+          }}
+        >
+          <span style={{ fontWeight: 500, color: '#5f6368' }}>用途</span>
+          <span style={{ fontWeight: 500, color: '#5f6368' }}>字体</span>
+          <span style={{ fontWeight: 500, color: '#5f6368' }}>字号名</span>
+          <span style={{ fontWeight: 500, color: '#5f6368' }}>pt</span>
+          <span style={{ fontWeight: 500, color: '#5f6368' }}>字重</span>
+          <span style={{ fontWeight: 500, color: '#5f6368' }}>对齐</span>
 
-      <div style={{ padding: 14, background: '#f8f9fa', borderRadius: 8 }}>
-        <div style={{ fontWeight: 600, marginBottom: 10 }}>段落间距</div>
-        <NumField label="行距" value={spacing.line} path={['spacing', 'line']} unit="倍" step={0.25} min={1} />
-        <NumField label="段后" value={spacing.paragraph} path={['spacing', 'paragraph']} unit="pt" step={1} min={0} />
-      </div>
+          {Object.entries(fonts).map(([key, val]: [string, any]) => (
+            <Fragment key={key}>
+              <span style={{ fontSize: 12, color: '#202124', lineHeight: '32px' }}>{FONT_NAMES[key] ?? key}</span>
+              <Input
+                size="middle"
+                value={val?.family ?? ''}
+                style={{ fontSize: 13 }}
+                onChange={e => onChange(['fonts', key, 'family'], e.target.value)}
+              />
+              <Select
+                size="middle"
+                value={val?.size_name ?? '小四号'}
+                options={SIZE_OPTIONS}
+                onChange={v => onChange(['fonts', key, 'size_name'], v)}
+              />
+              <InputNumber
+                size="middle"
+                controls={false}
+                value={val?.size_pt}
+                min={6}
+                max={72}
+                style={{ width: '100%', fontSize: 13 }}
+                onChange={v => onChange(['fonts', key, 'size_pt'], v)}
+              />
+              <Select
+                size="middle"
+                value={val?.bold ? 'bold' : 'normal'}
+                onChange={v => onChange(['fonts', key, 'bold'], v === 'bold')}
+                options={[{ value: 'normal', label: '常规' }, { value: 'bold', label: '加粗' }]}
+              />
+              <Select
+                size="middle"
+                value={val?.align ?? 'left'}
+                options={ALIGN_OPTIONS}
+                onChange={v => onChange(['fonts', key, 'align'], v)}
+              />
+            </Fragment>
+          ))}
+        </div>
+      </Section>
+
+      {/* ── 3. Spacing ───────────────────────────────────────────── */}
+      <Section title="三、段落与间距">
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Num label="行距" value={spacing.line} path={['spacing', 'line']} unit="倍" step={0.25} min={1} />
+          <Num label="段后" value={spacing.paragraph_after} path={['spacing', 'paragraph_after']} unit="pt" step={1} min={0} />
+          <Num label="段前" value={spacing.paragraph_before} path={['spacing', 'paragraph_before']} unit="pt" step={1} min={0} />
+          <Num label="首行缩进" value={spacing.first_line_indent} path={['spacing', 'first_line_indent']} unit="字" step={1} min={0} />
+        </div>
+        <Divider style={{ margin: '6px 0' }} />
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Num label="章前空行" value={spacing.chapter_before_lines} path={['spacing', 'chapter_before_lines']} unit="行" step={1} min={0} />
+          <Num label="一级节前空行" value={spacing.section_l1_before_lines} path={['spacing', 'section_l1_before_lines']} unit="行" step={1} min={0} />
+          <Num label="二级节前空行" value={spacing.section_l2_before_lines} path={['spacing', 'section_l2_before_lines']} unit="行" step={1} min={0} />
+        </div>
+      </Section>
+
+      {/* ── 4. Numbering ─────────────────────────────────────────── */}
+      <Section title="四、章节编号体系">
+        <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#5f6368' }}>主编号风格</span>
+          <Select size="middle" style={{ width: 140 }} value={numbering.style ?? 'arabic'}
+            onChange={v => onChange(['numbering', 'style'], v)}
+            options={[
+              { value: 'arabic', label: '阿拉伯数字 (1, 1.1)' },
+              { value: 'chinese', label: '汉字 (第一章, 第一节)' },
+            ]} />
+        </div>
+        <div style={{ marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: '#5f6368' }}>层级示例：</span>
+          <div style={{ marginTop: 4 }}>
+            {(numbering.style === 'chinese' ? (numbering.alt_examples ?? []) : (numbering.examples ?? [])).map((ex: string, i: number) => (
+              <Tag key={i} color="blue" style={{ marginBottom: 4 }}>{ex}</Tag>
+            ))}
+          </div>
+        </div>
+        <Num label="目录深度" value={numbering.toc_depth} path={['numbering', 'toc_depth']} unit="级" step={1} min={1} w={50} />
+      </Section>
+
+      {/* ── 5. Pagination ────────────────────────────────────────── */}
+      <Section title="五、页码规则">
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 6, alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, color: '#5f6368', marginRight: 6 }}>前置部分</span>
+            <Select size="middle" style={{ width: 130 }} value={pagination.front_matter ?? 'roman'}
+              onChange={v => onChange(['pagination', 'front_matter'], v)}
+              options={[{ value: 'roman', label: '罗马数字 I II' }, { value: 'arabic', label: '阿拉伯数字' }, { value: 'none', label: '不编页码' }]} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, color: '#5f6368' }}>正文部分</span>
+            <Select size="middle" style={{ width: 130 }} value={pagination.body ?? 'arabic'}
+              onChange={v => onChange(['pagination', 'body'], v)}
+              options={[{ value: 'arabic', label: '阿拉伯数字' }, { value: 'roman', label: '罗马数字' }]} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#5f6368' }}>单面打印位置</span>
+          <Select size="middle" style={{ width: 140 }} value={pagination.position_single ?? 'center_bottom'}
+            onChange={v => onChange(['pagination', 'position_single'], v)}
+            options={[{ value: 'center_bottom', label: '页脚居中' }, { value: 'right_bottom', label: '页脚右侧' }]} />
+        </div>
+      </Section>
+
+      {/* ── 6. Abstract requirements ─────────────────────────────── */}
+      <Section title="六、摘要与关键词规范">
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Num label="中文最少" value={abstract.cn_min_chars} path={['abstract', 'cn_min_chars']} unit="字" step={50} min={0} />
+          <Num label="中文最多" value={abstract.cn_max_chars} path={['abstract', 'cn_max_chars']} unit="字" step={50} min={0} />
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Num label="英文最少" value={abstract.en_min_words} path={['abstract', 'en_min_words']} unit="词" step={50} min={0} />
+          <Num label="英文最多" value={abstract.en_max_words} path={['abstract', 'en_max_words']} unit="词" step={50} min={0} />
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Num label="关键词最少" value={abstract.keywords_min} path={['abstract', 'keywords_min']} unit="个" step={1} min={1} w={50} />
+          <Num label="关键词最多" value={abstract.keywords_max} path={['abstract', 'keywords_max']} unit="个" step={1} min={1} w={50} />
+        </div>
+      </Section>
+
+      {/* ── 7. Word count ────────────────────────────────────────── */}
+      <Section title="七、字数要求">
+        <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 6 }}>
+          <Num label="最少字数" value={wordCount.min} path={['word_count', 'min']} unit="字" step={5000} min={0} w={80} />
+          <Num label="最多字数" value={wordCount.max} path={['word_count', 'max']} unit="字" step={5000} min={0} w={80} />
+        </div>
+        <div>
+          <span style={{ fontSize: 12, color: '#5f6368', marginRight: 6 }}>备注</span>
+          <Input size="middle" style={{ width: 300, fontSize: 13 }}
+            value={wordCount.note ?? ''}
+            onChange={e => onChange(['word_count', 'note'], e.target.value)}
+            placeholder="如：史论研究方向三万字左右" />
+        </div>
+      </Section>
+
+      {/* ── 8. Footnote & figures ─────────────────────────────────── */}
+      <Section title="八、注释与图表">
+        <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#5f6368' }}>注释方式</span>
+          <Select size="middle" style={{ width: 120 }} value={footnote.style ?? 'footnote'}
+            onChange={v => onChange(['footnote', 'style'], v)}
+            options={[{ value: 'footnote', label: '脚注' }, { value: 'endnote', label: '尾注' }, { value: 'both', label: '均可' }]} />
+          <span style={{ fontSize: 12, color: '#5f6368', margin: '0 12px 0 16px' }}>编号方式</span>
+          <Select size="middle" style={{ width: 140 }} value={footnote.numbering ?? 'per_page'}
+            onChange={v => onChange(['footnote', 'numbering'], v)}
+            options={[{ value: 'per_page', label: '每页重新编号' }, { value: 'continuous', label: '全文连续编号' }]} />
+        </div>
+        <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#5f6368' }}>图表标题位置</span>
+          <Select size="middle" style={{ width: 100 }} value={figures.caption_position ?? 'below'}
+            onChange={v => onChange(['figures', 'caption_position'], v)}
+            options={[{ value: 'below', label: '图下方' }, { value: 'above', label: '图上方' }]} />
+          <span style={{ fontSize: 12, color: '#5f6368', margin: '0 12px 0 16px' }}>图表编号</span>
+          <Select size="middle" style={{ width: 140 }} value={figures.numbering ?? 'chapter_seq'}
+            onChange={v => onChange(['figures', 'numbering'], v)}
+            options={[{ value: 'chapter_seq', label: '章-序号 (图1-1)' }, { value: 'global_seq', label: '全文序号 (图1)' }]} />
+        </div>
+        <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+          {footnote.format_note || '注释内容顺序：注释号、文献名、作者名、出版社、日期、页码'}
+        </Typography.Text>
+      </Section>
+
+      {/* ── 9. Cover fields ──────────────────────────────────────── */}
+      <Section title="九、封面信息字段">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+          {(cover.fields ?? []).map((f: string, i: number) => (
+            <Tag key={i}>{f}</Tag>
+          ))}
+        </div>
+        <Num label="题目上限" value={cover.title_max_chars} path={['cover', 'title_max_chars']} unit="字" step={5} min={10} w={60} />
+      </Section>
     </div>
   );
 }

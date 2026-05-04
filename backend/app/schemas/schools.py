@@ -11,6 +11,7 @@ class SchoolResponse(BaseModel):
     country: str | None = None
     logo_url: str | None = None
     enabled: bool
+    is_pinned: bool = False
     model_config = {"from_attributes": True}
 
 

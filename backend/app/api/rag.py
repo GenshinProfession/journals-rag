@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, HTTPException, Query
+from sqlalchemy import func, select
 
 from app.deps import (
     DbSessionDep,
     EmbeddingServiceDep,
+    LLMServiceDep,
     SettingsDep,
     WriterUserDep,
 )
@@ -156,17 +157,178 @@ async def search_rag(
     qvec = vectors[0]
 
     store = VectorStore(db)
-    chunks = store.search(project_id=project_id, embedding=qvec, limit=payload.limit)
+    results = store.search_with_scores(project_id=project_id, embedding=qvec, limit=payload.limit)
+    items = []
+    for ch, score in results:
+        lit = db.get(Literature, ch.literature_id) if ch.literature_id else None
+        items.append({
+            "id": str(ch.id),
+            "literature_id": str(ch.literature_id) if ch.literature_id else None,
+            "literature_title": lit.title if lit else None,
+            "topic_summary": ch.topic_summary,
+            "chunk_index": ch.chunk_index,
+            "text": ch.content[:800],
+            "tokens": len(ch.content) // 4,
+            "similarity_score": score,
+        })
     return {
         "project_id": str(project_id),
-        "items": [
-            {
-                "id": str(ch.id),
-                "literature_id": str(ch.literature_id) if ch.literature_id else None,
-                "chunk_index": ch.chunk_index,
-                "text": ch.content[:800],
-                "tokens": len(ch.content) // 4,
-            }
-            for ch in chunks
-        ],
+        "items": items,
     }
+
+
+@router.get("/chunks/browse")
+def browse_chunks_by_literature(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    project_id: UUID,
+    literature_id: UUID | None = Query(default=None, description="Filter to a specific literature"),
+    status: str | None = Query(default=None, description="Filter by chunk status: draft, confirmed"),
+) -> dict[str, object]:
+    """Browse RAG chunks grouped by literature, with topic summaries for easy review."""
+    _require_project(db, writer, project_id)
+
+    stmt = select(RAGChunk).where(RAGChunk.project_id == project_id)
+    if literature_id is not None:
+        stmt = stmt.where(RAGChunk.literature_id == literature_id)
+    if status is not None:
+        stmt = stmt.where(RAGChunk.status == status)
+    stmt = stmt.order_by(RAGChunk.literature_id, RAGChunk.chunk_index)
+    chunks = list(db.scalars(stmt).all())
+
+    # Group by literature
+    groups: dict[str, dict[str, object]] = {}
+    for c in chunks:
+        lit_key = str(c.literature_id) if c.literature_id else "__none__"
+        if lit_key not in groups:
+            lit = db.get(Literature, c.literature_id) if c.literature_id else None
+            groups[lit_key] = {
+                "literature_id": lit_key if lit_key != "__none__" else None,
+                "literature_title": lit.title if lit else None,
+                "literature_rag_status": lit.rag_status if lit else None,
+                "chunks": [],
+            }
+        groups[lit_key]["chunks"].append({
+            "id": str(c.id),
+            "chunk_index": c.chunk_index,
+            "status": c.status,
+            "topic_summary": c.topic_summary,
+            "tokens": len(c.content) // 4,
+            "content_preview": c.content[:400],
+        })
+
+    return {
+        "project_id": str(project_id),
+        "total_chunks": len(chunks),
+        "literature_groups": list(groups.values()),
+    }
+
+
+@router.post("/chunks/{chunk_id}/generate-topic")
+async def generate_chunk_topic(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    llm: LLMServiceDep,
+    project_id: UUID,
+    chunk_id: UUID,
+) -> dict[str, object]:
+    """AI-extract a topic summary for a chunk so humans can quickly assess relevance."""
+    project = _require_project(db, writer, project_id)
+    chunk = db.get(RAGChunk, chunk_id)
+    if chunk is None or chunk.project_id != project_id:
+        raise HTTPException(status_code=404, detail="Chunk not found")
+
+    model_stmt = (
+        select(ModelCatalog)
+        .where(ModelCatalog.enabled.is_(True))
+        .order_by(ModelCatalog.sort_order)
+    )
+    model = db.scalars(model_stmt).first()
+    if model is None:
+        raise HTTPException(status_code=400, detail="No model available")
+
+    content = await llm.call(
+        user_id=writer.id,
+        project_id=project.id,
+        agent_name="chunk_topic_extractor",
+        scenario="chunk_topic",
+        model=model,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "你是学术文本主题提取专家。阅读以下文本片段，用一句话（不超过80字）总结其核心主题。"
+                    "只输出主题摘要，不要任何多余文字。"
+                ),
+            },
+            {"role": "user", "content": chunk.content[:2000]},
+        ],
+    )
+    topic = content.strip()[:500] if content else None
+    chunk.topic_summary = topic
+    db.commit()
+    db.refresh(chunk)
+    return {
+        "chunk_id": str(chunk.id),
+        "topic_summary": chunk.topic_summary,
+    }
+
+
+@router.post("/chunks/batch-generate-topics")
+async def batch_generate_chunk_topics(
+    writer: WriterUserDep,
+    db: DbSessionDep,
+    llm: LLMServiceDep,
+    project_id: UUID,
+    literature_id: UUID | None = Query(default=None),
+) -> dict[str, object]:
+    """Batch-generate topic summaries for all confirmed chunks missing one."""
+    project = _require_project(db, writer, project_id)
+
+    stmt = select(RAGChunk).where(
+        RAGChunk.project_id == project_id,
+        RAGChunk.status == "confirmed",
+        RAGChunk.topic_summary.is_(None),
+    )
+    if literature_id is not None:
+        stmt = stmt.where(RAGChunk.literature_id == literature_id)
+    stmt = stmt.order_by(RAGChunk.chunk_index).limit(50)
+    chunks = list(db.scalars(stmt).all())
+
+    if not chunks:
+        return {"project_id": str(project_id), "processed": 0, "message": "所有片段已有主题摘要"}
+
+    model_stmt = (
+        select(ModelCatalog)
+        .where(ModelCatalog.enabled.is_(True))
+        .order_by(ModelCatalog.sort_order)
+    )
+    model = db.scalars(model_stmt).first()
+    if model is None:
+        raise HTTPException(status_code=400, detail="No model available")
+
+    processed = 0
+    for chunk in chunks:
+        content = await llm.call(
+            user_id=writer.id,
+            project_id=project.id,
+            agent_name="chunk_topic_extractor",
+            scenario="chunk_topic",
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "你是学术文本主题提取专家。阅读以下文本片段，用一句话（不超过80字）总结其核心主题。"
+                        "只输出主题摘要，不要任何多余文字。"
+                    ),
+                },
+                {"role": "user", "content": chunk.content[:2000]},
+            ],
+        )
+        topic = content.strip()[:500] if content else None
+        chunk.topic_summary = topic
+        processed += 1
+
+    db.commit()
+    return {"project_id": str(project_id), "processed": processed}

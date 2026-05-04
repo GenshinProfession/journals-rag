@@ -39,3 +39,5 @@ class Chapter(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     status: Mapped[str] = mapped_column(String(30), default="draft")
     feedback: Mapped[str | None] = mapped_column(Text)
     version: Mapped[int] = mapped_column(Integer, default=1)
+    level: Mapped[int] = mapped_column(Integer, default=1)
+    parent_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("chapters.id"), nullable=True)

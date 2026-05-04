@@ -3,7 +3,7 @@ from app.models.billing import AccountWallet, RechargeRecord, WalletLedger
 from app.models.job import BackgroundJob
 from app.models.model_catalog import ModelCatalog
 from app.models.project import Chapter, Project
-from app.models.rag import Literature, RAGChunk, RAGDocument, ReferenceReview
+from app.models.rag import GenerationRAGHit, Literature, RAGChunk, RAGDocument, ReferenceReview
 from app.models.school import (
     School,
     SchoolTemplateGroup,
@@ -11,13 +11,15 @@ from app.models.school import (
     TemplateFormatRules,
     TemplateCitationRules,
 )
-from app.models.user import User
+from app.models.user import AdminSchoolAssignment, User
 
 __all__ = [
+    "AdminSchoolAssignment",
     "AIUsageRecord",
     "AccountWallet",
     "BackgroundJob",
     "Chapter",
+    "GenerationRAGHit",
     "Literature",
     "ModelCatalog",
     "Project",

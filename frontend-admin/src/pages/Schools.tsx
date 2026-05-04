@@ -8,7 +8,7 @@ import {
   PlusOutlined, DeleteOutlined, SearchOutlined,
   CheckCircleOutlined, StopOutlined, SettingOutlined,
   ArrowLeftOutlined, RightOutlined, BookOutlined,
-  ReadOutlined, ExperimentOutlined
+  ReadOutlined, ExperimentOutlined, PushpinOutlined, PushpinFilled
 } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiFetch } from '../api/client';
@@ -17,7 +17,7 @@ import { apiFetch } from '../api/client';
 
 type School = {
   id: string; name: string; country: string | null;
-  logo_url: string | null; enabled: boolean;
+  logo_url: string | null; enabled: boolean; is_pinned: boolean;
 };
 
 type TemplateGroup = {
@@ -121,6 +121,11 @@ export function Schools() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'schools'] }),
   });
 
+  const pinMut = useMutation({
+    mutationFn: (s: School) => apiFetch(`/api/admin/schools/schools/${s.id}/pin`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'schools'] }),
+  });
+
   const createGroupMut = useMutation({
     mutationFn: (payload: Record<string, unknown>) =>
       apiFetch('/api/admin/schools/groups', { method: 'POST', body: JSON.stringify(payload) }),
@@ -153,7 +158,8 @@ export function Schools() {
   const filteredSchools = useMemo(() => {
     const all = schoolsQ.data ?? [];
     const q = search.trim().toLowerCase();
-    return q ? all.filter(s => s.name.toLowerCase().includes(q)) : all;
+    const filtered = q ? all.filter(s => s.name.toLowerCase().includes(q)) : all;
+    return [...filtered].sort((a, b) => (a.is_pinned === b.is_pinned ? 0 : a.is_pinned ? -1 : 1));
   }, [schoolsQ.data, search]);
 
   // Unique disciplines for selected degree
@@ -325,13 +331,22 @@ export function Schools() {
                     opacity: s.enabled ? 1 : 0.5, marginBottom: 2,
                   }}
                   extra={
-                    <Tooltip title={s.enabled ? '禁用' : '启用'}>
-                      <Button
-                        type="text" size="small"
-                        icon={s.enabled ? <CheckCircleOutlined style={{ color: '#34a853' }} /> : <StopOutlined style={{ color: '#d93025' }} />}
-                        onClick={e => { e.stopPropagation(); toggleSchoolMut.mutate(s); }}
-                      />
-                    </Tooltip>
+                    <Space size={0}>
+                      <Tooltip title={s.is_pinned ? '取消置顶' : '置顶'}>
+                        <Button
+                          type="text" size="small"
+                          icon={s.is_pinned ? <PushpinFilled style={{ color: '#1a73e8' }} /> : <PushpinOutlined style={{ color: '#9aa0a6' }} />}
+                          onClick={e => { e.stopPropagation(); pinMut.mutate(s); }}
+                        />
+                      </Tooltip>
+                      <Tooltip title={s.enabled ? '禁用' : '启用'}>
+                        <Button
+                          type="text" size="small"
+                          icon={s.enabled ? <CheckCircleOutlined style={{ color: '#34a853' }} /> : <StopOutlined style={{ color: '#d93025' }} />}
+                          onClick={e => { e.stopPropagation(); toggleSchoolMut.mutate(s); }}
+                        />
+                      </Tooltip>
+                    </Space>
                   }
                 >
                   <span style={{ fontSize: 14, fontWeight: selectedSchool?.id === s.id ? 500 : 400 }}>
