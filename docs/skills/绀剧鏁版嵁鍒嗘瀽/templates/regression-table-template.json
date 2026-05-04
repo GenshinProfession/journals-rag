@@ -1,0 +1,35 @@
+{
+  "table_number": "5-7",
+  "title": "层次回归分析结果 (因变量: 离职倾向)",
+  "columns": [
+    {"name": "变量", "type": "string"},
+    {"name": "模型1 β", "type": "number", "format": ".3f", "note": "标准化回归系数"},
+    {"name": "模型2 β", "type": "number", "format": ".3f"},
+    {"name": "VIF", "type": "number", "format": ".2f"}
+  ],
+  "sections": [
+    {
+      "section_name": "控制变量",
+      "rows": [
+        {"变量": "年龄", "模型1 β": null, "模型2 β": null, "VIF": null},
+        {"变量": "性别", "模型1 β": null, "模型2 β": null, "VIF": null},
+        {"变量": "学历", "模型1 β": null, "模型2 β": null, "VIF": null}
+      ]
+    },
+    {
+      "section_name": "自变量",
+      "rows": [
+        {"变量": "工作满意度", "模型1 β": null, "模型2 β": null, "VIF": null},
+        {"变量": "组织承诺", "模型1 β": null, "模型2 β": null, "VIF": null},
+        {"变量": "工作投入", "模型1 β": null, "模型2 β": null, "VIF": null}
+      ]
+    }
+  ],
+  "model_fit": [
+    {"stat": "R²", "model1": null, "model2": null, "is_starred": false},
+    {"stat": "Adj R²", "model1": null, "model2": null, "is_starred": false},
+    {"stat": "ΔR²", "model1": "—", "model2": null, "is_starred": true},
+    {"stat": "F", "model1": null, "model2": null, "is_starred": true}
+  ],
+  "footnote": "β为标准化回归系数; *p<0.05, **p<0.01, ***p<0.001"
+}

@@ -1,0 +1,116 @@
+{
+  "_description": "Data Agent 完整分析输出汇总格式。每个分析步骤产出此JSON的一个子对象。",
+  "project_id": "string",
+  "analysis_date": "YYYY-MM-DD",
+  "sample": {
+    "N": 384,
+    "response_rate": "87.3%",
+    "data_collection_method": "线上问卷调查",
+    "data_collection_period": "2024年3月-5月",
+    "demographics": {
+      "gender": {"男": {"n": 157, "pct": 40.9}, "女": {"n": 227, "pct": 59.1}},
+      "age": {"M": 33.5, "SD": 7.8, "range": [22, 60]},
+      "education": {"高中及以下": 18, "大专": 76, "本科": 189, "硕士及以上": 101},
+      "income": {}
+    }
+  },
+  "cmb": {
+    "method": "Harman单因子检验",
+    "first_factor_variance_pct": 28.45,
+    "threshold": 40,
+    "passed": true
+  },
+  "descriptive_stats": {
+    "variables": {
+      "JS": {"M": 3.82, "SD": 0.75, "Min": 1.00, "Max": 5.00, "skew": -0.32, "kurtosis": 0.15},
+      "OC": {"M": 3.95, "SD": 0.68, "Min": 1.20, "Max": 5.00, "skew": -0.28, "kurtosis": 0.21},
+      "TI": {"M": 2.64, "SD": 0.82, "Min": 1.00, "Max": 4.80, "skew": 0.41, "kurtosis": -0.18},
+      "WI": {"M": 3.71, "SD": 0.71, "Min": 1.40, "Max": 5.00, "skew": -0.15, "kurtosis": 0.08}
+    }
+  },
+  "reliability": {
+    "JS": {"alpha": 0.87, "ci_95": [0.84, 0.90], "CR": 0.89, "AVE": 0.62, "passed": true},
+    "OC": {"alpha": 0.91, "ci_95": [0.89, 0.93], "CR": 0.92, "AVE": 0.70, "passed": true},
+    "TI": {"alpha": 0.89, "ci_95": [0.87, 0.91], "CR": 0.90, "AVE": 0.65, "passed": true},
+    "WI": {"alpha": 0.85, "ci_95": [0.82, 0.88], "CR": 0.87, "AVE": 0.57, "passed": true}
+  },
+  "validity": {
+    "KMO": 0.89,
+    "Bartlett_chi2": 3842.56,
+    "Bartlett_df": 190,
+    "Bartlett_p": 0.000,
+    "passed": true,
+    "efa": {
+      "extraction_method": "主成分分析",
+      "rotation": "最大方差法",
+      "num_factors": 4,
+      "cumulative_variance_pct": 60.65,
+      "factor_loadings": {}
+    },
+    "discriminant_validity": {
+      "method": "Fornell-Larcker准则",
+      "passed": true
+    }
+  },
+  "correlation": {
+    "matrix": {
+      "JS_OC": {"r": 0.45, "p": 0.000, "sig": "**", "effect_size": "中"},
+      "JS_TI": {"r": -0.52, "p": 0.000, "sig": "**", "effect_size": "大"},
+      "JS_WI": {"r": 0.38, "p": 0.000, "sig": "**", "effect_size": "中"},
+      "OC_TI": {"r": -0.48, "p": 0.000, "sig": "**", "effect_size": "中"},
+      "OC_WI": {"r": 0.41, "p": 0.000, "sig": "**", "effect_size": "中"},
+      "TI_WI": {"r": -0.35, "p": 0.000, "sig": "**", "effect_size": "中"}
+    }
+  },
+  "regression": {
+    "dependent": "TI",
+    "models": {
+      "m1": {
+        "predictors": ["age", "gender", "education"],
+        "R2": 0.03, "adjR2": 0.02, "F": 3.21, "F_p": 0.023
+      },
+      "m2": {
+        "predictors": ["age", "gender", "education", "JS", "OC", "WI"],
+        "R2": 0.42, "adjR2": 0.41, "deltaR2": 0.39, "deltaR2_p": 0.000, "F": 42.56, "F_p": 0.000
+      }
+    },
+    "coefficients": [
+      {"predictor": "JS", "beta": -0.35, "t": -5.42, "p": 0.000, "sig": "***", "VIF": 2.45, "hypothesis": "H1", "supported": true},
+      {"predictor": "OC", "beta": -0.28, "t": -4.31, "p": 0.000, "sig": "***", "VIF": 2.31, "hypothesis": "H2", "supported": true},
+      {"predictor": "WI", "beta": -0.15, "t": -2.28, "p": 0.023, "sig": "*", "VIF": 1.89, "hypothesis": "H3", "supported": true}
+    ],
+    "VIF_range": [1.10, 2.45],
+    "DW": 1.92
+  },
+  "mediation": {
+    "model": "PROCESS Model 4",
+    "x": "JS", "m": "OC", "y": "TI",
+    "bootstrap_samples": 5000,
+    "total_effect": -0.52, "total_p": 0.000,
+    "direct_effect": -0.31, "direct_p": 0.002,
+    "indirect_effect": -0.21, "indirect_boot_se": 0.05,
+    "indirect_ci_95": [-0.32, -0.12],
+    "mediation_ratio_pct": 40.4,
+    "significant": true,
+    "hypothesis": "H4", "supported": true
+  },
+  "moderation": {
+    "x": "JS", "moderator": "OC", "y": "TI",
+    "interaction_beta": -0.18, "interaction_p": 0.004,
+    "deltaR2": 0.03, "deltaR2_p": 0.004,
+    "significant": true,
+    "simple_slopes": {
+      "low_minus1SD": {"beta": -0.15, "se": 0.08, "t": -1.88, "p": 0.06, "ci": [-0.31, 0.01]},
+      "mean": {"beta": -0.35, "se": 0.07, "t": -5.00, "p": 0.000, "ci": [-0.49, -0.21]},
+      "high_plus1SD": {"beta": -0.55, "se": 0.09, "t": -6.11, "p": 0.000, "ci": [-0.73, -0.37]}
+    },
+    "hypothesis": "H5", "supported": true
+  },
+  "hypotheses_summary": [
+    {"id": "H1", "statement": "工作满意度负向影响离职倾向", "result": "支持", "beta": -0.35, "p": "<0.001"},
+    {"id": "H2", "statement": "组织承诺负向影响离职倾向", "result": "支持", "beta": -0.28, "p": "<0.001"},
+    {"id": "H3", "statement": "工作投入负向影响离职倾向", "result": "支持", "beta": -0.15, "p": "<0.05"},
+    {"id": "H4", "statement": "组织承诺在工作满意度与离职倾向间起中介作用", "result": "支持", "indirect_effect": -0.21, "ci": "[-0.32, -0.12]"},
+    {"id": "H5", "statement": "组织承诺负向调节工作满意度与离职倾向的关系", "result": "支持", "interaction_beta": -0.18, "p": "<0.01"}
+  ]
+}

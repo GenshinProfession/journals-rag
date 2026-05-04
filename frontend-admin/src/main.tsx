@@ -12,6 +12,7 @@ import { Members } from './pages/Members';
 import { PRODUCT_NAME, ADMIN_CONSOLE_TAGLINE } from './brand';
 import { Models } from './pages/Models';
 import { Schools } from './pages/Schools';
+import { TemplateEditor } from './pages/TemplateEditor';
 import { Usage } from './pages/Usage';
 import { Users } from './pages/Users';
 import './styles.css';
@@ -124,6 +125,7 @@ function Layout() {
           <Route path="/usage" element={<Usage />} />
           <Route path="/models" element={<Models />} />
           <Route path="/schools" element={<Schools />} />
+          <Route path="/schools/edit/:groupId" element={<TemplateEditor />} />
           <Route path="/members" element={<Members />} />
         </Routes>
       </main>

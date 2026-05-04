@@ -1,0 +1,47 @@
+{
+  "table_number": "5-8",
+  "title": "Bootstrap中介效应检验 (5000次重抽样)",
+  "rows": [
+    {
+      "path": "总效应 (c)",
+      "x": "JS",
+      "y": "TI",
+      "effect": null,
+      "boot_se": null,
+      "ci_lower": null,
+      "ci_upper": null,
+      "is_direct": false,
+      "is_indirect": false,
+      "is_total": true
+    },
+    {
+      "path": "直接效应 (c')",
+      "x": "JS",
+      "y": "TI",
+      "effect": null,
+      "boot_se": null,
+      "ci_lower": null,
+      "ci_upper": null,
+      "is_direct": true,
+      "is_indirect": false,
+      "is_total": false
+    },
+    {
+      "path": "间接效应 (a×b)",
+      "x": "JS",
+      "m": "OC",
+      "y": "TI",
+      "effect": null,
+      "boot_se": null,
+      "ci_lower": null,
+      "ci_upper": null,
+      "is_direct": false,
+      "is_indirect": true,
+      "is_total": false
+    }
+  ],
+  "mediation_ratio": null,
+  "footnote": "*p<0.05, **p<0.01, ***p<0.001",
+  "bootstrap_samples": 5000,
+  "ci_level": 95
+}

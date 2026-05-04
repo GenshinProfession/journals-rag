@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "document-reader": {
+      "command": "python",
+      "args": ["${workspaceFolder}/document-reader-mcp/server.py"],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONPATH": "${workspaceFolder}/document-reader-mcp"
+      }
+    }
+  }
+}

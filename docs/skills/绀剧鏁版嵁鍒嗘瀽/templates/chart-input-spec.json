@@ -1,0 +1,172 @@
+{
+  "_description": "图表Agent 输入规范。data_agent 输出此格式的JSON，chart_agent 据此生成图表。",
+  "chart_types": {
+    "histogram": {
+      "description": "带正态曲线的直方图",
+      "required_fields": ["title", "data.values", "data.variable_name"],
+      "optional_fields": ["bins", "color"],
+      "example": {
+        "chart_type": "histogram",
+        "title": "图5-1 工作满意度的分布直方图",
+        "data": {
+          "variable_name": "工作满意度",
+          "values": [3.2, 4.1, 2.8, 3.5, 4.2, 3.1, 3.9, 3.7, 4.0, 3.3]
+        },
+        "style": "spss",
+        "format": "png",
+        "dpi": 300,
+        "bins": 20,
+        "add_normal_curve": true
+      }
+    },
+    "bar_chart": {
+      "description": "带误差线的组间比较柱状图",
+      "required_fields": ["title", "data.groups", "data.means", "data.errors"],
+      "optional_fields": ["data.error_type"],
+      "example": {
+        "chart_type": "bar_chart",
+        "title": "图5-2 不同学历组工作满意度的比较",
+        "data": {
+          "groups": ["高中及以下", "大专", "本科", "硕士及以上"],
+          "means": [3.45, 3.67, 3.85, 3.92],
+          "errors": [0.45, 0.38, 0.32, 0.29],
+          "error_type": "sd"
+        },
+        "style": "spss",
+        "format": "png",
+        "dpi": 300
+      }
+    },
+    "scatter_plot": {
+      "description": "散点图 + 回归线",
+      "required_fields": ["title", "data.x", "data.y", "data.x_label", "data.y_label"],
+      "optional_fields": ["data.group", "add_regline"],
+      "example": {
+        "chart_type": "scatter_plot",
+        "title": "图5-3 工作满意度与离职倾向的散点图",
+        "data": {
+          "x": [3.2, 4.1, 2.8, 3.5, 4.2, 3.1, 3.9, 3.7, 4.0, 3.3],
+          "y": [2.8, 1.9, 3.5, 2.4, 1.5, 3.1, 2.0, 2.3, 1.8, 2.9],
+          "x_label": "工作满意度",
+          "y_label": "离职倾向"
+        },
+        "add_regline": true,
+        "style": "spss",
+        "format": "png",
+        "dpi": 300
+      }
+    },
+    "heatmap": {
+      "description": "相关系数热力图",
+      "required_fields": ["title", "data.matrix", "data.labels"],
+      "example": {
+        "chart_type": "heatmap",
+        "title": "图5-4 变量相关系数热力图",
+        "data": {
+          "labels": ["工作满意度", "组织承诺", "离职倾向", "工作投入"],
+          "matrix": [
+            [1.00, 0.45, -0.52, 0.38],
+            [0.45, 1.00, -0.48, 0.41],
+            [-0.52, -0.48, 1.00, -0.35],
+            [0.38, 0.41, -0.35, 1.00]
+          ]
+        },
+        "style": "spss",
+        "format": "png",
+        "dpi": 300
+      }
+    },
+    "path_diagram": {
+      "description": "中介/调节效应路径系数图",
+      "required_fields": ["title", "data.nodes", "data.edges"],
+      "example": {
+        "chart_type": "path_diagram",
+        "title": "图5-5 中介效应路径系数图",
+        "data": {
+          "nodes": [
+            {"id": "X", "label": "工作满意度"},
+            {"id": "M", "label": "组织承诺"},
+            {"id": "Y", "label": "离职倾向"}
+          ],
+          "edges": [
+            {"from": "X", "to": "M", "label": "a=0.45***"},
+            {"from": "M", "to": "Y", "label": "b=-0.42***"},
+            {"from": "X", "to": "Y", "label": "c'=-0.31**"}
+          ]
+        },
+        "style": "spss",
+        "format": "png",
+        "dpi": 300
+      }
+    },
+    "interaction_plot": {
+      "description": "调节效应交互图 (简单斜率)",
+      "required_fields": ["title", "data.x_label", "data.y_label", "data.lines"],
+      "example": {
+        "chart_type": "interaction_plot",
+        "title": "图5-6 组织承诺在工作满意度与离职倾向间的调节效应",
+        "data": {
+          "x_label": "工作满意度",
+          "y_label": "离职倾向",
+          "lines": [
+            {
+              "label": "低组织承诺 (-1 SD)",
+              "x": [1, 2, 3, 4, 5],
+              "y": [4.2, 3.8, 3.4, 3.0, 2.6]
+            },
+            {
+              "label": "高组织承诺 (+1 SD)",
+              "x": [1, 2, 3, 4, 5],
+              "y": [3.5, 3.3, 3.1, 2.9, 2.7]
+            }
+          ]
+        },
+        "style": "spss",
+        "format": "png",
+        "dpi": 300
+      }
+    },
+    "box_plot": {
+      "description": "箱线图 (组间分布比较)",
+      "required_fields": ["title", "data.groups", "data.values"],
+      "example": {
+        "chart_type": "box_plot",
+        "title": "图5-7 不同学历组离职倾向的箱线图",
+        "data": {
+          "x_label": "学历",
+          "y_label": "离职倾向",
+          "groups": ["高中及以下", "大专", "本科", "硕士及以上"],
+          "values": [
+            [2.8, 3.1, 2.5, 3.2],
+            [2.5, 3.0, 2.2, 2.8],
+            [2.0, 2.5, 1.8, 2.3],
+            [1.8, 2.2, 1.5, 2.0]
+          ]
+        },
+        "style": "spss",
+        "format": "png",
+        "dpi": 300
+      }
+    },
+    "mermaid": {
+      "description": "概念框架图/理论模型图 (LLM生成Mermaid语法 → 前端渲染)",
+      "required_fields": ["title", "mermaid_code"],
+      "example": {
+        "chart_type": "mermaid",
+        "title": "图3-1 理论框架模型",
+        "mermaid_code": "graph LR\n    X[工作满意度] --> M[组织承诺]\n    M --> Y[离职倾向]\n    X --> Y\n    Z[组织支持感] -.-> X\n    Z -.-> M"
+      }
+    }
+  },
+  "global_style": {
+    "font_family": "SimHei",
+    "background": "white",
+    "grid": true,
+    "grid_axis": "y",
+    "grid_alpha": 0.3,
+    "spines": {"top": false, "right": false, "left": true, "bottom": true},
+    "color_palette": "colorblind",
+    "dpi": 300,
+    "figure_size": [8, 6]
+  }
+}

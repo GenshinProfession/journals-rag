@@ -4,7 +4,13 @@ from app.models.job import BackgroundJob
 from app.models.model_catalog import ModelCatalog
 from app.models.project import Chapter, Project
 from app.models.rag import Literature, RAGChunk, RAGDocument, ReferenceReview
-from app.models.school import SchoolTemplate
+from app.models.school import (
+    School,
+    SchoolTemplateGroup,
+    TemplateStructure,
+    TemplateFormatRules,
+    TemplateCitationRules,
+)
 from app.models.user import User
 
 __all__ = [
@@ -19,7 +25,11 @@ __all__ = [
     "RAGDocument",
     "RechargeRecord",
     "ReferenceReview",
-    "SchoolTemplate",
+    "School",
+    "SchoolTemplateGroup",
+    "TemplateCitationRules",
+    "TemplateFormatRules",
+    "TemplateStructure",
     "User",
     "WalletLedger",
 ]

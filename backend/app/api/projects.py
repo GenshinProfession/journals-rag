@@ -11,7 +11,7 @@ from app.models.ai_usage import AIUsageRecord
 from app.models.model_catalog import ModelCatalog
 from app.models.project import Chapter, Project
 from app.models.rag import Literature, ReferenceReview
-from app.models.school import SchoolTemplate
+from app.models.school import School, SchoolTemplateGroup
 from app.models.user import User
 from app.schemas.projects import (
     ChapterGenerateRequest,
@@ -91,20 +91,27 @@ def _latest_usage_id(db: Session, user_id: UUID) -> UUID | None:
 def _school_context(db: Session, project: Project) -> str:
     if project.school_id is None:
         return "未选择学校模板。"
-    school = db.get(SchoolTemplate, project.school_id)
-    if school is None:
+    group = db.get(SchoolTemplateGroup, project.school_id)
+    if group is None:
         return "学校模板不存在或已删除。"
+    school = db.get(School, group.school_id)
+    school_name = school.name if school else "未知"
     parts = [
-        f"学校模板：{school.name}",
-        f"适用层次：{school.degree_level or '通用'}",
-        f"适用专业：{school.discipline or '通用'}",
-        f"引用格式：{school.citation_style or '未指定'}",
-        f"字数范围：{school.word_count_min or '未设'} - {school.word_count_max or '未设'}",
+        f"学校：{school_name}",
+        f"层次：{group.degree_level}",
+        f"专业：{group.discipline or '通用'}",
+        f"年份：{group.year or '通用'}",
+        f"引用格式：{group.citation_style or '未指定'}",
     ]
-    if school.formatting_rules:
-        parts.append(f"格式规则：{school.formatting_rules}")
-    if school.outline_rules:
-        parts.append(f"大纲规则：{json.dumps(school.outline_rules, ensure_ascii=False)}")
+    if group.structure and group.structure.structure_json:
+        parts.append(f"结构DSL：{json.dumps(group.structure.structure_json, ensure_ascii=False)}")
+    if group.format_rules and group.format_rules.rules_json:
+        parts.append(f"格式DSL：{json.dumps(group.format_rules.rules_json, ensure_ascii=False)}")
+    if group.citation_rules:
+        if group.citation_rules.citation_json:
+            parts.append(f"引用DSL：{json.dumps(group.citation_rules.citation_json, ensure_ascii=False)}")
+        if group.citation_rules.citation_text:
+            parts.append(f"引用模板：\n{group.citation_rules.citation_text}")
     return "\n".join(parts)
 
 
@@ -134,9 +141,9 @@ def list_projects(writer: WriterUserDep, db: DbSessionDep) -> list[Project]:
 @router.post("", response_model=ProjectResponse, status_code=201)
 def create_project(writer: WriterUserDep, db: DbSessionDep, payload: ProjectCreate) -> Project:
     if payload.school_id is not None:
-        school = db.get(SchoolTemplate, payload.school_id)
-        if school is None or not school.enabled:
-            raise HTTPException(status_code=400, detail="School template not found or disabled")
+        group = db.get(SchoolTemplateGroup, payload.school_id)
+        if group is None or not group.enabled:
+            raise HTTPException(status_code=400, detail="School template group not found or disabled")
     project = Project(
         user_id=writer.id,
         school_id=payload.school_id,

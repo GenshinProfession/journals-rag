@@ -13,7 +13,7 @@ class Project(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     user_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id"), index=True)
     school_id: Mapped[UUID | None] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("school_templates.id", ondelete="SET NULL"), index=True
+        PGUUID(as_uuid=True), ForeignKey("school_template_groups.id", ondelete="SET NULL"), index=True
     )
     degree_level: Mapped[str] = mapped_column(String(30))
     discipline: Mapped[str] = mapped_column(String(80))

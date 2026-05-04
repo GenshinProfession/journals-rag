@@ -1,0 +1,39 @@
+{
+  "scale_name": "string (e.g. 工作满意度)",
+  "source": "string (e.g. Spector (1985); 中文版: Zhang et al. (2019))",
+  "num_items": 5,
+  "dimensions": [
+    {
+      "name": "string (e.g. 内在满意度)",
+      "items": ["JS1", "JS2", "JS3"]
+    },
+    {
+      "name": "string (e.g. 外在满意度)",
+      "items": ["JS4", "JS5"]
+    }
+  ],
+  "items": [
+    {
+      "id": "JS1",
+      "text": "string (e.g. 我对目前的工作感到满意)",
+      "dimension": "string",
+      "reverse": false
+    }
+  ],
+  "response_format": {
+    "type": "Likert",
+    "levels": 5,
+    "anchors": {
+      "1": "非常不同意",
+      "2": "不同意",
+      "3": "一般",
+      "4": "同意",
+      "5": "非常同意"
+    }
+  },
+  "reliability_targets": {
+    "cronbach_alpha_min": 0.70,
+    "CR_min": 0.70,
+    "AVE_min": 0.50
+  }
+}
