@@ -9,6 +9,7 @@ class SchoolResponse(BaseModel):
     id: UUID
     name: str
     university_id: UUID | None = None
+    owner_id: UUID | None = None
     country: str | None = None
     logo_url: str | None = None
     enabled: bool

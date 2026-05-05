@@ -1,4 +1,9 @@
-"""Writer-facing endpoints for browsing schools & template options."""
+"""Writer-facing endpoints for browsing schools & template options.
+
+Isolation rules:
+- Writer with org_id → sees only schools owned by their org_admin.
+- Writer without org_id (created by super_admin) → sees shared-pool schools (owner_id IS NULL).
+"""
 
 from uuid import UUID
 
@@ -12,9 +17,20 @@ from app.schemas.schools import SchoolResponse, WriterTemplateOption
 router = APIRouter()
 
 
+def _owner_filter(writer):
+    """Return SQLAlchemy filter for the schools this writer is allowed to see."""
+    if writer.org_id is not None:
+        return School.owner_id == writer.org_id
+    return School.owner_id.is_(None)
+
+
 @router.get("/schools", response_model=list[SchoolResponse])
 def list_schools(_writer: WriterUserDep, db: DbSessionDep, q: str | None = None) -> list[School]:
-    stmt = select(School).where(School.enabled.is_(True)).order_by(School.name)
+    stmt = (
+        select(School)
+        .where(School.enabled.is_(True), _owner_filter(_writer))
+        .order_by(School.name)
+    )
     if q:
         stmt = stmt.where(School.name.ilike(f"%{q}%"))
     return list(db.scalars(stmt).all())
@@ -28,6 +44,13 @@ def list_school_templates(
     school = db.get(School, school_id)
     if school is None:
         return []
+    # Enforce ownership isolation
+    if _writer.org_id is not None:
+        if school.owner_id != _writer.org_id:
+            return []
+    else:
+        if school.owner_id is not None:
+            return []
     stmt = (
         select(SchoolTemplateGroup)
         .where(SchoolTemplateGroup.school_id == school_id, SchoolTemplateGroup.enabled.is_(True))

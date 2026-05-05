@@ -77,14 +77,13 @@ function RequireAdmin({ children }: { children: React.ReactElement }) {
 
 const ALL_MENU_ITEMS: { key: string; path: string; label: string; end?: boolean }[] = [
   { key: 'dashboard',    path: '/',              label: '概览',     end: true },
-  { key: 'users',        path: '/users',         label: '用户管理' },
-  { key: 'writers',      path: '/writers',        label: '代写管理' },
+  { key: 'orgs',         path: '/orgs',          label: '机构授权' },
+  { key: 'writers',      path: '/writers',       label: '代写管理' },
   { key: 'billing',      path: '/billing',       label: '计费流水' },
   { key: 'usage',        path: '/usage',         label: 'AI 调用' },
   { key: 'models',       path: '/models',        label: '模型目录' },
   { key: 'schools',      path: '/schools',       label: '学校模板' },
   { key: 'universities', path: '/universities',  label: '高校目录' },
-  { key: 'members',      path: '/members',       label: '成员管理' },
 ];
 
 function Layout() {
@@ -129,7 +128,7 @@ function Layout() {
       <main className="main-area">
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
+          <Route path="/orgs" element={<Members />} />
           <Route path="/writers" element={<Users />} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/usage" element={<Usage />} />
@@ -137,7 +136,6 @@ function Layout() {
           <Route path="/schools" element={<Schools />} />
           <Route path="/schools/edit/:groupId" element={<TemplateEditor />} />
           <Route path="/universities" element={<Universities />} />
-          <Route path="/members" element={<Members />} />
         </Routes>
       </main>
     </div>

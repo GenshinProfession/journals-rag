@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import AdminUserDep, DbSessionDep
-from app.models.user import AdminSchoolAssignment, User
+from app.models.user import User
 from app.models.school import (
     School,
     SchoolTemplateGroup,
@@ -43,26 +43,15 @@ router = APIRouter()
 
 
 def _can_manage_school(db, admin: User, school_id: UUID) -> bool:
-    """Check if admin can manage the given school (all-access or assigned)."""
-    if admin.manage_all_schools:
+    """Check if admin can manage the given school.
+
+    super_admin: can manage everything.
+    org_admin: can only manage schools they own (owner_id == admin.id).
+    """
+    if admin.role in ("super_admin", "admin"):
         return True
-    hit = db.scalar(
-        select(AdminSchoolAssignment.id).where(
-            AdminSchoolAssignment.admin_id == admin.id,
-            AdminSchoolAssignment.school_id == school_id,
-        )
-    )
-    return hit is not None
-
-
-def _admin_school_ids(db, admin: User) -> list[UUID] | None:
-    """Return list of school IDs the admin can manage, or None if unrestricted."""
-    if admin.manage_all_schools:
-        return None
-    stmt = select(AdminSchoolAssignment.school_id).where(
-        AdminSchoolAssignment.admin_id == admin.id
-    )
-    return list(db.scalars(stmt).all())
+    school = db.get(School, school_id)
+    return school is not None and school.owner_id == admin.id
 
 
 # ── University directory search (for school creation) ────────────────────────
@@ -88,7 +77,11 @@ def search_university_directory(
 
 @router.post("/schools", response_model=SchoolResponse, status_code=201)
 def create_school(_admin: AdminUserDep, db: DbSessionDep, payload: SchoolCreate) -> School:
-    """Create a school, optionally linked to a UniversityDirectory entry."""
+    """Create a school, optionally linked to a UniversityDirectory entry.
+
+    org_admin: school.owner_id = caller.id (isolated to their org).
+    super_admin: owner_id = NULL (shared pool).
+    """
     existing = db.scalar(select(School.id).where(School.name == payload.name))
     if existing is not None:
         raise HTTPException(status_code=409, detail="School with this name already exists")
@@ -99,7 +92,11 @@ def create_school(_admin: AdminUserDep, db: DbSessionDep, payload: SchoolCreate)
             raise HTTPException(status_code=404, detail="University not found in directory")
         if not country:
             country = uni.country or uni.alpha_two_code
-    school = School(name=payload.name, university_id=payload.university_id, country=country)
+    owner_id = _admin.id if _admin.role == "org_admin" else None
+    school = School(
+        name=payload.name, university_id=payload.university_id,
+        country=country, owner_id=owner_id,
+    )
     db.add(school)
     db.commit()
     db.refresh(school)
@@ -118,12 +115,12 @@ def delete_school(_admin: AdminUserDep, db: DbSessionDep, school_id: UUID) -> No
 
 @router.get("/schools", response_model=list[SchoolResponse])
 def list_schools(_admin: AdminUserDep, db: DbSessionDep, q: str | None = None) -> list[School]:
+    """super_admin sees all; org_admin sees only own schools."""
     stmt = select(School).order_by(School.is_pinned.desc(), School.pinned_at.desc().nullslast(), School.name)
     if q:
         stmt = stmt.where(School.name.ilike(f"%{q}%"))
-    allowed = _admin_school_ids(db, _admin)
-    if allowed is not None:
-        stmt = stmt.where(School.id.in_(allowed))
+    if _admin.role == "org_admin":
+        stmt = stmt.where(School.owner_id == _admin.id)
     return list(db.scalars(stmt).all())
 
 

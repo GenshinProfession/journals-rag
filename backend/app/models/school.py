@@ -10,13 +10,21 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class School(UUIDPrimaryKeyMixin, TimestampMixin, Base):
-    """School entity with template configuration. Optionally linked to UniversityDirectory."""
+    """School entity with template configuration. Optionally linked to UniversityDirectory.
+
+    owner_id: NULL → shared pool (visible to super_admin's unattached writers).
+              non-NULL → owned by that org_admin; only their writers can see it.
+    """
 
     __tablename__ = "schools"
 
     name: Mapped[str] = mapped_column(String(300), unique=True, index=True)
     university_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("university_directory.id", ondelete="SET NULL"),
+        nullable=True, index=True,
+    )
+    owner_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True, index=True,
     )
     country: Mapped[str | None] = mapped_column(String(120))

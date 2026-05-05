@@ -31,7 +31,7 @@ def login(request: Request, db: DbSessionDep, payload: LoginRequest) -> TokenRes
 
 
 SUPER_ADMIN_MENUS = [
-    "dashboard", "users", "writers", "billing", "usage", "models", "schools", "universities", "members",
+    "dashboard", "orgs", "billing", "usage", "models", "schools", "universities",
 ]
 ORG_ADMIN_MENUS = [
     "dashboard", "writers", "usage", "schools", "universities",
