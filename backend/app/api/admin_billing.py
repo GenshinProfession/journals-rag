@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import cast, func, select
 from sqlalchemy import Date as SADate
 
-from app.deps import AdminUserDep, DbSessionDep, ProviderGatewayDep
+from app.deps import AdminUserDep, DbSessionDep, ProviderGatewayDep, SuperAdminDep
 from app.models.ai_usage import AIUsageRecord
 from app.models.billing import AccountWallet, WalletLedger
 from app.models.model_catalog import ModelCatalog
@@ -54,11 +54,11 @@ def list_wallets(_admin: AdminUserDep, db: DbSessionDep) -> list[WalletWithUserR
 
 @router.post("/recharge")
 def recharge(
-    admin: AdminUserDep, db: DbSessionDep, payload: RechargeRequest
+    admin: SuperAdminDep, db: DbSessionDep, payload: RechargeRequest
 ) -> dict[str, object]:
     target = db.get(User, payload.user_id)
-    if target is None or target.role != "writer":
-        raise HTTPException(status_code=400, detail="Recharge target must be an active writer account")
+    if target is None or target.role not in ("org_admin", "admin"):
+        raise HTTPException(status_code=400, detail="Recharge target must be an org_admin account")
     BillingService(db).recharge(user_id=payload.user_id, admin_id=admin.id, amount_cents=payload.amount_cents, note=payload.note)
     wallet = db.get(AccountWallet, payload.user_id)
     return {
@@ -71,11 +71,11 @@ def recharge(
 
 @router.post("/adjust")
 def adjust_wallet(
-    _admin: AdminUserDep, db: DbSessionDep, payload: WalletAdjustmentRequest
+    _admin: SuperAdminDep, db: DbSessionDep, payload: WalletAdjustmentRequest
 ) -> dict[str, object]:
     target = db.get(User, payload.user_id)
-    if target is None or target.role != "writer":
-        raise HTTPException(status_code=400, detail="Adjustment target must be a writer account")
+    if target is None or target.role not in ("org_admin", "admin"):
+        raise HTTPException(status_code=400, detail="Adjustment target must be an org_admin account")
     try:
         BillingService(db).adjust_balance(
             user_id=payload.user_id,

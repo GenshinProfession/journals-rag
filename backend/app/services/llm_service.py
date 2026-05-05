@@ -8,6 +8,7 @@ from app.config import Settings
 from app.models.ai_usage import AIUsageRecord
 from app.models.billing import AccountWallet
 from app.models.model_catalog import ModelCatalog
+from app.models.user import User
 from app.services.billing_service import BillingService, InsufficientBalanceError
 from app.services.provider_gateway import ProviderGatewayService
 
@@ -21,6 +22,13 @@ class LLMService:
         self.settings = settings
         self.billing = BillingService(db)
 
+    def _resolve_billing_user(self, user_id: UUID) -> UUID:
+        """Writer uses their org_admin's wallet; org_admin/super_admin uses own."""
+        user = self.db.get(User, user_id)
+        if user and user.role == "writer" and user.org_id is not None:
+            return user.org_id
+        return user_id
+
     async def call(
         self,
         user_id: UUID,
@@ -30,6 +38,8 @@ class LLMService:
         model: ModelCatalog,
         messages: list[dict[str, Any]],
     ) -> str:
+        billing_user_id = self._resolve_billing_user(user_id)
+
         usage = AIUsageRecord(
             user_id=user_id,
             project_id=project_id,
@@ -41,7 +51,7 @@ class LLMService:
         self.db.add(usage)
         self.db.flush()
 
-        wallet = self.db.get(AccountWallet, user_id)
+        wallet = self.db.get(AccountWallet, billing_user_id)
         balance_cents = wallet.balance_cents if wallet else 0
         model_is_billable = model.input_price_per_1k_cents > 0 or model.output_price_per_1k_cents > 0
         if model_is_billable and balance_cents <= 0:
@@ -55,7 +65,7 @@ class LLMService:
 
         try:
             if reserved_amount > 0:
-                self.billing.reserve_balance(user_id, reserved_amount, commit=False)
+                self.billing.reserve_balance(billing_user_id, reserved_amount, commit=False)
 
             outcome = await self.gateway.chat_completion(
                 model.provider_model,
@@ -84,7 +94,7 @@ class LLMService:
 
             try:
                 self.billing.settle_reserved_consumption(
-                    user_id,
+                    billing_user_id,
                     reserved_amount,
                     cost_cents,
                     usage_id=usage.id,
@@ -94,7 +104,7 @@ class LLMService:
                 usage.status = "succeeded"
             except InsufficientBalanceError:
                 if reserved_amount > 0:
-                    self.billing.cancel_reserve(user_id, reserved_amount, commit=False)
+                    self.billing.cancel_reserve(billing_user_id, reserved_amount, commit=False)
                 usage.status = "billing_failed"
                 usage.error = "insufficient_balance"
 
@@ -106,6 +116,6 @@ class LLMService:
             usage.error = str(exc)
             usage.completed_at = datetime.now(UTC)
             if reserved_amount > 0:
-                self.billing.cancel_reserve(user_id, reserved_amount, commit=False)
+                self.billing.cancel_reserve(billing_user_id, reserved_amount, commit=False)
             self.db.commit()
             raise

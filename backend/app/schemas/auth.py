@@ -17,5 +17,7 @@ class CurrentUserResponse(BaseModel):
     id: UUID
     username: str
     role: str
+    org_id: UUID | None = None
+    allowed_menus: list[str] = []
 
     model_config = {"from_attributes": True}

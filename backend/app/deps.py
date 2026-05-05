@@ -62,8 +62,16 @@ CurrentUserDep = Annotated[User, Depends(require_user)]
 
 
 def require_admin(user: CurrentUserDep) -> User:
-    if user.role != "admin":
+    """Accepts both super_admin and org_admin (and legacy 'admin')."""
+    if user.role not in ("super_admin", "org_admin", "admin"):
         raise HTTPException(status_code=403, detail="Administrator role required")
+    return user
+
+
+def require_super_admin(user: CurrentUserDep) -> User:
+    """Only super_admin (and legacy 'admin' for migration period)."""
+    if user.role not in ("super_admin", "admin"):
+        raise HTTPException(status_code=403, detail="Super administrator role required")
     return user
 
 
@@ -74,6 +82,7 @@ def require_writer(user: CurrentUserDep) -> User:
 
 
 AdminUserDep = Annotated[User, Depends(require_admin)]
+SuperAdminDep = Annotated[User, Depends(require_super_admin)]
 WriterUserDep = Annotated[User, Depends(require_writer)]
 
 

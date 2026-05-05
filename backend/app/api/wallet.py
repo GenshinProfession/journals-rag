@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter
 from sqlalchemy import select
 
@@ -8,9 +10,17 @@ from app.schemas.billing import MyWalletResponse, WalletLedgerResponse
 router = APIRouter()
 
 
+def _wallet_owner_id(writer) -> UUID:
+    """Writer uses org_admin's wallet; fallback to own id."""
+    if writer.org_id is not None:
+        return writer.org_id
+    return writer.id
+
+
 @router.get("", response_model=MyWalletResponse)
 def current_wallet(writer: WriterUserDep, db: DbSessionDep) -> MyWalletResponse:
-    wallet = db.get(AccountWallet, writer.id)
+    owner_id = _wallet_owner_id(writer)
+    wallet = db.get(AccountWallet, owner_id)
     if wallet is None:
         return MyWalletResponse(
             balance_cents=0, frozen_cents=0, total_recharged_cents=0, total_consumed_cents=0
@@ -25,9 +35,10 @@ def current_wallet(writer: WriterUserDep, db: DbSessionDep) -> MyWalletResponse:
 
 @router.get("/ledger", response_model=list[WalletLedgerResponse])
 def current_ledger(writer: WriterUserDep, db: DbSessionDep) -> list[WalletLedger]:
+    owner_id = _wallet_owner_id(writer)
     stmt = (
         select(WalletLedger)
-        .where(WalletLedger.user_id == writer.id)
+        .where(WalletLedger.user_id == owner_id)
         .order_by(WalletLedger.created_at.desc())
         .limit(200)
     )

@@ -20,6 +20,12 @@ import './styles.css';
 
 const queryClient = new QueryClient();
 
+const ADMIN_ROLES = ['super_admin', 'org_admin', 'admin'];
+
+// Shared state for allowed menus (set during auth, read by Layout)
+let _allowedMenus: string[] = [];
+let _currentRole: string = '';
+
 function RequireAdmin({ children }: { children: React.ReactElement }) {
   const nav = useNavigate();
   const [ready, setReady] = useState(false);
@@ -33,12 +39,14 @@ function RequireAdmin({ children }: { children: React.ReactElement }) {
       }
       try {
         const me = await authMe();
-        if (!cancelled && me.role !== 'admin') {
+        if (!cancelled && !ADMIN_ROLES.includes(me.role)) {
           clearToken();
           nav('/login', { replace: true });
           return;
         }
         if (!cancelled) {
+          _allowedMenus = me.allowed_menus ?? [];
+          _currentRole = me.role;
           setReady(true);
         }
       } catch {
@@ -67,12 +75,28 @@ function RequireAdmin({ children }: { children: React.ReactElement }) {
   return children;
 }
 
+const ALL_MENU_ITEMS: { key: string; path: string; label: string; end?: boolean }[] = [
+  { key: 'dashboard',    path: '/',              label: '概览',     end: true },
+  { key: 'users',        path: '/users',         label: '用户管理' },
+  { key: 'writers',      path: '/writers',        label: '代写管理' },
+  { key: 'billing',      path: '/billing',       label: '计费流水' },
+  { key: 'usage',        path: '/usage',         label: 'AI 调用' },
+  { key: 'models',       path: '/models',        label: '模型目录' },
+  { key: 'schools',      path: '/schools',       label: '学校模板' },
+  { key: 'universities', path: '/universities',  label: '高校目录' },
+  { key: 'members',      path: '/members',       label: '成员管理' },
+];
+
 function Layout() {
   const nav = useNavigate();
   function logout() {
     clearToken();
+    _allowedMenus = [];
+    _currentRole = '';
     nav('/login', { replace: true });
   }
+
+  const visibleMenus = ALL_MENU_ITEMS.filter(m => _allowedMenus.includes(m.key));
 
   return (
     <div className="shell">
@@ -83,40 +107,20 @@ function Layout() {
           <span className="sidebar__badge">{ADMIN_CONSOLE_TAGLINE}</span>
         </div>
         <nav className="sidebar__nav">
-          <NavLink to="/" end className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            概览
-          </NavLink>
-          <NavLink to="/users" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            代写账号
-          </NavLink>
-          <NavLink to="/billing" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            计费流水
-          </NavLink>
-          <NavLink to="/usage" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            AI 调用
-          </NavLink>
-          <NavLink to="/models" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            模型目录
-          </NavLink>
-          <NavLink to="/schools" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            学校模板
-          </NavLink>
-          <NavLink to="/universities" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            高校目录
-          </NavLink>
-          <NavLink to="/members" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
-            <span className="sidebar__link-dot" aria-hidden />
-            成员管理
-          </NavLink>
+          {visibleMenus.map(m => (
+            <NavLink
+              key={m.key}
+              to={m.path}
+              end={m.end}
+              className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}
+            >
+              <span className="sidebar__link-dot" aria-hidden />
+              {m.label}
+            </NavLink>
+          ))}
         </nav>
         <div className="sidebar__footer">
+          <span className="sidebar__role-badge">{_currentRole === 'super_admin' || _currentRole === 'admin' ? '超级管理员' : '机构管理员'}</span>
           <button type="button" className="btn btn--ghost btn--sm" onClick={logout}>
             退出登录
           </button>
@@ -126,6 +130,7 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/writers" element={<Users />} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/usage" element={<Usage />} />
           <Route path="/models" element={<Models />} />

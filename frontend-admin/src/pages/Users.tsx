@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Badge, Button, Input, InputNumber, Modal, Popconfirm, Space, Table, Tooltip,
+  Badge, Button, Input, Modal, Popconfirm, Space, Table, Tooltip,
   Typography, message
 } from 'antd';
 import {
   PlusOutlined, StopOutlined, CheckCircleOutlined,
-  DollarOutlined, ToolOutlined, CopyOutlined, ReloadOutlined
+  CopyOutlined, ReloadOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { apiFetch } from '../api/client';
@@ -20,13 +20,6 @@ export function Users() {
   const [nickname, setNickname] = useState('');
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
 
-  const [rechargeOpen, setRechargeOpen] = useState(false);
-  const [adjustOpen, setAdjustOpen] = useState(false);
-  const [targetUser, setTargetUser] = useState<UserRow | null>(null);
-  const [amountYuan, setAmountYuan] = useState<number | null>(null);
-  const [adjustYuan, setAdjustYuan] = useState<number | null>(null);
-  const [note, setNote] = useState('');
-  const [adjustNote, setAdjustNote] = useState('');
   const [regenKeyOpen, setRegenKeyOpen] = useState(false);
   const [regenKey, setRegenKey] = useState<string | null>(null);
   const [regenUser, setRegenUser] = useState<UserRow | null>(null);
@@ -58,30 +51,6 @@ export function Users() {
     onError: (e: Error) => message.error(e.message)
   });
 
-  const rechargeMut = useMutation({
-    mutationFn: (body: { user_id: string; amount_cents: number; note: string | null }) =>
-      apiFetch('/api/admin/billing/recharge', { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'wallets'] });
-      qc.invalidateQueries({ queryKey: ['admin', 'ledger'] });
-      message.success('充值成功');
-      setRechargeOpen(false);
-    },
-    onError: (e: Error) => message.error(e.message)
-  });
-
-  const adjustMut = useMutation({
-    mutationFn: (body: { user_id: string; amount_cents: number; note: string }) =>
-      apiFetch('/api/admin/billing/adjust', { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'wallets'] });
-      qc.invalidateQueries({ queryKey: ['admin', 'ledger'] });
-      message.success('调整成功');
-      setAdjustOpen(false);
-    },
-    onError: (e: Error) => message.error(e.message)
-  });
-
   const regenMut = useMutation({
     mutationFn: (userId: string) =>
       apiFetch(`/api/admin/users/${userId}/regenerate-key`, { method: 'POST' }) as Promise<{ secret_key: string }>,
@@ -105,20 +74,6 @@ export function Users() {
     setNickname('');
   };
 
-  const openRecharge = (u: UserRow) => { setTargetUser(u); setAmountYuan(null); setNote(''); setRechargeOpen(true); };
-  const openAdjust = (u: UserRow) => { setTargetUser(u); setAdjustYuan(null); setAdjustNote(''); setAdjustOpen(true); };
-
-  const handleRecharge = () => {
-    if (!targetUser || !amountYuan || amountYuan <= 0) { message.warning('金额必须为正数'); return; }
-    rechargeMut.mutate({ user_id: targetUser.id, amount_cents: Math.round(amountYuan * 100), note: note.trim() || null });
-  };
-
-  const handleAdjust = () => {
-    if (!targetUser || !adjustYuan || adjustYuan === 0) { message.warning('金额不能为 0'); return; }
-    if (!adjustNote.trim()) { message.warning('必须填写备注'); return; }
-    adjustMut.mutate({ user_id: targetUser.id, amount_cents: Math.round(adjustYuan * 100), note: adjustNote.trim() });
-  };
-
   const columns: ColumnsType<UserRow> = [
     { title: '用户名', dataIndex: 'username', ellipsis: true },
     { title: '昵称', dataIndex: 'nickname', width: 120, ellipsis: true, render: (v: string | null) => v || '—' },
@@ -136,8 +91,6 @@ export function Users() {
       title: '操作', key: 'actions', width: 200, align: 'center',
       render: (_: unknown, u: UserRow) => (
         <Space size={4}>
-          <Tooltip title="充值"><Button size="small" type="text" icon={<DollarOutlined style={{ color: '#34a853' }} />} onClick={() => openRecharge(u)} /></Tooltip>
-          <Tooltip title="调整"><Button size="small" type="text" icon={<ToolOutlined />} onClick={() => openAdjust(u)} /></Tooltip>
           <Tooltip title="重新生成密钥"><Button size="small" type="text" icon={<ReloadOutlined style={{ color: '#1a73e8' }} />} onClick={() => openRegen(u)} /></Tooltip>
           <Popconfirm title={`确认${u.is_active ? '停用' : '启用'}？`} onConfirm={() => updateMut.mutate({ id: u.id, is_active: !u.is_active })}>
             <Tooltip title={u.is_active ? '停用' : '启用'}>
@@ -164,7 +117,7 @@ export function Users() {
         <div>
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>代写账号</h2>
           <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
-            管理 writer 账号，操作列直接充值、调整余额。密码为一次性密钥。
+            管理代写账号。余额归属机构管理员，代写使用机构余额。密码为一次性密钥。
           </p>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => { setUsername(''); setNickname(''); setGeneratedKey(null); setCreateOpen(true); }}>
@@ -223,29 +176,6 @@ export function Users() {
         )}
       </Modal>
 
-      {/* Recharge */}
-      <Modal title={`充值 — ${targetUser?.nickname || targetUser?.username || ''}`} open={rechargeOpen} onOk={handleRecharge} onCancel={() => setRechargeOpen(false)} okText="确认充值" cancelText="取消" confirmLoading={rechargeMut.isPending} width={420} destroyOnClose>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
-          <Label text="充值金额（元）" required>
-            <InputNumber size="large" style={{ width: '100%' }} value={amountYuan} min={0.01} step={10} onChange={v => setAmountYuan(v)} placeholder="100" />
-          </Label>
-          <Label text="备注">
-            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="可选" />
-          </Label>
-        </div>
-      </Modal>
-
-      {/* Adjust */}
-      <Modal title={`账务调整 — ${targetUser?.nickname || targetUser?.username || ''}`} open={adjustOpen} onOk={handleAdjust} onCancel={() => setAdjustOpen(false)} okText="确认调整" cancelText="取消" confirmLoading={adjustMut.isPending} width={420} destroyOnClose>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
-          <Label text="调整金额（元）" required>
-            <InputNumber size="large" style={{ width: '100%' }} value={adjustYuan} step={1} onChange={v => setAdjustYuan(v)} placeholder="正数加余额，负数扣余额" />
-          </Label>
-          <Label text="调整备注" required>
-            <Input value={adjustNote} onChange={e => setAdjustNote(e.target.value)} placeholder="对账修正原因" />
-          </Label>
-        </div>
-      </Modal>
       {/* Regenerate key */}
       <Modal
         title={`重新生成密钥 — ${regenUser?.nickname || regenUser?.username || ''}`}

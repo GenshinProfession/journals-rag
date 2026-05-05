@@ -49,6 +49,6 @@ export async function login(username: string, password: string) {
   return data;
 }
 
-export async function authMe(): Promise<{ id: string; username: string; role: string }> {
+export async function authMe(): Promise<{ id: string; username: string; role: string; org_id: string | null; allowed_menus: string[] }> {
   return apiFetch('/api/auth/me');
 }

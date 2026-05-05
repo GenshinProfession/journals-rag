@@ -42,7 +42,7 @@ export function Billing() {
     queryKey: ['admin', 'users'],
     queryFn: () => apiFetch('/api/admin/users') as Promise<UserRow[]>
   });
-  const writers = (usersQ.data ?? []).filter(u => u.role === 'writer');
+  const walletOwners = (usersQ.data ?? []).filter(u => ['org_admin', 'admin'].includes(u.role));
   const userMap = useMemo(() => {
     const m: Record<string, string> = {};
     (usersQ.data ?? []).forEach(u => { m[u.id] = u.nickname || u.username; });
@@ -160,7 +160,7 @@ export function Billing() {
         <div>
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>计费与流水</h2>
           <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
-            钱包余额、流水趋势与明细。充值 / 调整请在「代写账号」操作。
+            钱包余额、流水趋势与明细。钱包归属机构管理员，充值请在此页操作。
           </p>
         </div>
         <Space>
@@ -182,7 +182,7 @@ export function Billing() {
             allowClear showSearch optionFilterProp="label"
             value={userId || undefined}
             onChange={v => setUserId(v ?? '')}
-            options={writers.map(u => ({ label: u.nickname || u.username, value: u.id }))}
+            options={walletOwners.map(u => ({ label: u.nickname || u.username, value: u.id }))}
           />
         </Col>
         <Col xs={24} sm={8} lg={6}>

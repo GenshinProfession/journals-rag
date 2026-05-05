@@ -30,6 +30,26 @@ def login(request: Request, db: DbSessionDep, payload: LoginRequest) -> TokenRes
     return TokenResponse(access_token=token)
 
 
+SUPER_ADMIN_MENUS = [
+    "dashboard", "users", "writers", "billing", "usage", "models", "schools", "universities", "members",
+]
+ORG_ADMIN_MENUS = [
+    "dashboard", "writers", "usage", "schools", "universities",
+]
+
+
 @router.get("/me", response_model=CurrentUserResponse)
 def me(current: CurrentUserDep) -> CurrentUserResponse:
-    return CurrentUserResponse.model_validate(current)
+    if current.role in ("super_admin", "admin"):
+        menus = SUPER_ADMIN_MENUS
+    elif current.role == "org_admin":
+        menus = ORG_ADMIN_MENUS
+    else:
+        menus = []
+    return CurrentUserResponse(
+        id=current.id,
+        username=current.username,
+        role=current.role,
+        org_id=getattr(current, "org_id", None),
+        allowed_menus=menus,
+    )

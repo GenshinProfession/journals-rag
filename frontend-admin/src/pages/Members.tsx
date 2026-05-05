@@ -13,7 +13,8 @@ import { apiFetch } from '../api/client';
 
 type UserRow = {
   id: string; username: string; nickname: string | null; role: string;
-  is_active: boolean; manage_all_schools: boolean; assigned_school_ids: string[];
+  is_active: boolean; manage_all_schools: boolean; org_id: string | null;
+  assigned_school_ids: string[];
 };
 type SchoolOption = { id: string; name: string };
 
@@ -41,16 +42,16 @@ export function Members() {
   });
   const schoolMap = new Map((schoolsQ.data ?? []).map(s => [s.id, s.name]));
 
-  const admins = (data ?? []).filter(u => u.role === 'admin');
+  const admins = (data ?? []).filter(u => ['super_admin', 'org_admin', 'admin'].includes(u.role));
 
   const createMut = useMutation({
     mutationFn: (body: {
       username: string; password: string; nickname?: string;
       manage_all_schools: boolean; assigned_school_ids?: string[];
-    }) => apiFetch('/api/admin/users/admin', { method: 'POST', body: JSON.stringify(body) }),
+    }) => apiFetch('/api/admin/users/org-admin', { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'users'] });
-      message.success('管理员已创建');
+      message.success('机构管理员已创建');
       setCreateOpen(false);
     },
     onError: (e: Error) => message.error(e.message)
@@ -104,6 +105,14 @@ export function Members() {
     { title: '用户名', dataIndex: 'username', width: 140, ellipsis: true },
     { title: '昵称', dataIndex: 'nickname', width: 100, ellipsis: true, render: (v: string | null) => v || '—' },
     {
+      title: '角色', dataIndex: 'role', width: 100,
+      render: (v: string) => {
+        if (v === 'super_admin' || v === 'admin') return <Tag color="red">超级管理员</Tag>;
+        if (v === 'org_admin') return <Tag color="blue">机构管理员</Tag>;
+        return <Tag>{v}</Tag>;
+      }
+    },
+    {
       title: '状态', dataIndex: 'is_active', width: 72, align: 'center',
       render: (v: boolean) => v ? <Badge status="success" text="启用" /> : <Badge status="error" text="停用" />
     },
@@ -156,7 +165,7 @@ export function Members() {
         <div>
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 400 }}>成员管理</h2>
           <p style={{ margin: '4px 0 0', color: '#5f6368', fontSize: 14 }}>
-            管理后台管理员账号，分配可管理的学校范围。代写账号请在「代写账号」页面管理。
+            管理机构管理员账号，分配可管理的学校范围。代写账号由机构管理员各自管理。
           </p>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => {
@@ -164,7 +173,7 @@ export function Members() {
           setManageAll(false); setSelectedSchools([]);
           setCreateOpen(true);
         }}>
-          新增管理员
+          新增机构管理员
         </Button>
       </div>
 
@@ -175,7 +184,7 @@ export function Members() {
 
       {/* Create admin */}
       <Modal
-        title="新增管理员"
+        title="新增机构管理员"
         open={createOpen} onOk={handleCreate} onCancel={() => setCreateOpen(false)}
         okText="创建" cancelText="取消" confirmLoading={createMut.isPending}
         width={480} destroyOnClose

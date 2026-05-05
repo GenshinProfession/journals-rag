@@ -28,7 +28,7 @@ def ensure_bootstrap_admin() -> None:
         admin = User(
             username=settings.bootstrap_admin_username,
             password_hash=hash_password(settings.bootstrap_admin_password),
-            role="admin",
+            role="super_admin",
             is_active=True,
             created_by=None,
         )

@@ -8,15 +8,21 @@ class WriterCreate(BaseModel):
     nickname: str | None = None
 
 
-class AdminCreate(BaseModel):
+class OrgAdminCreate(BaseModel):
+    """Create a new org_admin (institution administrator)."""
     username: str = Field(min_length=2, max_length=100)
     password: str = Field(min_length=6, max_length=128)
     nickname: str | None = None
     manage_all_schools: bool = False
     assigned_school_ids: list[UUID] | None = Field(
         default=None,
-        description="School IDs this admin can manage. Ignored when manage_all_schools is True.",
+        description="School IDs this org_admin can manage. Ignored when manage_all_schools is True.",
     )
+
+
+class AdminCreate(OrgAdminCreate):
+    """Legacy alias; super_admin uses this to create sub-admins."""
+    pass
 
 
 class UserUpdate(BaseModel):
@@ -33,6 +39,7 @@ class UserResponse(BaseModel):
     role: str
     is_active: bool
     manage_all_schools: bool = False
+    org_id: UUID | None = None
     assigned_school_ids: list[UUID] = []
 
     model_config = {"from_attributes": True}

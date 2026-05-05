@@ -9,6 +9,12 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """Roles: super_admin | org_admin | writer.
+
+    - super_admin: full access, can recharge org_admins.
+    - org_admin: manages schools/templates, owns a wallet, creates writers.
+    - writer: writes papers, consumes the wallet of their parent org_admin.
+    """
     __tablename__ = "users"
 
     username: Mapped[str] = mapped_column(String(100), unique=True, index=True)
@@ -18,6 +24,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_by: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id"))
     manage_all_schools: Mapped[bool] = mapped_column(Boolean, default=False)
+    org_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True,
+    )
 
 
 class AdminSchoolAssignment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
