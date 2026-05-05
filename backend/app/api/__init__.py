@@ -5,6 +5,7 @@ from app.api import (
     admin_models,
     admin_overview,
     admin_schools,
+    admin_universities,
     admin_users,
     auth,
     jobs,
@@ -23,6 +24,7 @@ router.include_router(admin_users.router, prefix="/admin/users", tags=["admin-us
 router.include_router(admin_billing.router, prefix="/admin/billing", tags=["admin-billing"])
 router.include_router(admin_models.router, prefix="/admin/models", tags=["admin-models"])
 router.include_router(admin_schools.router, prefix="/admin/schools", tags=["admin-schools"])
+router.include_router(admin_universities.router, prefix="/admin/universities", tags=["admin-universities"])
 router.include_router(wallet.router, prefix="/wallet", tags=["wallet"])
 router.include_router(models.router, prefix="/models", tags=["models"])
 router.include_router(schools.router, prefix="/school-templates", tags=["school-templates"])

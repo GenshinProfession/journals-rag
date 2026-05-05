@@ -11,10 +11,12 @@ from app.models.school import (
     TemplateFormatRules,
     TemplateCitationRules,
 )
+from app.models.university import UniversityDirectory
 from app.models.user import AdminSchoolAssignment, User
 
 __all__ = [
     "AdminSchoolAssignment",
+    "UniversityDirectory",
     "AIUsageRecord",
     "AccountWallet",
     "BackgroundJob",
@@ -33,5 +35,6 @@ __all__ = [
     "TemplateFormatRules",
     "TemplateStructure",
     "User",
+    "UniversityDirectory",
     "WalletLedger",
 ]

@@ -14,6 +14,7 @@ import { Models } from './pages/Models';
 import { Schools } from './pages/Schools';
 import { TemplateEditor } from './pages/TemplateEditor';
 import { Usage } from './pages/Usage';
+import { Universities } from './pages/Universities';
 import { Users } from './pages/Users';
 import './styles.css';
 
@@ -106,6 +107,10 @@ function Layout() {
             <span className="sidebar__link-dot" aria-hidden />
             学校模板
           </NavLink>
+          <NavLink to="/universities" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
+            <span className="sidebar__link-dot" aria-hidden />
+            高校目录
+          </NavLink>
           <NavLink to="/members" className={({ isActive }) => `sidebar__link${isActive ? ' sidebar__link--active' : ''}`}>
             <span className="sidebar__link-dot" aria-hidden />
             成员管理
@@ -126,6 +131,7 @@ function Layout() {
           <Route path="/models" element={<Models />} />
           <Route path="/schools" element={<Schools />} />
           <Route path="/schools/edit/:groupId" element={<TemplateEditor />} />
+          <Route path="/universities" element={<Universities />} />
           <Route path="/members" element={<Members />} />
         </Routes>
       </main>
