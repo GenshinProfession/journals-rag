@@ -45,8 +45,8 @@ export function Members() {
   });
 
   const schoolsQ = useQuery({
-    queryKey: ['admin', 'schools'],
-    queryFn: () => apiFetch('/api/admin/schools/schools') as Promise<SchoolOption[]>
+    queryKey: ['admin', 'schools', 'all'],
+    queryFn: () => apiFetch('/api/admin/schools/schools/all') as Promise<SchoolOption[]>
   });
   const schoolMap = new Map((schoolsQ.data ?? []).map(s => [s.id, s.name]));
 
@@ -193,7 +193,7 @@ export function Members() {
         <Space size={4}>
           {u.role === 'org_admin' && <Tooltip title="充值"><Button size="small" type="text" icon={<DollarOutlined style={{ color: '#34a853' }} />} onClick={() => openRecharge(u)} /></Tooltip>}
           {u.role === 'org_admin' && <Tooltip title="调整"><Button size="small" type="text" icon={<ToolOutlined />} onClick={() => openAdjust(u)} /></Tooltip>}
-          <Tooltip title="分配学校"><Button size="small" type="text" icon={<BankOutlined />} onClick={() => openAssign(u)} /></Tooltip>
+          {u.role === 'org_admin' && <Tooltip title="分配学校"><Button size="small" type="text" icon={<BankOutlined />} onClick={() => openAssign(u)} /></Tooltip>}
           {u.role === 'org_admin' && <Tooltip title="重置密钥"><Button size="small" type="text" icon={<KeyOutlined />} onClick={() => regenKeyMut.mutate(u.id)} /></Tooltip>}
           <Popconfirm title={`确认${u.is_active ? '停用' : '启用'}？`} onConfirm={() => updateMut.mutate({ id: u.id, is_active: !u.is_active })}>
             <Tooltip title={u.is_active ? '停用' : '启用'}>

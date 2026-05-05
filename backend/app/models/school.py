@@ -17,8 +17,11 @@ class School(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """
 
     __tablename__ = "schools"
+    __table_args__ = (
+        UniqueConstraint("name", "owner_id", name="uq_school_name_owner"),
+    )
 
-    name: Mapped[str] = mapped_column(String(300), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(300), index=True)
     university_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("university_directory.id", ondelete="SET NULL"),
         nullable=True, index=True,

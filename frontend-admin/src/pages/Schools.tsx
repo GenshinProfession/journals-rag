@@ -17,7 +17,7 @@ import { apiFetch } from '../api/client';
 
 type School = {
   id: string; name: string; university_id: string | null; country: string | null;
-  logo_url: string | null; enabled: boolean; is_pinned: boolean;
+  logo_url: string | null; enabled: boolean; is_pinned: boolean; owner_id: string | null;
 };
 
 type UniversityHit = {
@@ -75,7 +75,6 @@ export function Schools() {
   const [uniSearch, setUniSearch] = useState('');
   const [uniResults, setUniResults] = useState<UniversityHit[]>([]);
   const [uniLoading, setUniLoading] = useState(false);
-  const [customName, setCustomName] = useState('');
 
   /* ── queries ────────────────────────────────────────────────────── */
 
@@ -120,13 +119,13 @@ export function Schools() {
   /* ── mutations ──────────────────────────────────────────────────── */
 
   const addSchoolMut = useMutation({
-    mutationFn: (body: { name: string; university_id?: string; country?: string }) =>
+    mutationFn: (body: { name: string; university_id: string; country?: string }) =>
       apiFetch('/api/admin/schools/schools', { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'schools'] });
       message.success('学校已添加');
       setAddSchoolOpen(false);
-      setUniSearch(''); setUniResults([]); setCustomName('');
+      setUniSearch(''); setUniResults([]);
     },
     onError: (e: Error) => message.error(e.message?.includes('409') ? '该学校已存在' : e.message),
   });
@@ -393,6 +392,7 @@ export function Schools() {
                 >
                   <span style={{ fontSize: 14, fontWeight: selectedSchool?.id === s.id ? 500 : 400 }}>
                     {s.name}
+                    {!s.owner_id && <Tag color="gold" style={{ marginLeft: 6, fontSize: 11 }}>权威</Tag>}
                   </span>
                 </List.Item>
               )}
@@ -604,7 +604,7 @@ export function Schools() {
       <Modal
         title="从高校目录添加学校"
         open={addSchoolOpen}
-        onCancel={() => { setAddSchoolOpen(false); setUniSearch(''); setUniResults([]); setCustomName(''); }}
+        onCancel={() => { setAddSchoolOpen(false); setUniSearch(''); setUniResults([]); }}
         footer={null}
         width={560} destroyOnClose
       >
@@ -621,7 +621,7 @@ export function Schools() {
             style={{ marginBottom: 8 }}
           />
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            从全球高校目录搜索，选择后添加为模板学校。若目录中没有，可在下方手动输入。
+            从全球高校目录搜索，选择后添加为模板学校。如目录中缺少，请先在「高校目录」中添加。
           </Typography.Text>
         </div>
 
@@ -656,26 +656,6 @@ export function Schools() {
           </div>
         )}
 
-        <Card size="small" style={{ background: '#f8f9fa' }}>
-          <Typography.Text strong style={{ fontSize: 13 }}>手动添加</Typography.Text>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <Input
-              placeholder="学校名称"
-              value={customName}
-              onChange={e => setCustomName(e.target.value)}
-              onPressEnter={() => customName.trim() && addSchoolMut.mutate({ name: customName.trim() })}
-              style={{ flex: 1 }}
-            />
-            <Button
-              type="primary"
-              disabled={!customName.trim()}
-              loading={addSchoolMut.isPending}
-              onClick={() => addSchoolMut.mutate({ name: customName.trim() })}
-            >
-              添加
-            </Button>
-          </div>
-        </Card>
       </Modal>
     </div>
   );

@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 
-from app.deps import AdminUserDep, DbSessionDep
+from app.deps import AdminUserDep, DbSessionDep, SuperAdminDep
 from app.models.user import AdminSchoolAssignment, User
 from app.models.school import (
     School,
@@ -91,22 +91,22 @@ def search_university_directory(
 
 @router.post("/schools", response_model=SchoolResponse, status_code=201)
 def create_school(_admin: AdminUserDep, db: DbSessionDep, payload: SchoolCreate) -> School:
-    """Create a school, optionally linked to a UniversityDirectory entry.
+    """Create a school from the university directory.
 
+    university_id is required — schools must be created from the global directory.
     org_admin: school.owner_id = caller.id (isolated to their org).
-    super_admin: owner_id = NULL (shared pool).
+    super_admin: owner_id = NULL (shared pool / authoritative).
     """
-    existing = db.scalar(select(School.id).where(School.name == payload.name))
-    if existing is not None:
-        raise HTTPException(status_code=409, detail="School with this name already exists")
-    country = payload.country
-    if payload.university_id is not None:
-        uni = db.get(UniversityDirectory, payload.university_id)
-        if uni is None:
-            raise HTTPException(status_code=404, detail="University not found in directory")
-        if not country:
-            country = uni.country or uni.alpha_two_code
+    uni = db.get(UniversityDirectory, payload.university_id)
+    if uni is None:
+        raise HTTPException(status_code=404, detail="University not found in directory")
     owner_id = _admin.id if _admin.role == "org_admin" else None
+    # Check duplicate within the same owner scope
+    owner_filter = School.owner_id == owner_id if owner_id else School.owner_id.is_(None)
+    dup_stmt = select(School.id).where(School.name == payload.name, owner_filter)
+    if db.scalar(dup_stmt) is not None:
+        raise HTTPException(status_code=409, detail="School with this name already exists in your scope")
+    country = payload.country or uni.country or uni.alpha_two_code
     school = School(
         name=payload.name, university_id=payload.university_id,
         country=country, owner_id=owner_id,
@@ -126,6 +126,13 @@ def delete_school(_admin: AdminUserDep, db: DbSessionDep, school_id: UUID) -> No
         raise HTTPException(status_code=403, detail="No permission to manage this school")
     db.delete(school)
     db.commit()
+
+@router.get("/schools/all", response_model=list[SchoolResponse])
+def list_all_schools(_admin: SuperAdminDep, db: DbSessionDep) -> list[School]:
+    """Return ALL schools in the system. Super-admin only. Used for assignment dropdowns."""
+    stmt = select(School).order_by(School.name)
+    return list(db.scalars(stmt).all())
+
 
 @router.get("/schools", response_model=list[SchoolResponse])
 def list_schools(_admin: AdminUserDep, db: DbSessionDep, q: str | None = None) -> list[School]:

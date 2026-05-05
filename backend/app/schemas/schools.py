@@ -18,7 +18,7 @@ class SchoolResponse(BaseModel):
 
 
 class SchoolCreate(BaseModel):
-    university_id: UUID | None = None
+    university_id: UUID = Field(description="Must reference an entry in the university directory")
     name: str = Field(max_length=300)
     country: str | None = Field(default=None, max_length=120)
 
