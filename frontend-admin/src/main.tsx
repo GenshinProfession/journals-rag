@@ -25,6 +25,7 @@ const ADMIN_ROLES = ['super_admin', 'org_admin', 'admin'];
 // Shared state for allowed menus (set during auth, read by Layout)
 let _allowedMenus: string[] = [];
 let _currentRole: string = '';
+let _currentNickname: string = '';
 
 function RequireAdmin({ children }: { children: React.ReactElement }) {
   const nav = useNavigate();
@@ -47,6 +48,7 @@ function RequireAdmin({ children }: { children: React.ReactElement }) {
         if (!cancelled) {
           _allowedMenus = me.allowed_menus ?? [];
           _currentRole = me.role;
+          _currentNickname = me.nickname ?? '';
           setReady(true);
         }
       } catch {
@@ -92,6 +94,7 @@ function Layout() {
     clearToken();
     _allowedMenus = [];
     _currentRole = '';
+    _currentNickname = '';
     nav('/login', { replace: true });
   }
 
@@ -119,7 +122,7 @@ function Layout() {
           ))}
         </nav>
         <div className="sidebar__footer">
-          <span className="sidebar__role-badge">{_currentRole === 'super_admin' || _currentRole === 'admin' ? '超级管理员' : '机构管理员'}</span>
+          <span className="sidebar__role-badge">{_currentNickname || (_currentRole === 'super_admin' || _currentRole === 'admin' ? '超级管理员' : '机构管理员')}</span>
           <button type="button" className="btn btn--ghost btn--sm" onClick={logout}>
             退出登录
           </button>

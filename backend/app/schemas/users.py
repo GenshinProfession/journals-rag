@@ -9,9 +9,12 @@ class WriterCreate(BaseModel):
 
 
 class OrgAdminCreate(BaseModel):
-    """Create a new org_admin (institution administrator)."""
+    """Create a new org_admin (institution administrator).
+
+    No password required — a one-time secret key is generated (same flow as writers).
+    The password_hash in the DB can be manually set as a fallback.
+    """
     username: str = Field(min_length=2, max_length=100)
-    password: str = Field(min_length=6, max_length=128)
     nickname: str | None = None
     manage_all_schools: bool = False
     assigned_school_ids: list[UUID] | None = Field(

@@ -9,11 +9,11 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import AdminUserDep, DbSessionDep
-from app.models.user import User
+from app.models.user import AdminSchoolAssignment, User
 from app.models.school import (
     School,
     SchoolTemplateGroup,
@@ -46,12 +46,26 @@ def _can_manage_school(db, admin: User, school_id: UUID) -> bool:
     """Check if admin can manage the given school.
 
     super_admin: can manage everything.
-    org_admin: can only manage schools they own (owner_id == admin.id).
+    org_admin with manage_all_schools: can manage everything.
+    org_admin otherwise: can manage own schools + assigned schools.
     """
     if admin.role in ("super_admin", "admin"):
         return True
+    if admin.manage_all_schools:
+        return True
     school = db.get(School, school_id)
-    return school is not None and school.owner_id == admin.id
+    if school is None:
+        return False
+    if school.owner_id == admin.id:
+        return True
+    # Check assignment table
+    hit = db.scalar(
+        select(AdminSchoolAssignment.id).where(
+            AdminSchoolAssignment.admin_id == admin.id,
+            AdminSchoolAssignment.school_id == school_id,
+        )
+    )
+    return hit is not None
 
 
 # ── University directory search (for school creation) ────────────────────────
@@ -115,12 +129,17 @@ def delete_school(_admin: AdminUserDep, db: DbSessionDep, school_id: UUID) -> No
 
 @router.get("/schools", response_model=list[SchoolResponse])
 def list_schools(_admin: AdminUserDep, db: DbSessionDep, q: str | None = None) -> list[School]:
-    """super_admin sees all; org_admin sees only own schools."""
+    """super_admin sees all; org_admin sees own + assigned (or all if manage_all_schools)."""
     stmt = select(School).order_by(School.is_pinned.desc(), School.pinned_at.desc().nullslast(), School.name)
     if q:
         stmt = stmt.where(School.name.ilike(f"%{q}%"))
-    if _admin.role == "org_admin":
-        stmt = stmt.where(School.owner_id == _admin.id)
+    if _admin.role == "org_admin" and not _admin.manage_all_schools:
+        assigned_ids = select(AdminSchoolAssignment.school_id).where(
+            AdminSchoolAssignment.admin_id == _admin.id
+        ).scalar_subquery()
+        stmt = stmt.where(
+            or_(School.owner_id == _admin.id, School.id.in_(assigned_ids))
+        )
     return list(db.scalars(stmt).all())
 
 

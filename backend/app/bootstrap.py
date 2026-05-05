@@ -27,10 +27,12 @@ def ensure_bootstrap_admin() -> None:
             return
         admin = User(
             username=settings.bootstrap_admin_username,
+            nickname="超级管理员",
             password_hash=hash_password(settings.bootstrap_admin_password),
             role="super_admin",
             is_active=True,
             created_by=None,
+            manage_all_schools=True,
         )
         db.add(admin)
         db.commit()

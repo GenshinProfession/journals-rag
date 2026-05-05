@@ -49,6 +49,7 @@ def me(current: CurrentUserDep) -> CurrentUserResponse:
     return CurrentUserResponse(
         id=current.id,
         username=current.username,
+        nickname=current.nickname,
         role=current.role,
         org_id=getattr(current, "org_id", None),
         allowed_menus=menus,

@@ -6,6 +6,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app/backend
 
 COPY backend/ ./
+COPY data/ /app/data/
 RUN pip install --no-cache-dir -e .
 
 EXPOSE 8000

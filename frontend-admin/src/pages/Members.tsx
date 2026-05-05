@@ -22,8 +22,8 @@ export function Members() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
+  const [keyModalData, setKeyModalData] = useState<{ username: string; key: string } | null>(null);
   const [manageAll, setManageAll] = useState(false);
   const [selectedSchools, setSelectedSchools] = useState<string[]>([]);
 
@@ -54,13 +54,28 @@ export function Members() {
 
   const createMut = useMutation({
     mutationFn: (body: {
-      username: string; password: string; nickname?: string;
+      username: string; nickname?: string;
       manage_all_schools: boolean; assigned_school_ids?: string[];
     }) => apiFetch('/api/admin/users/org-admin', { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       qc.invalidateQueries({ queryKey: ['admin', 'users'] });
-      message.success('机构管理员已创建');
       setCreateOpen(false);
+      if (data?.secret_key) {
+        setKeyModalData({ username: data.username ?? username, key: data.secret_key });
+      } else {
+        message.success('机构管理员已创建');
+      }
+    },
+    onError: (e: Error) => message.error(e.message)
+  });
+
+  const regenKeyMut = useMutation({
+    mutationFn: (userId: string) =>
+      apiFetch(`/api/admin/users/${userId}/regenerate-key`, { method: 'POST' }),
+    onSuccess: (data: any) => {
+      if (data?.secret_key) {
+        setKeyModalData({ username: data.username, key: data.secret_key });
+      }
     },
     onError: (e: Error) => message.error(e.message)
   });
@@ -111,17 +126,11 @@ export function Members() {
     onError: (e: Error) => message.error(e.message)
   });
 
-  const resetPassword = (user: UserRow) => {
-    const pwd = window.prompt(`为 ${user.username} 设置新密码（至少 6 位）`);
-    if (!pwd) return;
-    updateMut.mutate({ id: user.id, password: pwd });
-  };
-
   const handleCreate = () => {
     const u = username.trim();
-    if (!u || password.length < 6) { message.warning('用户名不能为空，密码至少 6 位'); return; }
+    if (!u) { message.warning('用户名不能为空'); return; }
     createMut.mutate({
-      username: u, password, nickname: nickname.trim() || undefined,
+      username: u, nickname: nickname.trim() || undefined,
       manage_all_schools: manageAll,
       assigned_school_ids: manageAll ? undefined : selectedSchools,
     });
@@ -185,7 +194,7 @@ export function Members() {
           {u.role === 'org_admin' && <Tooltip title="充值"><Button size="small" type="text" icon={<DollarOutlined style={{ color: '#34a853' }} />} onClick={() => openRecharge(u)} /></Tooltip>}
           {u.role === 'org_admin' && <Tooltip title="调整"><Button size="small" type="text" icon={<ToolOutlined />} onClick={() => openAdjust(u)} /></Tooltip>}
           <Tooltip title="分配学校"><Button size="small" type="text" icon={<BankOutlined />} onClick={() => openAssign(u)} /></Tooltip>
-          <Tooltip title="重置密码"><Button size="small" type="text" icon={<KeyOutlined />} onClick={() => resetPassword(u)} /></Tooltip>
+          {u.role === 'org_admin' && <Tooltip title="重置密钥"><Button size="small" type="text" icon={<KeyOutlined />} onClick={() => regenKeyMut.mutate(u.id)} /></Tooltip>}
           <Popconfirm title={`确认${u.is_active ? '停用' : '启用'}？`} onConfirm={() => updateMut.mutate({ id: u.id, is_active: !u.is_active })}>
             <Tooltip title={u.is_active ? '停用' : '启用'}>
               <Button size="small" type="text" icon={u.is_active ? <StopOutlined style={{ color: '#f9ab00' }} /> : <CheckCircleOutlined style={{ color: '#34a853' }} />} />
@@ -217,7 +226,7 @@ export function Members() {
           </p>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => {
-          setUsername(''); setPassword(''); setNickname('');
+          setUsername(''); setNickname('');
           setManageAll(false); setSelectedSchools([]);
           setCreateOpen(true);
         }}>
@@ -240,9 +249,6 @@ export function Members() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '12px 0 4px' }}>
           <Label text="用户名" required>
             <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="登录用户名" autoComplete="off" />
-          </Label>
-          <Label text="密码" required>
-            <Input.Password value={password} onChange={e => setPassword(e.target.value)} placeholder="至少 6 位" autoComplete="new-password" />
           </Label>
           <Label text="昵称">
             <Input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="可选" />
@@ -321,6 +327,33 @@ export function Members() {
             <Input value={adjustNote} onChange={e => setAdjustNote(e.target.value)} placeholder="对账修正原因" />
           </Label>
         </div>
+      </Modal>
+      {/* Secret key display */}
+      <Modal
+        title="密钥已生成"
+        open={!!keyModalData}
+        onOk={() => setKeyModalData(null)}
+        onCancel={() => setKeyModalData(null)}
+        cancelButtonProps={{ style: { display: 'none' } }}
+        okText="已复制，关闭"
+        width={480}
+      >
+        {keyModalData && (
+          <div style={{ padding: '12px 0' }}>
+            <p style={{ marginBottom: 8 }}>用户名：<strong>{keyModalData.username}</strong></p>
+            <p style={{ marginBottom: 8 }}>一次性密钥（仅显示一次，请立即复制）：</p>
+            <Input.TextArea
+              readOnly
+              value={keyModalData.key}
+              autoSize={{ minRows: 1, maxRows: 3 }}
+              style={{ fontFamily: 'monospace', fontSize: 16, background: '#f5f5f5' }}
+              onClick={e => { (e.target as HTMLTextAreaElement).select(); navigator.clipboard.writeText(keyModalData.key); message.success('已复制到剪贴板'); }}
+            />
+            <p style={{ marginTop: 12, color: '#5f6368', fontSize: 13 }}>
+              该密钥是登录凭据，关闭后无法再查看。如丢失可通过“重置密钥”重新生成。
+            </p>
+          </div>
+        )}
       </Modal>
     </div>
   );

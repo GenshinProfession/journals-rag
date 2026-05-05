@@ -98,16 +98,23 @@ def create_writer(caller: AdminUserDep, db: DbSessionDep, payload: WriterCreate)
 
 
 @router.post("/{user_id}/regenerate-key")
-def regenerate_writer_key(caller: AdminUserDep, db: DbSessionDep, user_id: UUID) -> dict:
-    """Generate a new secret key for a writer. Returns the key once; it is never stored in plain text."""
+def regenerate_key(caller: AdminUserDep, db: DbSessionDep, user_id: UUID) -> dict:
+    """Generate a new secret key for a writer or org_admin.
+
+    Returns the key once; it is never stored in plain text.
+    The password field in the DB is kept as a fallback (set via DB directly).
+    """
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    if user.role != "writer":
-        raise HTTPException(status_code=400, detail="Only writer accounts use secret keys")
+    if user.role not in ("writer", "org_admin"):
+        raise HTTPException(status_code=400, detail="Only writer and org_admin accounts use secret keys")
     # org_admin can only regenerate keys for their own writers
-    if caller.role == "org_admin" and user.org_id != caller.id:
-        raise HTTPException(status_code=403, detail="Cannot manage writers outside your organization")
+    if caller.role == "org_admin":
+        if user.role == "writer" and user.org_id != caller.id:
+            raise HTTPException(status_code=403, detail="Cannot manage writers outside your organization")
+        if user.role == "org_admin" and user.id != caller.id:
+            raise HTTPException(status_code=403, detail="Cannot regenerate key for other org_admin")
     raw_key = secrets.token_hex(16)
     user.password_hash = hash_password(raw_key)
     db.commit()
@@ -120,14 +127,19 @@ def regenerate_writer_key(caller: AdminUserDep, db: DbSessionDep, user_id: UUID)
 
 @router.post("/org-admin", status_code=201)
 def create_org_admin(caller: SuperAdminDep, db: DbSessionDep, payload: OrgAdminCreate) -> dict:
-    """Create a new org_admin (institution administrator). Super-admin only."""
+    """Create a new org_admin (institution administrator). Super-admin only.
+
+    Returns a one-time secret key (like writers). The key is hashed and never stored
+    in plain text. Password can be set directly in the DB as a fallback.
+    """
     dup = db.scalar(select(User.id).where(User.username == payload.username))
     if dup is not None:
         raise HTTPException(status_code=409, detail="Username already registered")
+    raw_key = secrets.token_hex(16)
     user = User(
         username=payload.username,
         nickname=payload.nickname,
-        password_hash=hash_password(payload.password),
+        password_hash=hash_password(raw_key),
         role="org_admin",
         is_active=True,
         created_by=caller.id,
@@ -145,7 +157,9 @@ def create_org_admin(caller: SuperAdminDep, db: DbSessionDep, payload: OrgAdminC
 
     db.commit()
     db.refresh(user)
-    return _user_response(db, user)
+    resp = _user_response(db, user)
+    resp["secret_key"] = raw_key
+    return resp
 
 
 @router.post("/admin", status_code=201)

@@ -16,6 +16,7 @@ class TokenResponse(BaseModel):
 class CurrentUserResponse(BaseModel):
     id: UUID
     username: str
+    nickname: str | None = None
     role: str
     org_id: UUID | None = None
     allowed_menus: list[str] = []
