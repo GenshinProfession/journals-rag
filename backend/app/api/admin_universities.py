@@ -22,20 +22,29 @@ from app.schemas.universities import (
 
 router = APIRouter()
 
-_DATA_FILE = Path(__file__).resolve().parents[3] / "data" / "world_universities_and_domains.json"
+_DATA_FILE = Path(__file__).resolve().parents[3] / "data" / "world_universities_zh.json"
+_CHINA_CODES = {"CN", "HK", "MO", "TW"}
 
 
 @router.post("/seed", status_code=200)
 def seed_universities(_admin: AdminUserDep, db: DbSessionDep) -> dict:
-    """Import world_universities_and_domains.json into the directory table.
+    """Import world_universities_zh.json into the directory table.
 
-    Skips rows whose name already exists (idempotent).
+    For Chinese-region entries (CN/HK/MO/TW):
+      - name  = name_zh  (中文校名)
+      - state_province = state_province_zh (if available)
+    For all entries:
+      - country = country_zh  (中文国家名)
+
+    Skips rows whose resolved name already exists (idempotent).
     """
     if not _DATA_FILE.exists():
         raise HTTPException(status_code=404, detail=f"Data file not found: {_DATA_FILE}")
 
     with open(_DATA_FILE, "r", encoding="utf-8") as f:
-        raw: list[dict] = json.load(f)
+        data = json.load(f)
+
+    raw: list[dict] = data.get("universities", data) if isinstance(data, dict) else data
 
     # Fetch existing names for fast de-dup
     existing_names: set[str] = set(db.scalars(select(UniversityDirectory.name)).all())
@@ -43,22 +52,32 @@ def seed_universities(_admin: AdminUserDep, db: DbSessionDep) -> dict:
     created = 0
     batch: list[UniversityDirectory] = []
     for entry in raw:
-        name = (entry.get("name") or "").strip()
+        alpha = (entry.get("alpha_two_code") or "").upper()
+        is_cn = alpha in _CHINA_CODES
+
+        # Resolve name: Chinese regions use name_zh
+        name = (entry.get("name_zh") or entry.get("name") or "").strip() if is_cn else (entry.get("name") or "").strip()
         if not name or name in existing_names:
             continue
+
+        # country always uses country_zh when available
+        country = entry.get("country_zh") or entry.get("country")
+
+        # state_province: Chinese regions prefer zh version
+        sp = entry.get("state_province_zh") or entry.get("state_province") if is_cn else entry.get("state_province")
+
         existing_names.add(name)
         batch.append(
             UniversityDirectory(
                 name=name,
-                country=entry.get("country"),
-                alpha_two_code=entry.get("alpha_two_code"),
-                state_province=entry.get("state-province"),
+                country=country,
+                alpha_two_code=alpha or None,
+                state_province=sp,
                 domains=entry.get("domains"),
                 web_pages=entry.get("web_pages"),
             )
         )
         created += 1
-        # Flush in batches to keep memory reasonable
         if len(batch) >= 500:
             db.add_all(batch)
             db.flush()
@@ -85,8 +104,9 @@ def list_universities(
     count_base = select(func.count(UniversityDirectory.id))
 
     if q:
-        base = base.where(UniversityDirectory.name.ilike(f"%{q}%"))
-        count_base = count_base.where(UniversityDirectory.name.ilike(f"%{q}%"))
+        name_filter = UniversityDirectory.name.ilike(f"%{q}%") | UniversityDirectory.country.ilike(f"%{q}%")
+        base = base.where(name_filter)
+        count_base = count_base.where(name_filter)
     if country:
         base = base.where(UniversityDirectory.alpha_two_code == country.upper())
         count_base = count_base.where(UniversityDirectory.alpha_two_code == country.upper())
