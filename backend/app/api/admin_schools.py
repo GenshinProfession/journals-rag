@@ -21,11 +21,13 @@ from app.models.school import (
     TemplateFormatRules,
     TemplateStructure,
 )
+from app.models.university import UniversityDirectory
 from app.schemas.schools import (
     CitationRulesPayload,
     CitationRulesResponse,
     FormatRulesPayload,
     FormatRulesResponse,
+    SchoolCreate,
     SchoolResponse,
     SchoolUpdate,
     StructurePayload,
@@ -35,6 +37,7 @@ from app.schemas.schools import (
     TemplateGroupResponse,
     TemplateGroupUpdate,
 )
+from app.schemas.universities import UniversityResponse
 
 router = APIRouter()
 
@@ -62,57 +65,56 @@ def _admin_school_ids(db, admin: User) -> list[UUID] | None:
     return list(db.scalars(stmt).all())
 
 
-# ── Preset university list (for bootstrapping) ──────────────────────────────
+# ── University directory search (for school creation) ────────────────────────
 
-CHINA_UNIVERSITIES = [
-    "北京大学", "清华大学", "中国人民大学", "北京航空航天大学", "北京理工大学",
-    "中国农业大学", "北京师范大学", "中央民族大学", "北京邮电大学", "北京交通大学",
-    "北京科技大学", "北京化工大学", "北京林业大学", "中国传媒大学", "中央财经大学",
-    "对外经济贸易大学", "北京中医药大学", "北京外国语大学", "中国政法大学",
-    "华北电力大学", "中国矿业大学(北京)", "中国石油大学(北京)", "中国地质大学(北京)",
-    "复旦大学", "上海交通大学", "同济大学", "华东师范大学", "上海财经大学",
-    "上海外国语大学", "东华大学", "华东理工大学", "上海大学",
-    "南京大学", "东南大学", "南京航空航天大学", "南京理工大学", "河海大学",
-    "南京农业大学", "中国药科大学", "南京师范大学", "苏州大学", "江南大学",
-    "中国矿业大学",
-    "浙江大学", "中国科学技术大学", "合肥工业大学", "安徽大学",
-    "厦门大学", "福州大学",
-    "山东大学", "中国海洋大学", "中国石油大学(华东)",
-    "武汉大学", "华中科技大学", "中南财经政法大学", "华中师范大学",
-    "华中农业大学", "中国地质大学(武汉)", "武汉理工大学",
-    "中南大学", "湖南大学", "湖南师范大学", "国防科技大学",
-    "中山大学", "华南理工大学", "暨南大学", "华南师范大学",
-    "四川大学", "电子科技大学", "西南交通大学", "西南财经大学",
-    "重庆大学", "西南大学",
-    "西安交通大学", "西北工业大学", "西安电子科技大学", "长安大学",
-    "西北农林科技大学", "陕西师范大学",
-    "兰州大学", "西北大学",
-    "哈尔滨工业大学", "吉林大学", "东北大学", "大连理工大学",
-    "东北师范大学", "哈尔滨工程大学", "延边大学",
-    "天津大学", "南开大学",
-    "郑州大学", "河南大学",
-    "云南大学", "贵州大学", "广西大学", "海南大学",
-    "新疆大学", "石河子大学", "西藏大学", "内蒙古大学", "宁夏大学", "青海大学",
-    "太原理工大学", "南昌大学",
-    "中央美术学院", "中国美术学院", "西安美术学院", "广州美术学院",
-    "四川美术学院", "天津美术学院", "鲁迅美术学院", "湖北美术学院",
-]
-
-
-@router.post("/bootstrap-schools", status_code=200)
-def bootstrap_schools(_admin: AdminUserDep, db: DbSessionDep) -> dict[str, int]:
-    """Seed the schools table from the preset list. Idempotent."""
-    created = 0
-    for name in CHINA_UNIVERSITIES:
-        exists = db.scalar(select(School.id).where(School.name == name))
-        if exists is None:
-            db.add(School(name=name, country="CN"))
-            created += 1
-    db.commit()
-    return {"created": created, "total": len(CHINA_UNIVERSITIES)}
+@router.get("/university-search", response_model=list[UniversityResponse])
+def search_university_directory(
+    _admin: AdminUserDep,
+    db: DbSessionDep,
+    q: str = Query(min_length=1, description="Name search"),
+    limit: int = Query(default=20, ge=1, le=50),
+) -> list[UniversityDirectory]:
+    """Search the global university directory (for creating schools from it)."""
+    stmt = (
+        select(UniversityDirectory)
+        .where(UniversityDirectory.name.ilike(f"%{q}%"))
+        .order_by(UniversityDirectory.name)
+        .limit(limit)
+    )
+    return list(db.scalars(stmt).all())
 
 
 # ── Layer 1: Schools ─────────────────────────────────────────────────────────
+
+@router.post("/schools", response_model=SchoolResponse, status_code=201)
+def create_school(_admin: AdminUserDep, db: DbSessionDep, payload: SchoolCreate) -> School:
+    """Create a school, optionally linked to a UniversityDirectory entry."""
+    existing = db.scalar(select(School.id).where(School.name == payload.name))
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="School with this name already exists")
+    country = payload.country
+    if payload.university_id is not None:
+        uni = db.get(UniversityDirectory, payload.university_id)
+        if uni is None:
+            raise HTTPException(status_code=404, detail="University not found in directory")
+        if not country:
+            country = uni.country or uni.alpha_two_code
+    school = School(name=payload.name, university_id=payload.university_id, country=country)
+    db.add(school)
+    db.commit()
+    db.refresh(school)
+    return school
+
+@router.delete("/schools/{school_id}", status_code=204)
+def delete_school(_admin: AdminUserDep, db: DbSessionDep, school_id: UUID) -> None:
+    """Delete a school and all its template groups."""
+    school = db.get(School, school_id)
+    if school is None:
+        raise HTTPException(status_code=404, detail="School not found")
+    if not _can_manage_school(db, _admin, school_id):
+        raise HTTPException(status_code=403, detail="No permission to manage this school")
+    db.delete(school)
+    db.commit()
 
 @router.get("/schools", response_model=list[SchoolResponse])
 def list_schools(_admin: AdminUserDep, db: DbSessionDep, q: str | None = None) -> list[School]:

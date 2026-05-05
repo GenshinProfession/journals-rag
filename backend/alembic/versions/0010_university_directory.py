@@ -17,6 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # 1. Create the university directory table
     op.create_table(
         "university_directory",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
@@ -31,6 +32,25 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
     )
 
+    # 2. Link schools → university_directory (optional FK)
+    op.add_column("schools", sa.Column(
+        "university_id", postgresql.UUID(as_uuid=True), nullable=True,
+    ))
+    op.create_index("ix_schools_university_id", "schools", ["university_id"])
+    op.create_foreign_key(
+        "fk_schools_university_id", "schools", "university_directory",
+        ["university_id"], ["id"], ondelete="SET NULL",
+    )
+
+    # 3. Widen schools.name (160→300) and schools.country (10→120) to match directory data
+    op.alter_column("schools", "name", type_=sa.String(300), existing_type=sa.String(160))
+    op.alter_column("schools", "country", type_=sa.String(120), existing_type=sa.String(10))
+
 
 def downgrade() -> None:
+    op.alter_column("schools", "country", type_=sa.String(10), existing_type=sa.String(120))
+    op.alter_column("schools", "name", type_=sa.String(160), existing_type=sa.String(300))
+    op.drop_constraint("fk_schools_university_id", "schools", type_="foreignkey")
+    op.drop_index("ix_schools_university_id", table_name="schools")
+    op.drop_column("schools", "university_id")
     op.drop_table("university_directory")

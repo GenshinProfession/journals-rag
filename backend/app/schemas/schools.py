@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 class SchoolResponse(BaseModel):
     id: UUID
     name: str
+    university_id: UUID | None = None
     country: str | None = None
     logo_url: str | None = None
     enabled: bool
@@ -15,7 +16,15 @@ class SchoolResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class SchoolCreate(BaseModel):
+    university_id: UUID | None = None
+    name: str = Field(max_length=300)
+    country: str | None = Field(default=None, max_length=120)
+
+
 class SchoolUpdate(BaseModel):
+    name: str | None = Field(default=None, max_length=300)
+    country: str | None = Field(default=None, max_length=120)
     enabled: bool | None = None
     logo_url: str | None = None
 

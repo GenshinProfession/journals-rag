@@ -10,12 +10,16 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class School(UUIDPrimaryKeyMixin, TimestampMixin, Base):
-    """Top-level school entity. System-preset, not user-created."""
+    """School entity with template configuration. Optionally linked to UniversityDirectory."""
 
     __tablename__ = "schools"
 
-    name: Mapped[str] = mapped_column(String(160), unique=True, index=True)
-    country: Mapped[str | None] = mapped_column(String(10))
+    name: Mapped[str] = mapped_column(String(300), unique=True, index=True)
+    university_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("university_directory.id", ondelete="SET NULL"),
+        nullable=True, index=True,
+    )
+    country: Mapped[str | None] = mapped_column(String(120))
     logo_url: Mapped[str | None] = mapped_column(String(500))
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     is_pinned: Mapped[bool] = mapped_column(Boolean, default=False, index=True)

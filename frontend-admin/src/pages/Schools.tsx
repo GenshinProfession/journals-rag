@@ -16,8 +16,14 @@ import { apiFetch } from '../api/client';
 /* ── types ──────────────────────────────────────────────────────────── */
 
 type School = {
-  id: string; name: string; country: string | null;
+  id: string; name: string; university_id: string | null; country: string | null;
   logo_url: string | null; enabled: boolean; is_pinned: boolean;
+};
+
+type UniversityHit = {
+  id: string; name: string; country: string | null;
+  alpha_two_code: string | null; state_province: string | null;
+  domains: string[] | null; web_pages: string[] | null;
 };
 
 type TemplateGroup = {
@@ -64,6 +70,13 @@ export function Schools() {
   const [addYearOpen, setAddYearOpen] = useState(false);
   const [newYear, setNewYear] = useState(new Date().getFullYear());
 
+  // Add-school modal (university directory search)
+  const [addSchoolOpen, setAddSchoolOpen] = useState(false);
+  const [uniSearch, setUniSearch] = useState('');
+  const [uniResults, setUniResults] = useState<UniversityHit[]>([]);
+  const [uniLoading, setUniLoading] = useState(false);
+  const [customName, setCustomName] = useState('');
+
   /* ── queries ────────────────────────────────────────────────────── */
 
   const schoolsQ = useQuery({
@@ -106,13 +119,37 @@ export function Schools() {
 
   /* ── mutations ──────────────────────────────────────────────────── */
 
-  const bootstrapMut = useMutation({
-    mutationFn: () => apiFetch('/api/admin/schools/bootstrap-schools', { method: 'POST' }),
-    onSuccess: (data: any) => {
+  const addSchoolMut = useMutation({
+    mutationFn: (body: { name: string; university_id?: string; country?: string }) =>
+      apiFetch('/api/admin/schools/schools', { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'schools'] });
-      message.success(`初始化完成：新增 ${data.created} 所学校`);
+      message.success('学校已添加');
+      setAddSchoolOpen(false);
+      setUniSearch(''); setUniResults([]); setCustomName('');
+    },
+    onError: (e: Error) => message.error(e.message?.includes('409') ? '该学校已存在' : e.message),
+  });
+
+  const deleteSchoolMut = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/admin/schools/schools/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'schools'] });
+      if (selectedSchool) setSelectedSchool(null);
+      message.success('已删除');
     },
   });
+
+  // University directory search
+  const searchUniversities = async (q: string) => {
+    if (!q.trim()) { setUniResults([]); return; }
+    setUniLoading(true);
+    try {
+      const data = await apiFetch(`/api/admin/schools/university-search?q=${encodeURIComponent(q)}&limit=20`) as UniversityHit[];
+      setUniResults(data);
+    } catch { setUniResults([]); }
+    setUniLoading(false);
+  };
 
   const toggleSchoolMut = useMutation({
     mutationFn: (s: School) => apiFetch(`/api/admin/schools/schools/${s.id}`, {
@@ -308,9 +345,9 @@ export function Schools() {
               value={search} onChange={e => setSearch(e.target.value)}
               allowClear style={{ borderRadius: 20, height: 36 }}
             />
-            <Tooltip title="从预置列表初始化学校（幂等）">
-              <Button onClick={() => bootstrapMut.mutate()} loading={bootstrapMut.isPending} size="small" style={{ height: 36 }}>
-                初始化
+            <Tooltip title="从高校目录搜索添加学校">
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddSchoolOpen(true)} size="small" style={{ height: 36 }}>
+                添加
               </Button>
             </Tooltip>
           </div>
@@ -320,7 +357,7 @@ export function Schools() {
           <div style={{ maxHeight: 'calc(100vh - 260px)', overflowY: 'auto' }}>
             <List
               dataSource={filteredSchools}
-              locale={{ emptyText: <Empty description="暂无学校，请先初始化" /> }}
+              locale={{ emptyText: <Empty description="暂无学校，点击上方「添加」按钮" /> }}
               renderItem={s => (
                 <List.Item
                   key={s.id}
@@ -346,6 +383,11 @@ export function Schools() {
                           onClick={e => { e.stopPropagation(); toggleSchoolMut.mutate(s); }}
                         />
                       </Tooltip>
+                      <Popconfirm title="删除该学校？（模板组将一并删除）" onConfirm={e => { e?.stopPropagation(); deleteSchoolMut.mutate(s.id); }} onCancel={e => e?.stopPropagation()} okText="删除" cancelText="取消">
+                        <Tooltip title="删除">
+                          <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={e => e.stopPropagation()} />
+                        </Tooltip>
+                      </Popconfirm>
                     </Space>
                   }
                 >
@@ -556,6 +598,84 @@ export function Schools() {
             autoFocus
           />
         </div>
+      </Modal>
+
+      {/* ── Modal: Add School from University Directory ─────────── */}
+      <Modal
+        title="从高校目录添加学校"
+        open={addSchoolOpen}
+        onCancel={() => { setAddSchoolOpen(false); setUniSearch(''); setUniResults([]); setCustomName(''); }}
+        footer={null}
+        width={560} destroyOnClose
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Input.Search
+            placeholder="搜索高校名称（如: 北京大学, Harvard …）"
+            value={uniSearch}
+            onChange={e => setUniSearch(e.target.value)}
+            onSearch={searchUniversities}
+            loading={uniLoading}
+            enterButton="搜索"
+            allowClear
+            autoFocus
+            style={{ marginBottom: 8 }}
+          />
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            从全球高校目录搜索，选择后添加为模板学校。若目录中没有，可在下方手动输入。
+          </Typography.Text>
+        </div>
+
+        {uniResults.length > 0 && (
+          <div style={{ maxHeight: 260, overflowY: 'auto', marginBottom: 16 }}>
+            <List
+              size="small"
+              dataSource={uniResults}
+              renderItem={(u: UniversityHit) => (
+                <List.Item
+                  key={u.id}
+                  style={{ cursor: 'pointer', padding: '8px 12px' }}
+                  onClick={() => addSchoolMut.mutate({ name: u.name, university_id: u.id, country: u.country || u.alpha_two_code || undefined })}
+                  extra={
+                    <Button type="link" size="small" loading={addSchoolMut.isPending}>
+                      添加
+                    </Button>
+                  }
+                >
+                  <List.Item.Meta
+                    title={<span style={{ fontSize: 13, fontWeight: 500 }}>{u.name}</span>}
+                    description={
+                      <span style={{ fontSize: 12, color: '#9aa0a6' }}>
+                        {[u.alpha_two_code, u.country, u.state_province].filter(Boolean).join(' · ')}
+                        {u.domains?.length ? ` — ${u.domains[0]}` : ''}
+                      </span>
+                    }
+                  />
+                </List.Item>
+              )}
+            />
+          </div>
+        )}
+
+        <Card size="small" style={{ background: '#f8f9fa' }}>
+          <Typography.Text strong style={{ fontSize: 13 }}>手动添加</Typography.Text>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <Input
+              placeholder="学校名称"
+              value={customName}
+              onChange={e => setCustomName(e.target.value)}
+              onPressEnter={() => customName.trim() && addSchoolMut.mutate({ name: customName.trim() })}
+              style={{ flex: 1 }}
+            />
+            <Button
+              type="primary"
+              disabled={!customName.trim()}
+              loading={addSchoolMut.isPending}
+              onClick={() => addSchoolMut.mutate({ name: customName.trim() })}
+            >
+              添加
+            </Button>
+          </div>
+        </Card>
       </Modal>
     </div>
   );
