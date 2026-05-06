@@ -217,6 +217,19 @@ export function TemplateEditor() {
     }
   }, [citationQ.data]);
 
+  /* ── validation ──────────────────────────────────────────────────── */
+
+  const structureReady = sections.length > 0;
+  const formatReady = Object.keys(formatData).length > 0;
+  const citationReady = !!citationType && citationExamples.some(e => e.trim()) && citationRules.some(r => r.trim());
+  const allReady = structureReady && formatReady && citationReady;
+
+  const missingParts = [
+    ...(!structureReady ? ['结构模板'] : []),
+    ...(!formatReady ? ['格式规则'] : []),
+    ...(!citationReady ? ['参考文献模板'] : []),
+  ];
+
   /* ── unified save ───────────────────────────────────────────────── */
 
   const handleSaveAll = async () => {
@@ -418,14 +431,17 @@ export function TemplateEditor() {
         </div>
         <Space>
           {dirty && <Tag color="orange">未保存</Tag>}
-          <Button
-            type="primary" size="large"
-            icon={<SaveOutlined />}
-            loading={saving}
-            onClick={handleSaveAll}
-          >
-            保存全部
-          </Button>
+          <Tooltip title={!allReady ? `请先完成：${missingParts.join('、')}` : ''} placement="bottomRight">
+            <Button
+              type="primary" size="large"
+              icon={<SaveOutlined />}
+              loading={saving}
+              disabled={!allReady}
+              onClick={handleSaveAll}
+            >
+              保存全部
+            </Button>
+          </Tooltip>
         </Space>
       </div>
 

@@ -89,7 +89,7 @@ def create_literature(
         citation_key=payload.citation_key,
         folder=payload.folder,
         source="manual",
-        rag_status="pending",
+        rag_status="review_passed",
     )
     db.add(lit)
     db.commit()
@@ -129,7 +129,7 @@ async def upload_literature(
             project_id=project_id,
             title=file_title,
             source="upload",
-            rag_status="pending",
+            rag_status="review_passed",
         )
         db.add(lit)
         db.flush()

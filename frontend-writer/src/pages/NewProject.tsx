@@ -66,8 +66,7 @@ export function NewProject() {
     createMut.mutate({
       degree_level: values.degree_level,
       discipline: values.discipline?.trim(),
-      title: values.title?.trim() || null,
-      topic: values.topic?.trim() || null,
+      title: values.title?.trim(),
       school_id: selectedGroupId || null,
     });
   };
@@ -187,11 +186,8 @@ export function NewProject() {
           <Form.Item name="discipline" label="学科 / 方向" rules={[{ required: true, message: '请填写学科或方向关键词' }]}>
             <Input placeholder="如：教育学、计算机科学与技术" autoFocus />
           </Form.Item>
-          <Form.Item name="title" label="论文题目（可选）">
-            <Input placeholder="可后续在写作流中再改" />
-          </Form.Item>
-          <Form.Item name="topic" label="主题说明（可选）">
-            <Input.TextArea rows={4} placeholder="研究问题、方法或导师要求等，便于审核与大纲生成" />
+          <Form.Item name="title" label="论文题目" rules={[{ required: true, message: '请填写论文题目' }]}>
+            <Input placeholder="请输入论文题目" />
           </Form.Item>
           {createMut.isError && (
             <Typography.Text type="danger" style={{ display: 'block', marginBottom: 16 }}>

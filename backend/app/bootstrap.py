@@ -52,32 +52,46 @@ def ensure_demo_model() -> None:
     ]
     demo_models = [
         {
-            "display_name": "DeepSeek Chat",
-            "provider_model": "deepseek-chat",
+            "display_name": "Gemini 3.1 Pro Preview",
+            "provider_model": "gemini-3.1-pro-preview",
             "endpoint_type": "openai_chat",
-            "context_window": 128000,
+            "context_window": 1_000_000,
             "sort_order": 10,
         },
         {
-            "display_name": "GPT-4o",
-            "provider_model": "gpt-4o",
+            "display_name": "Gemini 3 Flash Preview",
+            "provider_model": "gemini-3-flash-preview",
             "endpoint_type": "openai_chat",
-            "context_window": 128000,
+            "context_window": 1_000_000,
             "sort_order": 20,
         },
         {
-            "display_name": "Claude Sonnet 4",
-            "provider_model": "claude-sonnet-4-20250514",
+            "display_name": "DeepSeek V4 Flash",
+            "provider_model": "deepseek-v4-flash",
             "endpoint_type": "openai_chat",
-            "context_window": 200000,
+            "context_window": 128000,
             "sort_order": 30,
         },
         {
-            "display_name": "GPT-4o Mini",
-            "provider_model": "gpt-4o-mini",
+            "display_name": "DeepSeek V4 Pro",
+            "provider_model": "deepseek-v4-pro",
             "endpoint_type": "openai_chat",
             "context_window": 128000,
             "sort_order": 40,
+        },
+        {
+            "display_name": "GPT-5.5 Pro",
+            "provider_model": "gpt-5.5-pro",
+            "endpoint_type": "openai_chat",
+            "context_window": 256000,
+            "sort_order": 50,
+        },
+        {
+            "display_name": "GPT-5.5",
+            "provider_model": "gpt-5.5",
+            "endpoint_type": "openai_chat",
+            "context_window": 256000,
+            "sort_order": 60,
         },
     ]
     with SessionLocal() as db:

@@ -131,6 +131,7 @@ export function Wizard() {
 
   /* ── Local state ─────────────────────────────────────────────────── */
   const [panelTab, setPanelTab] = useState<PanelTab>('literature');
+  const [viewStep, setViewStep] = useState<number | null>(null);
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const [chapterDrafts, setChapterDrafts] = useState<Record<string, string>>({});
   const [addChapterTitle, setAddChapterTitle] = useState('');
@@ -139,6 +140,9 @@ export function Wizard() {
 
   // Model selection
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+
+  // Topic state
+  const [topicText, setTopicText] = useState(project?.topic ?? '');
 
   // Literature state
   const [litTitle, setLitTitle] = useState('');
@@ -159,7 +163,12 @@ export function Wizard() {
     setLitTitle(''); setBodyText(''); setUploadFiles([]); setLiteratureId('');
     setDocumentId(''); setChunkPreview([]); setSelectedChunkIds([]);
     setLitSearchQuery(''); setLitSearchResults([]);
+    setTopicText(project?.topic ?? '');
   }, [projectId]);
+
+  useEffect(() => {
+    if (project?.topic && !topicText) setTopicText(project.topic);
+  }, [project?.topic]);
 
   // Auto-select first chapter when chapters load
   useEffect(() => {
@@ -185,6 +194,14 @@ export function Wizard() {
   const selectedLiterature = litData?.items?.find(x => x.id === literatureId);
 
   /* ── Mutations ───────────────────────────────────────────────────── */
+  const saveTopic = useMutation({
+    mutationFn: () => apiFetch(`/api/projects/${projectId}`, {
+      method: 'PATCH', body: JSON.stringify({ topic: topicText.trim() }),
+    }),
+    onSuccess: () => { ok('主题说明已保存'); qc.invalidateQueries({ queryKey: ['writer', 'projects'] }); setViewStep(1); },
+    onError: fail,
+  });
+
   const createLiterature = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/literature`, {
       method: 'POST', body: JSON.stringify({ title: litTitle, body_text: bodyText, abstract: bodyText.slice(0, 2000) }),
@@ -335,13 +352,16 @@ export function Wizard() {
 
   if (!projectId) return <Navigate to="/" replace />;
 
-  const currentStep = (() => {
-    if (litCount < minRequired) return 0;
+  const progressStep = (() => {
+    if (!project?.topic) return 0;
+    if (litCount < minRequired) return 1;
     const hasIndexed = litData?.items?.some(l => l.rag_status === 'indexed');
-    if (!hasIndexed) return 1;
-    if (!chapters.length) return 2;
-    return 3;
+    if (!hasIndexed) return 2;
+    if (!chapters.length) return 3;
+    return 4;
   })();
+
+  const activeStep = viewStep ?? progressStep;
 
   const activeContent = activeChapter ? (chapterDrafts[activeChapter.id] ?? activeChapter.content ?? '') : '';
   const setActiveContent = (v: string) => { if (activeChapter) setChapterDrafts(prev => ({ ...prev, [activeChapter.id]: v })); };
@@ -403,12 +423,18 @@ export function Wizard() {
 
       {/* ── Steps bar ────────────────────────────────────────────────── */}
       <div style={{ padding: '12px 0', flexShrink: 0 }}>
-        <Steps current={currentStep} size="small" items={[
-          { title: `文献 (${litCount}/${minRequired})` },
-          { title: '审核入库' },
-          { title: '大纲' },
-          { title: '写作' },
-        ]} />
+        {(() => {
+          const stepTitles = ['主题说明', `文献 (${litCount}/${minRequired})`, '审核入库', '大纲', '写作'];
+          const goTo = (i: number) => { setViewStep(i); if (i <= 2) setPanelTab('literature'); else setPanelTab('writing'); };
+          return (
+            <Steps current={activeStep} size="small" items={stepTitles.map((t, i) => ({
+              title: <span onClick={() => goTo(i)} style={{ cursor: 'pointer' }}>{t}</span>,
+              status: i === activeStep ? 'process' : i < progressStep ? 'finish' : 'wait' as 'process' | 'finish' | 'wait',
+              style: { cursor: 'pointer' },
+              onClick: () => goTo(i),
+            }))} />
+          );
+        })()}
       </div>
 
       {/* ── Main split panel ─────────────────────────────────────────── */}
@@ -416,29 +442,31 @@ export function Wizard() {
 
         {/* LEFT: Editor / Literature */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid #e8eaed' }}>
-          {/* Tab bar */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #e8eaed', flexShrink: 0 }}>
-            {(['literature', 'writing'] as PanelTab[]).map(t => (
-              <button
-                key={t}
-                onClick={() => setPanelTab(t)}
-                style={{
-                  flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
-                  background: panelTab === t ? '#fff' : '#f8f9fa',
-                  color: panelTab === t ? '#1a73e8' : '#5f6368',
-                  borderBottom: panelTab === t ? '2px solid #1a73e8' : '2px solid transparent',
-                }}
-              >
-                {t === 'literature' ? `文献准备 (${litCount})` : '章节编辑'}
-              </button>
-            ))}
-          </div>
-
           {/* Content area */}
           <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
 
-            {/* ── LITERATURE TAB ─────────────────────────────────────── */}
-            {panelTab === 'literature' && (
+            {/* ── STEP 0: 主题说明 ─────────────────────────────────── */}
+            {activeStep === 0 && (
+              <Card size="small">
+                <Title level={5} style={{ margin: '0 0 8px' }}>主题说明</Title>
+                <Typography.Paragraph type="secondary" style={{ fontSize: 13, marginBottom: 12 }}>
+                  请填写研究问题、方法或导师要求等，便于后续审核与大纲生成。
+                </Typography.Paragraph>
+                <Input.TextArea
+                  rows={6}
+                  value={topicText}
+                  onChange={e => setTopicText(e.target.value)}
+                  placeholder="例如：基于深度学习的图像分类研究，导师要求使用 Transformer 架构..."
+                  style={{ marginBottom: 12 }}
+                />
+                <Button type="primary" loading={saveTopic.isPending} disabled={!topicText.trim()} onClick={() => saveTopic.mutate()}>
+                  保存并继续
+                </Button>
+              </Card>
+            )}
+
+            {/* ── STEP 1: 文献管理 ─────────────────────────────────── */}
+            {activeStep === 1 && (
               <>
                 {!canStartWriting && (
                   <Alert type="warning" showIcon style={{ marginBottom: 12 }}
@@ -448,20 +476,21 @@ export function Wizard() {
                 )}
 
                 <Collapse size="small" style={{ marginBottom: 12 }} items={[{
+                  key: 'upload', label: '上传文件',
+                  children: (
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                      <input type="file" multiple accept=".pdf,.txt,.md,.text" onChange={e => setUploadFiles(Array.from(e.target.files ?? []))} />
+                      {uploadFiles.length > 0 && <span style={{ fontSize: 12, color: '#888' }}>已选 {uploadFiles.length} 个文件</span>}
+                      <Button type="primary" icon={<UploadOutlined />} disabled={!uploadFiles.length} loading={uploadLiterature.isPending} onClick={() => uploadLiterature.mutate()}>上传 {uploadFiles.length > 0 ? `(${uploadFiles.length})` : ''}</Button>
+                    </Space>
+                  ),
+                }, {
                   key: 'add', label: '手动添加文献',
                   children: (
                     <Form layout="vertical" onFinish={() => { if (!litTitle.trim()) { msgApi.warning('请填写文献标题'); return; } createLiterature.mutate(); }}>
                       <Form.Item label="文献标题"><Input value={litTitle} onChange={e => setLitTitle(e.target.value)} placeholder="参考论文标题" /></Form.Item>
                       <Form.Item label="正文 / 摘要"><Input.TextArea rows={3} value={bodyText} onChange={e => setBodyText(e.target.value)} placeholder="粘贴 PDF 抽取文本或摘要" /></Form.Item>
-                      <Space>
-                        <Button type="primary" htmlType="submit" loading={createLiterature.isPending} icon={<FileTextOutlined />}>保存</Button>
-                      </Space>
-                      <Divider plain style={{ margin: '12px 0 8px' }}>或上传文件（支持多选）</Divider>
-                      <Space direction="vertical" style={{ width: '100%' }}>
-                        <input type="file" multiple accept=".pdf,.txt,.md,.text" onChange={e => setUploadFiles(Array.from(e.target.files ?? []))} />
-                        {uploadFiles.length > 0 && <span style={{ fontSize: 12, color: '#888' }}>已选 {uploadFiles.length} 个文件</span>}
-                        <Button icon={<UploadOutlined />} disabled={!uploadFiles.length} loading={uploadLiterature.isPending} onClick={() => uploadLiterature.mutate()}>上传 {uploadFiles.length > 0 ? `(${uploadFiles.length})` : ''}</Button>
-                      </Space>
+                      <Button type="primary" htmlType="submit" loading={createLiterature.isPending} icon={<FileTextOutlined />}>保存</Button>
                     </Form>
                   ),
                 }]} />
@@ -473,9 +502,13 @@ export function Wizard() {
                 <Table dataSource={litData?.items ?? []} columns={litTableCols} rowKey="id" size="small" pagination={false}
                   locale={{ emptyText: <Empty description="暂无文献" /> }} scroll={{ y: 300 }}
                 />
+              </>
+            )}
 
-                {/* Review & chunk */}
-                <Card size="small" title="审核与入库" style={{ marginTop: 12 }}>
+            {/* ── STEP 2: 审核入库 ─────────────────────────────────── */}
+            {activeStep === 2 && (
+              <>
+                <Card size="small" title="审核与入库">
                   <Select value={literatureId || undefined} onChange={setLiteratureId} placeholder="选择文献" allowClear style={{ width: '100%', marginBottom: 8 }}>
                     {litData?.items?.map(lit => <Select.Option key={lit.id} value={lit.id}>{lit.title} · <Tag>{lit.rag_status}</Tag></Select.Option>)}
                   </Select>
@@ -495,11 +528,15 @@ export function Wizard() {
                     </div>
                   )}
                 </Card>
+
+                <Table dataSource={litData?.items ?? []} columns={litTableCols} rowKey="id" size="small" pagination={false} style={{ marginTop: 12 }}
+                  locale={{ emptyText: <Empty description="暂无文献" /> }} scroll={{ y: 240 }}
+                />
               </>
             )}
 
-            {/* ── WRITING TAB ────────────────────────────────────────── */}
-            {panelTab === 'writing' && (
+            {/* ── STEP 3 & 4: 大纲 & 写作 ─────────────────────────── */}
+            {activeStep >= 3 && (
               <>
                 {!activeChapter ? (
                   <div style={{ textAlign: 'center', paddingTop: 60 }}>
