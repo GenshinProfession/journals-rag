@@ -52,31 +52,31 @@ def ensure_demo_model() -> None:
     ]
     demo_models = [
         {
-            "display_name": "DeepSeek V4 Pro",
-            "provider_model": "deepseek-v4-pro",
+            "display_name": "DeepSeek Chat",
+            "provider_model": "deepseek-chat",
             "endpoint_type": "openai_chat",
             "context_window": 128000,
             "sort_order": 10,
         },
         {
-            "display_name": "GPT-5.5",
-            "provider_model": "gpt-5.5",
+            "display_name": "GPT-4o",
+            "provider_model": "gpt-4o",
             "endpoint_type": "openai_chat",
-            "context_window": 256000,
+            "context_window": 128000,
             "sort_order": 20,
         },
         {
-            "display_name": "Claude Opus 4.7",
-            "provider_model": "claude-opus-4-7",
+            "display_name": "Claude Sonnet 4",
+            "provider_model": "claude-sonnet-4-20250514",
             "endpoint_type": "openai_chat",
-            "context_window": 1_000_000,
+            "context_window": 200000,
             "sort_order": 30,
         },
         {
-            "display_name": "Gemini 3.1 Pro Preview",
-            "provider_model": "gemini-3.1-pro-preview",
-            "endpoint_type": "gemini_generate_content",
-            "context_window": 1_000_000,
+            "display_name": "GPT-4o Mini",
+            "provider_model": "gpt-4o-mini",
+            "endpoint_type": "openai_chat",
+            "context_window": 128000,
             "sort_order": 40,
         },
     ]

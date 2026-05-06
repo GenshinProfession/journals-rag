@@ -39,7 +39,14 @@ type WritingReadiness = { literature_count: number; indexed_count: number; min_r
 type SearchResult = { title: string; authors: string; year: number; journal: string; abstract: string; doi: string };
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
-function requireModel(models: ModelRow[] | undefined, scenario: string): string {
+function findModel(models: ModelRow[] | undefined, scenario: string, selectedId: string | null): string {
+  if (selectedId) {
+    const sel = (models ?? []).find(m => m.id === selectedId);
+    if (sel) {
+      const a = sel.allowed_scenarios ?? [];
+      if (a.length === 0 || a.includes(scenario)) return sel.id;
+    }
+  }
   const found = (models ?? []).find(m => {
     const a = m.allowed_scenarios ?? [];
     return a.length === 0 || a.includes(scenario);
@@ -130,6 +137,9 @@ export function Wizard() {
   const [addChapterLevel, setAddChapterLevel] = useState(1);
   const [showAddChapter, setShowAddChapter] = useState(false);
 
+  // Model selection
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+
   // Literature state
   const [litTitle, setLitTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
@@ -214,7 +224,7 @@ export function Wizard() {
 
   const review = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/reference/review`, {
-      method: 'POST', body: JSON.stringify({ literature_id: literatureId, model_id: requireModel(modelsQ.data, 'reference_review') }),
+      method: 'POST', body: JSON.stringify({ literature_id: literatureId, model_id: findModel(modelsQ.data, 'reference_review', selectedModelId) }),
     }) as Promise<{ passed: boolean; overall_score: number }>,
     onSuccess: (res) => { ok(`审核${res.passed ? '通过' : '未通过'}，总分 ${res.overall_score}`); refreshLit(); },
     onError: fail,
@@ -222,7 +232,7 @@ export function Wizard() {
 
   const chunk = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/rag/documents/${literatureId}/chunk`, {
-      method: 'POST', body: JSON.stringify({ literature_id: literatureId, model_id: requireModel(modelsQ.data, 'rag'), text_override: bodyText || undefined }),
+      method: 'POST', body: JSON.stringify({ literature_id: literatureId, model_id: findModel(modelsQ.data, 'rag', selectedModelId), text_override: bodyText || undefined }),
     }) as Promise<ChunkResponse>,
     onSuccess: (res) => { setDocumentId(res.document_id); setChunkPreview(res.preview); setSelectedChunkIds(res.preview.map(c => c.id)); ok(`已生成 ${res.chunk_count} 个预切块`); },
     onError: fail,
@@ -238,7 +248,7 @@ export function Wizard() {
 
   const outline = useMutation({
     mutationFn: () => apiFetch(`/api/projects/${projectId}/outline/generate`, {
-      method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'outline') }),
+      method: 'POST', body: JSON.stringify({ model_id: findModel(modelsQ.data, 'outline', selectedModelId) }),
     }),
     onSuccess: () => { ok('大纲已生成'); refreshChapters(); qc.invalidateQueries({ queryKey: ['writer', 'projects'] }); },
     onError: fail,
@@ -259,7 +269,7 @@ export function Wizard() {
 
   const generateChapter = useMutation({
     mutationFn: (chapterId: string) => apiFetch(`/api/projects/${projectId}/chapters/${chapterId}/generate`, {
-      method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'chapter_write'), target_words: 1200 }),
+      method: 'POST', body: JSON.stringify({ model_id: findModel(modelsQ.data, 'chapter_write', selectedModelId), target_words: 1200 }),
     }),
     onSuccess: () => { ok('章节正文已生成'); refreshChapters(); },
     onError: fail,
@@ -275,7 +285,7 @@ export function Wizard() {
 
   const reviewChapter = useMutation({
     mutationFn: (id: string) => apiFetch(`/api/projects/${projectId}/chapters/${id}/review`, {
-      method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'chapter_review') }),
+      method: 'POST', body: JSON.stringify({ model_id: findModel(modelsQ.data, 'chapter_review', selectedModelId) }),
     }),
     onSuccess: () => { ok('审校完成'); refreshChapters(); },
     onError: fail,
@@ -283,7 +293,7 @@ export function Wizard() {
 
   const rewriteChapter = useMutation({
     mutationFn: (id: string) => apiFetch(`/api/projects/${projectId}/chapters/${id}/rewrite`, {
-      method: 'POST', body: JSON.stringify({ model_id: requireModel(modelsQ.data, 'chapter_rewrite') }),
+      method: 'POST', body: JSON.stringify({ model_id: findModel(modelsQ.data, 'chapter_rewrite', selectedModelId) }),
     }),
     onSuccess: () => { ok('已改写'); refreshChapters(); },
     onError: fail,
@@ -372,6 +382,15 @@ export function Wizard() {
           <Tag>{project?.status ?? ''}</Tag>
         </div>
         <Space size="small">
+          <Select
+            style={{ width: 180 }}
+            placeholder="选择模型"
+            value={selectedModelId}
+            onChange={v => setSelectedModelId(v)}
+            options={(modelsQ.data ?? []).map(m => ({ label: m.display_name, value: m.id }))}
+            allowClear
+            size="small"
+          />
           <Dropdown menu={{ items: [
             { key: 'md', label: 'Markdown', icon: <DownloadOutlined />, onClick: () => exportDoc.mutate('markdown') },
             { key: 'tex', label: 'LaTeX', icon: <DownloadOutlined />, onClick: () => exportDoc.mutate('latex') },
