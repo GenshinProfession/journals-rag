@@ -103,42 +103,54 @@ async def upload_literature(
     db: DbSessionDep,
     settings: SettingsDep,
     project_id: UUID,
-    title: str = Form(...),
-    file: UploadFile = File(...),
+    title: str = Form(""),
+    files: list[UploadFile] = File(...),
 ) -> dict[str, object]:
     _require_project(db, writer, project_id)
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="missing_filename")
-    suffix = Path(file.filename).suffix.lower()
-    if suffix not in settings.upload_allowed_extensions:
-        raise HTTPException(status_code=400, detail="unsupported_file_type")
+    results: list[dict[str, str]] = []
+    errors: list[str] = []
 
-    lit = Literature(
-        project_id=project_id,
-        title=title,
-        source="upload",
-        rag_status="pending",
-    )
-    db.add(lit)
-    db.flush()
+    for file in files:
+        if not file.filename:
+            errors.append("missing_filename")
+            continue
+        suffix = Path(file.filename).suffix.lower()
+        if suffix not in settings.upload_allowed_extensions:
+            errors.append(f"{file.filename}: unsupported_file_type")
+            continue
 
-    upload_root = Path(settings.upload_root).resolve()
-    target_dir = upload_root / str(project_id) / str(lit.id)
-    target_dir.mkdir(parents=True, exist_ok=True)
+        data = await file.read()
+        if len(data) > settings.upload_max_bytes:
+            errors.append(f"{file.filename}: file_too_large (>{settings.upload_max_bytes // (1024*1024)}MB)")
+            continue
 
-    fname = _safe_filename(file.filename)
-    dest_abs = target_dir / fname
+        file_title = title.strip() if (title.strip() and len(files) == 1) else Path(file.filename).stem
+        lit = Literature(
+            project_id=project_id,
+            title=file_title,
+            source="upload",
+            rag_status="pending",
+        )
+        db.add(lit)
+        db.flush()
 
-    data = await file.read()
-    if len(data) > settings.upload_max_bytes:
-        raise HTTPException(status_code=413, detail="file_too_large")
-    dest_abs.write_bytes(data)
+        upload_root = Path(settings.upload_root).resolve()
+        target_dir = upload_root / str(project_id) / str(lit.id)
+        target_dir.mkdir(parents=True, exist_ok=True)
 
-    lit.file_path = f"{project_id}/{lit.id}/{fname}"
-    db.add(lit)
+        fname = _safe_filename(file.filename)
+        dest_abs = target_dir / fname
+        dest_abs.write_bytes(data)
+
+        lit.file_path = f"{project_id}/{lit.id}/{fname}"
+        db.add(lit)
+        results.append({"id": str(lit.id), "title": lit.title, "file_path": lit.file_path, "rag_status": lit.rag_status})
+
+    if not results and errors:
+        raise HTTPException(status_code=400, detail="; ".join(errors))
+
     db.commit()
-    db.refresh(lit)
-    return {"id": str(lit.id), "title": lit.title, "file_path": lit.file_path, "rag_status": lit.rag_status}
+    return {"uploaded": results, "errors": errors, "count": len(results)}
 
 
 @router.delete("/{literature_id}")

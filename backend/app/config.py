@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 1536
 
     upload_root: str = "uploads"
-    upload_max_bytes: int = 50 * 1024 * 1024
+    upload_max_bytes: int = 100 * 1024 * 1024
     upload_allowed_extensions: list[str] = [".pdf", ".txt", ".md", ".text"]
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:5174"]
 

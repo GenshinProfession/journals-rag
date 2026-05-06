@@ -133,7 +133,7 @@ export function Wizard() {
   // Literature state
   const [litTitle, setLitTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [literatureId, setLiteratureId] = useState('');
   const [documentId, setDocumentId] = useState('');
   const [chunkPreview, setChunkPreview] = useState<ChunkPreview[]>([]);
@@ -146,7 +146,7 @@ export function Wizard() {
 
   useEffect(() => {
     setActiveChapterId(null); setChapterDrafts({});
-    setLitTitle(''); setBodyText(''); setUploadFile(null); setLiteratureId('');
+    setLitTitle(''); setBodyText(''); setUploadFiles([]); setLiteratureId('');
     setDocumentId(''); setChunkPreview([]); setSelectedChunkIds([]);
     setLitSearchQuery(''); setLitSearchResults([]);
   }, [projectId]);
@@ -185,11 +185,16 @@ export function Wizard() {
 
   const uploadLiterature = useMutation({
     mutationFn: () => {
-      if (!uploadFile) throw new Error('请先选择文件');
-      const fd = new FormData(); fd.set('title', litTitle.trim() || uploadFile.name); fd.set('file', uploadFile);
-      return apiFetch(`/api/projects/${projectId}/literature/upload`, { method: 'POST', body: fd }) as Promise<{ id: string }>;
+      if (!uploadFiles.length) throw new Error('请先选择文件');
+      const fd = new FormData();
+      fd.set('title', litTitle.trim());
+      uploadFiles.forEach(f => fd.append('files', f));
+      return apiFetch(`/api/projects/${projectId}/literature/upload`, { method: 'POST', body: fd }) as Promise<{ count: number; errors: string[] }>;
     },
-    onSuccess: (res) => { setLiteratureId(res.id); ok('文件已上传'); refreshLit(); },
+    onSuccess: (res) => {
+      const msg = `已上传 ${res.count} 个文件` + (res.errors.length ? `，${res.errors.length} 个失败` : '');
+      ok(msg); setUploadFiles([]); refreshLit();
+    },
     onError: fail,
   });
 
@@ -432,10 +437,11 @@ export function Wizard() {
                       <Space>
                         <Button type="primary" htmlType="submit" loading={createLiterature.isPending} icon={<FileTextOutlined />}>保存</Button>
                       </Space>
-                      <Divider plain style={{ margin: '12px 0 8px' }}>或上传文件</Divider>
-                      <Space>
-                        <input type="file" accept=".pdf,.txt,.md,.text" onChange={e => setUploadFile(e.target.files?.[0] ?? null)} />
-                        <Button icon={<UploadOutlined />} disabled={!uploadFile} loading={uploadLiterature.isPending} onClick={() => uploadLiterature.mutate()}>上传</Button>
+                      <Divider plain style={{ margin: '12px 0 8px' }}>或上传文件（支持多选）</Divider>
+                      <Space direction="vertical" style={{ width: '100%' }}>
+                        <input type="file" multiple accept=".pdf,.txt,.md,.text" onChange={e => setUploadFiles(Array.from(e.target.files ?? []))} />
+                        {uploadFiles.length > 0 && <span style={{ fontSize: 12, color: '#888' }}>已选 {uploadFiles.length} 个文件</span>}
+                        <Button icon={<UploadOutlined />} disabled={!uploadFiles.length} loading={uploadLiterature.isPending} onClick={() => uploadLiterature.mutate()}>上传 {uploadFiles.length > 0 ? `(${uploadFiles.length})` : ''}</Button>
                       </Space>
                     </Form>
                   ),
