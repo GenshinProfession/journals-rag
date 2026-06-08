@@ -1,0 +1,7667 @@
+{
+  "page_setup": {
+    "paper_width_cm": 21.0,
+    "paper_height_cm": 29.7,
+    "margin_top_cm": 2.0,
+    "margin_bottom_cm": 2.0,
+    "margin_left_cm": 3.0,
+    "margin_right_cm": 2.0,
+    "header_distance_cm": 1.5,
+    "footer_distance_cm": 0.75
+  },
+  "zone_summary": [
+    {
+      "start_index": 0,
+      "zone": "cover",
+      "zone_name": "封面"
+    },
+    {
+      "start_index": 52,
+      "zone": "abstract_cn",
+      "zone_name": "中文摘要"
+    },
+    {
+      "start_index": 56,
+      "zone": "abstract_en",
+      "zone_name": "英文摘要"
+    },
+    {
+      "start_index": 60,
+      "zone": "toc",
+      "zone_name": "目录"
+    },
+    {
+      "start_index": 89,
+      "zone": "body",
+      "zone_name": "正文·引言"
+    },
+    {
+      "start_index": 170,
+      "zone": "reference",
+      "zone_name": "参考文献"
+    },
+    {
+      "start_index": 208,
+      "zone": "acknowledgement",
+      "zone_name": "致谢"
+    },
+    {
+      "start_index": 214,
+      "zone": "appendix",
+      "zone_name": "附录"
+    }
+  ],
+  "element_count": 250,
+  "elements": [
+    {
+      "index": 0,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 1,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 2,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 3,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 4,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 5,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 6,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 7,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 8,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 9,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 10,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 11,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 12,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 13,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 14,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 15,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 16,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 17,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 18,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 19,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 20,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 21,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 7.9,
+        "first_line_indent_cm": 2.98
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 22,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "table",
+      "row_count": 7,
+      "col_count": 3,
+      "rows": [
+        [
+          "题    目："
+        ],
+        [],
+        [
+          "学    院："
+        ],
+        [
+          "专业年级："
+        ],
+        [
+          "学    号："
+        ],
+        [
+          "学生姓名："
+        ],
+        [
+          "指导教师、职称："
+        ]
+      ]
+    },
+    {
+      "index": 23,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 24,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 25,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 26,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 27,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 28,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 29,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 30,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 31,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "2026 年 5 月",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "fixed_pt",
+          "value": 35.0
+        },
+        "first_line_indent_chars": 0.0,
+        "first_line_indent_cm": 0.01
+      },
+      "runs": [
+        {
+          "text": "2",
+          "font": "黑体",
+          "size_pt": 14.0,
+          "size_cn": "四号"
+        },
+        {
+          "text": "026",
+          "font": "黑体",
+          "size_pt": 14.0,
+          "size_cn": "四号"
+        },
+        {
+          "text": " 年 5",
+          "font": "黑体",
+          "size_pt": 14.0,
+          "size_cn": "四号"
+        },
+        {
+          "text": " 月",
+          "font": "黑体",
+          "size_pt": 14.0,
+          "size_cn": "四号"
+        }
+      ],
+      "primary_font": "黑体",
+      "primary_size_cn": "四号",
+      "primary_bold": false
+    },
+    {
+      "index": 32,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 33,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 34,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 35,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 4.1,
+        "first_line_indent_cm": 1.55
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 36,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 4.1,
+        "first_line_indent_cm": 1.55
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 37,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 4.1,
+        "first_line_indent_cm": 1.55
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 38,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 4.1,
+        "first_line_indent_cm": 1.55
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 39,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "Intelligent Soil Moisture Metector Mased on",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "Intelligent",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "S",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "oil",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "M",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "oisture",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "M",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "etector",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "M",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "ased",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "on",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "二号",
+      "primary_bold": false
+    },
+    {
+      "index": 40,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "Single Chip Microcomputer",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "S",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "ingle ",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "C",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "hip ",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "M",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        },
+        {
+          "text": "icrocomputer",
+          "size_pt": 22.0,
+          "size_cn": "二号",
+          "underline": true,
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "二号",
+      "primary_bold": false
+    },
+    {
+      "index": 41,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "first_line_indent_chars": 5.2,
+        "first_line_indent_cm": 1.94
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 42,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "（英文标题二号居中，Times New Roman不加粗，实词首字母大写）",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.6,
+        "first_line_indent_cm": 0.99
+      },
+      "runs": [
+        {
+          "text": "（英文标",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "题二号",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "居中，",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "Times New Roman不加粗",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "，",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "实词首字母大写",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "）",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 43,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.6,
+        "first_line_indent_cm": 0.99
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 44,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.6,
+        "first_line_indent_cm": 0.99
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 45,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "table",
+      "row_count": 6,
+      "col_count": 5,
+      "rows": [
+        [
+          "College:",
+          "College of Computer and Information Sciences"
+        ],
+        [
+          "Specialty and Grade:",
+          "Electronic Information Engineering, 2014 Technology, 2013"
+        ],
+        [
+          "Number:",
+          "3130101011"
+        ],
+        [
+          "Name:",
+          "Zhang San"
+        ],
+        [
+          "Advisor:",
+          "Lecturer Li Si"
+        ],
+        [
+          "Submitted Time:",
+          "May, 2018"
+        ]
+      ]
+    },
+    {
+      "index": 46,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.6,
+        "first_line_indent_cm": 0.99
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 47,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.6,
+        "first_line_indent_cm": 0.99
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 48,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "  Professor（教授）、Associate Professor（副教授）、Lecturer（讲师）",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "  Professor（",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "教授",
+          "color": "0000FF"
+        },
+        {
+          "text": "）、Associate Professor（副",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "教授",
+          "color": "0000FF"
+        },
+        {
+          "text": "）、Lecturer（",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        },
+        {
+          "text": "讲师",
+          "color": "0000FF"
+        },
+        {
+          "text": "）",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 49,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "论文英文标题",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 22.0,
+        "size_cn": "二号",
+        "alignment": "center",
+        "style_name": "论文英文标题"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "二号",
+      "primary_bold": false
+    },
+    {
+      "index": 50,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 51,
+      "zone": "cover",
+      "zone_name": "封面",
+      "type": "paragraph",
+      "text": "            ",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 52,
+      "zone": "abstract_cn",
+      "zone_name": "中文摘要",
+      "type": "paragraph",
+      "text": "摘要",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "摘要",
+          "size_pt": 18.0,
+          "size_cn": "小二",
+          "bold": true
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小二",
+      "primary_bold": true
+    },
+    {
+      "index": 53,
+      "zone": "abstract_cn",
+      "zone_name": "中文摘要",
+      "type": "paragraph",
+      "text": "本文介绍了一种以STC89C52型号单片机为主要控制手段的智能台灯的设计，主要实现了检测人体靠近后自动开启，根据周围光强进行自动调节灯光亮度，使用者距离过近时进行报警提醒调整坐姿，液晶屏参数显示及调整",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "runs": [
+        {
+          "text": "本文介绍了一种以STC89C52型号单片机为主要控制手段的智能台灯的设计，主要实现了检测人体靠近后自动开启，根据周围光强",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 54,
+      "zone": "abstract_cn",
+      "zone_name": "中文摘要",
+      "type": "paragraph",
+      "text": "关键词：STC89C52；智能台灯；PWM调光；超声波测距",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "关键词",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "bold": true,
+          "color": "000000"
+        },
+        {
+          "text": "：",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "STC89C52",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "；",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "智能台灯",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "；PWM调光；超声波测距",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": true
+    },
+    {
+      "index": 55,
+      "zone": "abstract_cn",
+      "zone_name": "中文摘要",
+      "type": "paragraph",
+      "text": "（关键词3-5个，关键词之间用分号“；”隔开）",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "（关键词3-5个，关键词之间用分号“；”隔开）",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 56,
+      "zone": "abstract_en",
+      "zone_name": "英文摘要",
+      "type": "paragraph",
+      "text": "Abstract",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "Abstract",
+          "size_pt": 18.0,
+          "size_cn": "小二",
+          "bold": true
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小二",
+      "primary_bold": true
+    },
+    {
+      "index": 57,
+      "zone": "abstract_en",
+      "zone_name": "英文摘要",
+      "type": "paragraph",
+      "text": "For the convenience of plant research, this paper designed a based on single chip microcomputer inte",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "For the convenience of plant research, this paper designed a",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 58,
+      "zone": "abstract_en",
+      "zone_name": "英文摘要",
+      "type": "paragraph",
+      "text": "Key words: STC89C52; Intelligent lamps; PWM dimming; Ultrasonic ranging",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "Key words:",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "bold": true
+        },
+        {
+          "text": "STC89C52; Intelligent lamps; PWM dimming; Ultrasonic ranging",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": true
+    },
+    {
+      "index": 59,
+      "zone": "abstract_en",
+      "zone_name": "英文摘要",
+      "type": "paragraph",
+      "text": "（与中文关键词对应，关键词之间用分号“;”隔开）",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "（与中文关键词对应，关键词之间用分号“;”隔开）",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "0000FF"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 60,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "目 录",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "目",
+          "size_pt": 18.0,
+          "size_cn": "小二",
+          "bold": true
+        },
+        {
+          "text": "录",
+          "size_pt": 18.0,
+          "size_cn": "小二",
+          "bold": true
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小二",
+      "primary_bold": true
+    },
+    {
+      "index": 61,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 62,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "1\t引言\t1",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "1"
+        },
+        {
+          "text": "引言"
+        },
+        {
+          "text": "1"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 63,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "1.1\t课题设计的背景\t1",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "1.1"
+        },
+        {
+          "text": "课题设计的背景"
+        },
+        {
+          "text": "1"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 64,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "1.2\t课题设计的目的和意义\t1",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "1.2"
+        },
+        {
+          "text": "课题设计的目的和意义"
+        },
+        {
+          "text": "1"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 65,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "1.3\t课题设计的预期成果\t1",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "1.3"
+        },
+        {
+          "text": "课题设计的预期成果"
+        },
+        {
+          "text": "1"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 66,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "2\t主要器件和方案选择\t2",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "2"
+        },
+        {
+          "text": "主要器件和方案选择"
+        },
+        {
+          "text": "2"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 67,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "2.1\t单片机的选择\t2",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "2.1"
+        },
+        {
+          "text": "单片机的选择"
+        },
+        {
+          "text": "2"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 68,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "2.2\t土壤湿度传感器的选择\t2",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "2.2"
+        },
+        {
+          "text": "土壤湿度传感器的选择"
+        },
+        {
+          "text": "2"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 69,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "2.3\tA832*********\t3",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "2.3"
+        },
+        {
+          "text": "A832*********"
+        },
+        {
+          "text": "3"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 70,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "2.3.1\t单片机最小系统\t3",
+      "style_name": "toc 3",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "2.3.1"
+        },
+        {
+          "text": "单片机最小系统"
+        },
+        {
+          "text": "3"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 3"
+      }
+    },
+    {
+      "index": 71,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "3\t硬件电路设计\t4",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "3"
+        },
+        {
+          "text": "硬件电路设计"
+        },
+        {
+          "text": "4"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 72,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "3.1\t硬件电路系统总框图\t4",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "3.1"
+        },
+        {
+          "text": "硬件电路系统总框图"
+        },
+        {
+          "text": "4"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 73,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "3.2\t硬件各模块电路\t4",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "3.2"
+        },
+        {
+          "text": "硬件各模块电路"
+        },
+        {
+          "text": "4"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 74,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "3.2.1\t51单片机最小系统\t4",
+      "style_name": "toc 3",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "3.2.1"
+        },
+        {
+          "text": "51"
+        },
+        {
+          "text": "单片机最小系统"
+        },
+        {
+          "text": "4"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 3"
+      }
+    },
+    {
+      "index": 75,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "3.2.2\t土壤湿度检测模块\t4",
+      "style_name": "toc 3",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "3.2.2"
+        },
+        {
+          "text": "土壤湿度检测模块"
+        },
+        {
+          "text": "4"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 3"
+      }
+    },
+    {
+      "index": 76,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "4\t软件设计\t5",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "4"
+        },
+        {
+          "text": "软件"
+        },
+        {
+          "text": "设计",
+          "font": "宋体"
+        },
+        {
+          "text": "5"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 77,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "4.1\t主程序设计\t5",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "4.1"
+        },
+        {
+          "text": "主程序设计"
+        },
+        {
+          "text": "5"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 78,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "4.2\t串口初始化\t6",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "4.2"
+        },
+        {
+          "text": "串口初始化"
+        },
+        {
+          "text": "6"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 79,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "5\t系统调试与功能分析\t7",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "5"
+        },
+        {
+          "text": "系统调试与功能分析"
+        },
+        {
+          "text": "7"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 80,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "5.1\t硬件电路检测\t7",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "5.1"
+        },
+        {
+          "text": "硬件电路检测"
+        },
+        {
+          "text": "7"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 81,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "5.2\t*****测\t7",
+      "style_name": "toc 2",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "5.2"
+        },
+        {
+          "text": "*****"
+        },
+        {
+          "text": "测"
+        },
+        {
+          "text": "7"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 2"
+      }
+    },
+    {
+      "index": 82,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "6\t结束语\t8",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "6"
+        },
+        {
+          "text": "结束语"
+        },
+        {
+          "text": "8"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": false,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 83,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "参考文献\t9",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "参考文献",
+          "bold": true
+        },
+        {
+          "text": "9"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 84,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "致谢\t11",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "致谢",
+          "bold": true
+        },
+        {
+          "text": "11"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 85,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "附录\t12",
+      "style_name": "toc 1",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "附录",
+          "bold": true
+        },
+        {
+          "text": "12"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "alignment": "justify",
+        "style_name": "toc 1"
+      }
+    },
+    {
+      "index": 86,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 87,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 88,
+      "zone": "toc",
+      "zone_name": "目录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 89,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "引言",
+      "style_name": "Heading 1",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -2.8,
+        "first_line_indent_cm": -1.06,
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6,
+        "page_break_before": true
+      },
+      "runs": [
+        {
+          "text": "引言"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小二",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 18.0,
+        "size_cn": "小二",
+        "bold": true,
+        "alignment": "center",
+        "font_name": "Times New Roman",
+        "style_name": "Heading 1"
+      }
+    },
+    {
+      "index": 90,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "课题设计的背景",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "课题设计的"
+        },
+        {
+          "text": "背景"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 91,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "随着如今人们经济水平的提高，生活已不仅仅只是衣食住行，还有各种各样的业余兴趣，不少的人也开始种植花草。***********************植物对于人们是不可缺少的，现代人把侍弄花草当成一种生",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "随着",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "如今人们经济水平的提高，生活已不仅仅只是衣食住行，还有各种各样的业余兴趣，不少的人也开始种植花草。***********",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "也不同",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "[",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "1",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "]",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "。所以土壤湿度的检测是必不可少的，目前主要利用的是土壤湿度传感器进行土壤湿度的检测，其体积小，方便高效，是目前使用最多的",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "[2]",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 92,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "另外，目前无线网络的也逐渐应用于各个领域中，无线网络带给人们很多方便，不再局限于方寸之地，有很大的发展空间，给许多的领域带来新生。本文所设计的智能土壤湿度检测器也用到了无线网络通信，有数据获取实时方便",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "另外，目前无线网络的也逐渐应用于各个领域中，无线网络带给人们很多方便，不再局限于方寸之地，有很大的发展空间，给许多的领域",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 93,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "课题设计的目的和意义",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "课题设计的目的和意义"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 94,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "无论植物的大小多少，*******，首先必须要有严谨的研究方式。所以科研工作必须是严谨的，效率、准确度是非常重要的，实时而精确地获取土壤湿度数据对于植物的科研工作具有重要意义[3]。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "无论植物的大小多少，*******，首先必须要有严谨的研究方式。所以科研工作必须是严谨的，效率、准确度是非常重要的，实时",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "[3]",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 95,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "另外，当今社会，几*******手机来获得湿度数据给研究土壤湿度带来了方便，使得获取数据有着高效，便捷的优点。而本设计通过无线网络来连接单片机与手机，使得其拥有远距离传输数据的优点。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "另外，当今社会，几*******手机来获得湿度数据给研究土壤湿度带来了方便，使得获取数据有着高效，便捷的优点。而本设计通",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 96,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "课题设计的预期成果",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "课题设计的"
+        },
+        {
+          "text": "预期"
+        },
+        {
+          "text": "成果"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 97,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "本文课题设***********************手机APP端，进行实时监控湿度数据，方便记录。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.2,
+        "first_line_indent_cm": 0.84,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "本文课题设",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "***********************手机APP端，进行实时监控湿度数据，方便记录。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 98,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "本文所设计的主要分为两个部分：",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.2,
+        "first_line_indent_cm": 0.84,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "本文所设计的主要分为两个部分：",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 99,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "硬件*************3V。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "硬件*************3V。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 100,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "软件***********************部分主要用来显示接收和显示湿度数据。用Java语言对显示界面的设计以及主程序的进行编写。主程序实现了通信的连接，以及接收数据及其显示[4]。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.1,
+        "first_line_indent_cm": 0.81,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "软件***********************部分主要用来显示接收和显示湿度数据。用Java语言对显示界面的设计以及",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "其显示",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "[4]",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 101,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 102,
+      "zone": "body",
+      "zone_name": "正文·引言"
+    },
+    {
+      "index": 103,
+      "zone": "body",
+      "zone_name": "正文·引言"
+    },
+    {
+      "index": 104,
+      "zone": "body",
+      "zone_name": "正文·引言"
+    },
+    {
+      "index": 105,
+      "zone": "body",
+      "zone_name": "正文·引言"
+    },
+    {
+      "index": 106,
+      "zone": "body",
+      "zone_name": "正文·引言"
+    },
+    {
+      "index": 107,
+      "zone": "body",
+      "zone_name": "正文·引言",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "List Paragraph",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6,
+        "keep_with_next": true
+      },
+      "inherited": {
+        "first_line_indent_chars": 2.0,
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "List Paragraph"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 108,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "主要器件和方案选择",
+      "style_name": "Heading 1",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "主要器件和方案选择"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小二",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 18.0,
+        "size_cn": "小二",
+        "bold": true,
+        "alignment": "center",
+        "font_name": "Times New Roman",
+        "style_name": "Heading 1"
+      }
+    },
+    {
+      "index": 109,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "智能土壤湿度检***********************************************件和方案选择。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "智能土壤湿度检***********************************************件和方案选择",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 110,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "List Paragraph",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8,
+        "keep_with_next": true
+      },
+      "inherited": {
+        "first_line_indent_chars": 2.0,
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "List Paragraph"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 111,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "单片机的选择",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "单片机的选择"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 112,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "STC89C52单片*************************************************功能[5]。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.8,
+        "first_line_indent_cm": 1.06,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "STC89C52单片*************************************************功",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "[5]",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 113,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "由于该单********************************的实物主要用来显示接收和显示湿度数据。用Java语言对显示界面的设计以及主程序的进行编写。引脚图如图 2-1所示。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "由于该单********************************的实物主要用来显示接收和显示湿度数据。用Java",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "图 ",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "2",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "-",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "1",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "所示",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 114,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 115,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "图 2-1单片机引脚图",
+      "style_name": "Caption",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "first_line_indent_chars": 14.8,
+        "first_line_indent_cm": 5.56
+      },
+      "runs": [
+        {
+          "text": "图 ",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "2",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "-",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "1",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "单片机引脚图",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        }
+      ],
+      "primary_font": "宋体",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 116,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "土壤湿度传感器的选择",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "土壤湿度传感器的选择"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 117,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "土壤湿度传感器主要用来测量土壤容积含水量，量程为:0—100%[6]。其优点有体积小、携带轻便，易于安装，可以直接接触土壤，由于其材质外部以环氧树脂纯胶体封装，不易于受到腐蚀。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "土壤湿度传感器主要用来测量土壤容积含水量，量",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "程为:0—100%",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "[6]",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "其优点有体积小、携带轻便，易于安装，可以直接接触土壤，由于其材质外部以环氧树脂纯胶体封装，不易于受到腐蚀。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 118,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "本文设计的WIFI智能土壤湿度检测器，主要用于植物培养与科研工作中，该土壤湿度传感器具有的检测准确度高，小巧便捷等优点十分适用本设计。器件实物图如图 2-2所示。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "本文设计的WIFI智能土壤湿度检测器，主要用于植物培养与科研工作中，该土壤湿度传感器具有的检测准确度高，小巧便捷等优点十",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "图 ",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "2",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "-",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "2",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "所示。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 119,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 120,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "图 2-2土壤湿度传感器实物图",
+      "style_name": "Caption",
+      "alignment": "center",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "图 ",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "2",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "-",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "2",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "土壤湿度传感器实物图",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        }
+      ],
+      "primary_font": "宋体",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 121,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "A832*********",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "A832"
+        },
+        {
+          "text": "*********"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 122,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "***************如表 2-1。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "***************",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "如",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "表 ",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "2",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "-",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "1",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 123,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "表 2-1 轴距表",
+      "style_name": "Caption",
+      "alignment": "center",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "表 ",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "2",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "-",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "1",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "轴距表",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        }
+      ],
+      "primary_font": "宋体",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 124,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "table",
+      "row_count": 5,
+      "col_count": 2,
+      "rows": [
+        [
+          "参数名称",
+          "取值"
+        ],
+        [
+          "圆盘质量",
+          "27.5kg"
+        ],
+        [
+          "轴刚度系数",
+          "300kN/m"
+        ],
+        [
+          "偏心距",
+          "0.0002m"
+        ],
+        [
+          "支承松动间隙",
+          "0.0005m"
+        ]
+      ]
+    },
+    {
+      "index": 125,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "单片机最小系统",
+      "style_name": "标题3",
+      "alignment": "left",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "单片机最小系统"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "bold": true,
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "style_name": "标题3"
+      }
+    },
+    {
+      "index": 126,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "单*******",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.2,
+        "first_line_indent_cm": 0.82,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "单*******",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 127,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.2,
+        "first_line_indent_cm": 0.82,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 128,
+      "zone": "body",
+      "zone_name": "正文·主要器件和方案选择"
+    },
+    {
+      "index": 129,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "硬件电路设计",
+      "style_name": "Heading 1",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6,
+        "page_break_before": true
+      },
+      "runs": [
+        {
+          "text": "硬件电路设计"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小二",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 18.0,
+        "size_cn": "小二",
+        "bold": true,
+        "alignment": "center",
+        "font_name": "Times New Roman",
+        "style_name": "Heading 1"
+      }
+    },
+    {
+      "index": 130,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "本文所设计的智能**************模块等。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "本文所设计的智能**************模块等。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 131,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "硬件电路系统总框图",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "硬件电路系统总框图"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 132,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "智能土壤湿度检测器的具体硬件部分结构框图如图 3-1所示。其中土壤湿度传感器模块检测土壤湿度；模数转换模块将土壤湿度检测到的量变换为可存储的数字量；串口WIFI模块将串口中的数据送到无线网络中；AMS",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "智能土壤湿度检测器的具体硬件部分结构框图如",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "图 ",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "3",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "-",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "1",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "所示。其中土壤湿度传感器模块检测土壤湿度；模数转换模块将土壤湿度检测到的量变换为可存储的数字量；串口WIFI模块将串口中",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 133,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 134,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "图 3-1硬件电路结构总框图",
+      "style_name": "Caption",
+      "alignment": "center",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "图 ",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "3",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "-",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "1",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "硬件电路结构总框图",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        }
+      ],
+      "primary_font": "宋体",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 135,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "硬件各模块电路",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "硬件各模块电路"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 136,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "51单片机最小系统",
+      "style_name": "标题3",
+      "alignment": "left",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "51"
+        },
+        {
+          "text": "单片机最小系统"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "bold": true,
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "style_name": "标题3"
+      }
+    },
+    {
+      "index": 137,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "STC89C52单片*******。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "STC89C52",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "单片*******",
+          "font": "宋体",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 138,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计"
+    },
+    {
+      "index": 139,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "土壤湿度检测模块",
+      "style_name": "标题3",
+      "alignment": "left",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "土壤湿度检测模块"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小四",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 12.0,
+        "size_cn": "小四",
+        "bold": true,
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "font_name": "Times New Roman",
+        "style_name": "标题3"
+      }
+    },
+    {
+      "index": 140,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "土壤湿度检测模*****************如图3-2所示。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "runs": [
+        {
+          "text": "土壤湿度检测模*****************如图",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "3-2",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "所示。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 141,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 142,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计"
+    },
+    {
+      "index": 143,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计"
+    },
+    {
+      "index": 144,
+      "zone": "body",
+      "zone_name": "正文·硬件电路设计"
+    },
+    {
+      "index": 145,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "软件设计",
+      "style_name": "Heading 1",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6,
+        "page_break_before": true
+      },
+      "runs": [
+        {
+          "text": "软件"
+        },
+        {
+          "text": "设计",
+          "font": "宋体"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小二",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 18.0,
+        "size_cn": "小二",
+        "bold": true,
+        "alignment": "center",
+        "font_name": "Times New Roman",
+        "style_name": "Heading 1"
+      }
+    },
+    {
+      "index": 146,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "智能土壤湿度检**************序的调用。",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "智能土壤湿度检**************序的调用。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 147,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "主程序设计",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "主程序设计"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 148,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "主程序部分是一个程序的核心部分，包括了整个程序的功能以及流程。其主程序的具体流程图如图4-1所示。",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "主程序部分是一个程序的核心部分，包括了整个程序的功能以及流程。其主程序的具体",
+          "font": "宋体",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "流程图如图",
+          "font": "宋体",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "4-1",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "000000"
+        },
+        {
+          "text": "所示。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": "宋体",
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 149,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.0,
+        "first_line_indent_cm": 0.74,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 150,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "图 4-1****流程图",
+      "style_name": "Caption",
+      "alignment": "center",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "图 ",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "4",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "-",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "1",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        },
+        {
+          "text": "****流程图",
+          "font": "宋体",
+          "size_pt": 10.5,
+          "size_cn": "五号"
+        }
+      ],
+      "primary_font": "宋体",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 151,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "进入主程序中首先执行对串口的最开始的数值设置，再定义一个8位字符型数据类型用于表示湿度数据，然后再调用读取湿度数据的子程序，进入进程，延时，得到一个湿度数据，最后将数据发送出去。",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "进入主程序中首先执行对串口的最开始的数值设置，再定义一个8位字符型数据类型用于表示湿度数据，然后再调用读取湿度数据的子程",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 152,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "*****算法中较为常用，其效果也较好，其调整公式为：",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "*****算法中较为常用，其效果也较好，其调整公式为：",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 153,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "\t\t  \t(4-1)",
+      "style_name": "Normal",
+      "alignment": "right",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.0,
+        "first_line_indent_cm": 0.74,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "("
+        },
+        {
+          "text": "4"
+        },
+        {
+          "text": "-"
+        },
+        {
+          "text": "1"
+        },
+        {
+          "text": ")"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 154,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "其中X为调整前图像，Y为调整后图像，（i，j）为像素坐标，D为全局均方差，boxmean和的计算公式如下：",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "其中X为调整前图像，Y为调整后图像，（",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "i",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "，",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "j",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "）为像素坐标，D为全局均方差，",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "b",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "oxmean和",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "的计算公式如下",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "：",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 155,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 156,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": " \t\t    \t   \t(4-2)",
+      "style_name": "Normal",
+      "alignment": "right",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "("
+        },
+        {
+          "text": "4"
+        },
+        {
+          "text": "-"
+        },
+        {
+          "text": "2"
+        },
+        {
+          "text": ")"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 157,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "串口初始化",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "串口初始化"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 158,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "*******",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "runs": [
+        {
+          "text": "*******",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 159,
+      "zone": "body",
+      "zone_name": "正文·软件设计",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 160,
+      "zone": "body",
+      "zone_name": "正文·系统调试与功能分析",
+      "type": "paragraph",
+      "text": "系统调试与功能分析",
+      "style_name": "Heading 1",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "系统调试与功能分析"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小二",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 18.0,
+        "size_cn": "小二",
+        "bold": true,
+        "alignment": "center",
+        "font_name": "Times New Roman",
+        "style_name": "Heading 1"
+      }
+    },
+    {
+      "index": 161,
+      "zone": "body",
+      "zone_name": "正文·系统调试与功能分析",
+      "type": "paragraph",
+      "text": "硬件电路检测",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "硬件电路检测"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 162,
+      "zone": "body",
+      "zone_name": "正文·系统调试与功能分析",
+      "type": "paragraph",
+      "text": "硬件电**********。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "runs": [
+        {
+          "text": "硬件电**********。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 163,
+      "zone": "body",
+      "zone_name": "正文·系统调试与功能分析",
+      "type": "paragraph",
+      "text": "*****测",
+      "style_name": "Heading 2",
+      "alignment": "left",
+      "paragraph_format": {
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "*****测"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小三",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 15.0,
+        "size_cn": "小三",
+        "alignment": "left",
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "bold": true,
+        "font_name": "Times New Roman",
+        "style_name": "Heading 2"
+      }
+    },
+    {
+      "index": 164,
+      "zone": "body",
+      "zone_name": "正文·系统调试与功能分析",
+      "type": "paragraph",
+      "text": "首先将土壤********* ",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "runs": [
+        {
+          "text": "首先将土壤*********",
+          "font": "宋体",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": "宋体",
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 165,
+      "zone": "body",
+      "zone_name": "正文·系统调试与功能分析",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 166,
+      "zone": "body",
+      "zone_name": "正文·结束语",
+      "type": "paragraph",
+      "text": "结束语",
+      "style_name": "Heading 1",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "结束语"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "小二",
+      "primary_bold": true,
+      "inherited": {
+        "size_pt": 18.0,
+        "size_cn": "小二",
+        "bold": true,
+        "alignment": "center",
+        "font_name": "Times New Roman",
+        "style_name": "Heading 1"
+      }
+    },
+    {
+      "index": 167,
+      "zone": "body",
+      "zone_name": "正文·结束语",
+      "type": "paragraph",
+      "text": "本文完成……********设计。实现了****功能。有****优点",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "本文完成",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "……",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "********设计。实现了****功能。有****优点",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 168,
+      "zone": "body",
+      "zone_name": "正文·结束语",
+      "type": "paragraph",
+      "text": "本设计内容虽然达到预期效果，但实现的程序还存在一些不足之处，如******功能不完善，界面不够友好，****等。对于上述问题，可以通过******来解决（可提供思路和方法）。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.3,
+        "first_line_indent_cm": 0.85,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "本设计内容虽然达到预期效果，但实现的程序还存在一些不足之处，如******功能不完善，界面不够友好，****等。",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "对于上述问题",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "，",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "可以通",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        },
+        {
+          "text": "过******来解决（可提供思路和方法）。",
+          "size_pt": 12.0,
+          "size_cn": "小四",
+          "color": "FF0000"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 169,
+      "zone": "body",
+      "zone_name": "正文·结束语",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 170,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "参考文献",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "参考文献",
+          "size_pt": 14.0,
+          "size_cn": "四号",
+          "bold": true
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "四号",
+      "primary_bold": true
+    },
+    {
+      "index": 171,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "庄志红.基于PIC单片机的农田灌溉智能控制系统研究[J] .安徽农业学,2010,30(12):21-29.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "庄志红"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "基于"
+        },
+        {
+          "text": "PIC"
+        },
+        {
+          "text": "单片机的农田灌溉智能控制系统研究"
+        },
+        {
+          "text": "[J] ."
+        },
+        {
+          "text": "安徽农业学"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "2010"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "30"
+        },
+        {
+          "text": "(",
+          "font": "宋体"
+        },
+        {
+          "text": "12"
+        },
+        {
+          "text": ")",
+          "font": "宋体"
+        },
+        {
+          "text": ":",
+          "color": "000000"
+        },
+        {
+          "text": "21"
+        },
+        {
+          "text": "-",
+          "font": "宋体"
+        },
+        {
+          "text": "29"
+        },
+        {
+          "text": ".",
+          "font": "宋体"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 172,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "张毅刚.单片机原理及接口技术(C51编程)[M].北京:人民邮电出版社,2013:13-14.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "张毅刚"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "单片机原理及接口技术"
+        },
+        {
+          "text": "(C51"
+        },
+        {
+          "text": "编程"
+        },
+        {
+          "text": ")[M]."
+        },
+        {
+          "text": "北京"
+        },
+        {
+          "text": ":"
+        },
+        {
+          "text": "人民邮电出版社"
+        },
+        {
+          "text": ",",
+          "font": "宋体"
+        },
+        {
+          "text": "2013"
+        },
+        {
+          "text": ":",
+          "color": "000000"
+        },
+        {
+          "text": "1",
+          "font": "宋体"
+        },
+        {
+          "text": "3"
+        },
+        {
+          "text": "-1",
+          "font": "宋体"
+        },
+        {
+          "text": "4"
+        },
+        {
+          "text": "."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 173,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "沈晓波,王留留,苗磊.数字技术与应用[J].2012,30(12) :21-29.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "沈晓波"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "王留留"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "苗磊"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "数字技术与应用"
+        },
+        {
+          "text": "[J].2012"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "30"
+        },
+        {
+          "text": "(",
+          "font": "宋体"
+        },
+        {
+          "text": "12"
+        },
+        {
+          "text": ")",
+          "font": "宋体"
+        },
+        {
+          "text": " :",
+          "color": "000000"
+        },
+        {
+          "text": "21"
+        },
+        {
+          "text": "-",
+          "font": "宋体"
+        },
+        {
+          "text": "29"
+        },
+        {
+          "text": "."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 174,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "刘健.基于ST89C52RC单片机实验系统的设计与开发[D].湖南:湖南大学,2013:15-19.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "刘健"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "基于"
+        },
+        {
+          "text": "ST89C52RC"
+        },
+        {
+          "text": "单片机实验系统的设计与开发"
+        },
+        {
+          "text": "[D]."
+        },
+        {
+          "text": "湖南"
+        },
+        {
+          "text": ":",
+          "color": "000000"
+        },
+        {
+          "text": "湖南大学"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "2013"
+        },
+        {
+          "text": ":"
+        },
+        {
+          "text": "15-19",
+          "font": "宋体",
+          "color": "000000"
+        },
+        {
+          "text": "."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 175,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "王洋,巫庆辉,庞艳伟.ADC0832在真空度数据检测中的应用[J].电子设计工程,2013,30(12):21-29.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "王洋"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "巫庆辉"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "庞艳伟"
+        },
+        {
+          "text": ".ADC0832"
+        },
+        {
+          "text": "在真空度数据检测中的应用"
+        },
+        {
+          "text": "[J]."
+        },
+        {
+          "text": "电子设计工程"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "2013"
+        },
+        {
+          "text": ",30(12):21-29."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 176,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "王兴龙,董云峰.分布式集群飞行器地面仿真平台设计及其通信协议仿真[C].北京航空航天大学宇航学院,2012:65-72.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "王兴龙"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "董云峰"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "分布式集群飞行器地面仿真平台设计及其通信协议仿真"
+        },
+        {
+          "text": "[C]."
+        },
+        {
+          "text": "北京航空航天大学宇航学院"
+        },
+        {
+          "text": ",2012"
+        },
+        {
+          "text": ":65-72.",
+          "color": "000000"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 177,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "史艳娥.基于超声的故障诊断系统的设计[D].燕山大学.2012:15-19.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "史艳娥"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "基于超声的故障诊断系统的设计"
+        },
+        {
+          "text": "[D]."
+        },
+        {
+          "text": "燕山大学"
+        },
+        {
+          "text": ".2012"
+        },
+        {
+          "text": ":"
+        },
+        {
+          "text": "15-19",
+          "font": "宋体",
+          "color": "000000"
+        },
+        {
+          "text": "."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 178,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "董树锋,何光宇,刘凯诚,张王俊,王治华.使用Eclipse建模框架实现基于公共信息模型系统的开发[J].电力系统自动化.2012,30(12):21-29.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "董树锋"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "何光宇"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "刘凯诚"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "张王俊"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "王治华"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "使用"
+        },
+        {
+          "text": "Eclipse"
+        },
+        {
+          "text": "建模框架实现基于公共信息模型系统的开发"
+        },
+        {
+          "text": "[J]."
+        },
+        {
+          "text": "电力系统自动化"
+        },
+        {
+          "text": ".2012"
+        },
+        {
+          "text": ","
+        },
+        {
+          "text": "30"
+        },
+        {
+          "text": "(",
+          "font": "宋体"
+        },
+        {
+          "text": "12"
+        },
+        {
+          "text": ")",
+          "font": "宋体"
+        },
+        {
+          "text": ":",
+          "color": "000000"
+        },
+        {
+          "text": "21"
+        },
+        {
+          "text": "-",
+          "font": "宋体"
+        },
+        {
+          "text": "29"
+        },
+        {
+          "text": "."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 179,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "Evan S, Jonathan L, Trevor D. Fully Convolutional Networks for Semantic Segmentation [J]. arXiv. 201",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "Evan S, Jonathan L, Trevor D. Fully Convolutional Networks f"
+        },
+        {
+          "text": "-"
+        },
+        {
+          "text": "5."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 180,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "方俊义.AJAX的原理及应用[EB/OL].(2006-6-7)[2007-5-6].http://info.lib.uh.edu/ pacs1.html.",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        }
+      },
+      "runs": [
+        {
+          "text": "方俊义"
+        },
+        {
+          "text": ".",
+          "font": "宋体"
+        },
+        {
+          "text": "AJAX的原理及应用["
+        },
+        {
+          "text": "EB/OL"
+        },
+        {
+          "text": "]."
+        },
+        {
+          "text": "(2006-6-7)",
+          "font": "宋体"
+        },
+        {
+          "text": "[2007-5-6",
+          "font": "宋体"
+        },
+        {
+          "text": "]",
+          "font": "宋体"
+        },
+        {
+          "text": "."
+        },
+        {
+          "text": "http://info.lib.uh.edu/ pacs1.html."
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 181,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 182,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 183,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 184,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -2.0,
+        "first_line_indent_cm": -0.74
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 185,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 186,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 187,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 188,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 189,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 190,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 191,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 192,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 193,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 194,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 195,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 196,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 197,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 198,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 199,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 200,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 201,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 202,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": -1.5,
+        "first_line_indent_cm": -0.56
+      },
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 203,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 204,
+      "zone": "reference",
+      "zone_name": "参考文献"
+    },
+    {
+      "index": 205,
+      "zone": "reference",
+      "zone_name": "参考文献"
+    },
+    {
+      "index": 206,
+      "zone": "reference",
+      "zone_name": "参考文献"
+    },
+    {
+      "index": 207,
+      "zone": "reference",
+      "zone_name": "参考文献",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 208,
+      "zone": "acknowledgement",
+      "zone_name": "致谢",
+      "type": "paragraph",
+      "text": "致谢",
+      "style_name": "Normal",
+      "alignment": "center",
+      "paragraph_format": {
+        "space_before_pt": 15.6,
+        "space_after_pt": 15.6
+      },
+      "runs": [
+        {
+          "text": "致谢",
+          "size_pt": 18.0,
+          "size_cn": "小二",
+          "bold": true
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小二",
+      "primary_bold": true
+    },
+    {
+      "index": 209,
+      "zone": "acknowledgement",
+      "zone_name": "致谢",
+      "type": "paragraph",
+      "text": "…………感谢老师和同学，感谢母校。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.0,
+        "first_line_indent_cm": 0.74,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "…………",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "感谢老师和同学，感谢母校。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 210,
+      "zone": "acknowledgement",
+      "zone_name": "致谢",
+      "type": "paragraph",
+      "text": "本设计是在……",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.0,
+        "first_line_indent_cm": 0.74,
+        "space_before_pt": 7.8,
+        "space_after_pt": 7.8
+      },
+      "runs": [
+        {
+          "text": "本设计是在",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "……",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 211,
+      "zone": "acknowledgement",
+      "zone_name": "致谢",
+      "type": "paragraph",
+      "text": "本设计的完成还要感谢……另外还要感谢家人和朋友的默默支持。",
+      "style_name": "Normal",
+      "alignment": "inherit",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.0,
+        "first_line_indent_cm": 0.74
+      },
+      "runs": [
+        {
+          "text": "本设计的完成还要感谢……",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        },
+        {
+          "text": "另外还要感谢家人和朋友的默默支持。",
+          "size_pt": 12.0,
+          "size_cn": "小四"
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "小四",
+      "primary_bold": false
+    },
+    {
+      "index": 212,
+      "zone": "acknowledgement",
+      "zone_name": "致谢",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 213,
+      "zone": "acknowledgement",
+      "zone_name": "致谢",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 214,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "附录 ",
+      "style_name": "Normal",
+      "alignment": "left",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "附录",
+          "size_pt": 14.0,
+          "size_cn": "四号",
+          "bold": true
+        }
+      ],
+      "primary_font": null,
+      "primary_size_cn": "四号",
+      "primary_bold": true
+    },
+    {
+      "index": 215,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "这里是附录的普通文字内容，宋体五号，段前后0行，行距1.25。下面是代码内容，字号也为五号，段前后0行，单倍行距。",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {
+        "line_spacing": {
+          "type": "multiple",
+          "value": 1.25
+        },
+        "first_line_indent_chars": 2.0,
+        "first_line_indent_cm": 0.74
+      },
+      "runs": [
+        {
+          "text": "这里是附录的普通文字内容",
+          "color": "0000FF"
+        },
+        {
+          "text": "，宋体五号，段前后0行，行距1.25。下面是代码内容，字号也为五号，段前后0行，单倍行距。",
+          "color": "0000FF"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 216,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "# -*- coding: utf-8 -*-",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "# -*- coding: utf-8 -*-"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 217,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "\"\"\"",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "\"\"\""
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 218,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "Created on Tue May 09 23:42:30 2017",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "Created on Tue May 09 23:42:30 2017"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 219,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 220,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "@author: pm7",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "@author: pm7"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 221,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "\"\"\"",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "\"\"\""
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 222,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 223,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "import numpy as np",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "import numpy as np"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 224,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "import cv2",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "import cv2"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 225,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "import sys",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "import sys"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 226,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 227,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "def saliency(src):",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "def saliency(src):"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 228,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    src_mean = cv2.mean(src)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    src_mean = cv2.mean(src)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 229,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    print src_mean",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    print src_mean"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 230,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    print np.asarray(src_mean).shape",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    print np.asarray(src_mean).shape"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 231,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    src_gaussian = cv2.GaussianBlur(src, (3, 3), 0)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    src_gaussian = cv2.GaussianBlur(src, (3, 3), 0)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 232,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    print src_gaussian.shape",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    print src_gaussian.shape"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 233,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    return cv2.absdiff(src_mean, src_gaussian)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    return cv2.absdiff(src_mean, src_gaussian)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 234,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 235,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "if __name__ == '__main__':",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "if __name__ == '__main__':"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 236,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    try:",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    try:"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 237,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "        img = cv2.imread(sys.argv[1])",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "        img = cv2.imread(sys.argv[1])"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 238,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    except:",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    except:"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 239,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "        print \"image load failed.\"",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "        print \"image load failed.\""
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 240,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "        sys.exit(-1)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "        sys.exit(-1)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 241,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    ",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 242,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    img_saliency = saliency(img)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    img_saliency = saliency(img)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 243,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    img_saliency = img_saliency[:,:,1]",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    img_saliency = img_saliency[:,:,1]"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 244,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    cv2.imshow('src', img)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    cv2.imshow('src', img)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 245,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    cv2.imshow('src after saliency', img_saliency)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    cv2.imshow('src after saliency', img_saliency)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 246,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    cv2.waitKey(0)",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    cv2.waitKey(0)"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 247,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "    cv2.destroyAllWindows()",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "runs": [
+        {
+          "text": "    cv2.destroyAllWindows()"
+        }
+      ],
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false,
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      }
+    },
+    {
+      "index": 248,
+      "zone": "appendix",
+      "zone_name": "附录",
+      "type": "paragraph",
+      "text": "",
+      "style_name": "Normal",
+      "alignment": "justify",
+      "paragraph_format": {},
+      "inherited": {
+        "font_name": "Times New Roman",
+        "size_pt": 10.5,
+        "size_cn": "五号",
+        "alignment": "justify",
+        "style_name": "Normal"
+      },
+      "primary_font": "Times New Roman",
+      "primary_size_cn": "五号",
+      "primary_bold": false
+    },
+    {
+      "index": 249,
+      "zone": "appendix",
+      "zone_name": "附录"
+    }
+  ],
+  "_meta": {
+    "id": "dbdcaad9",
+    "original_file": "附件3：计算机与信息学院本科毕业设计说明书模板.doc",
+    "clean_report": {
+      "empty_paragraphs": 81,
+      "empty_runs": 155,
+      "textboxes": 32
+    }
+  }
+}

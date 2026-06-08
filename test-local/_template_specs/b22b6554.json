@@ -1,0 +1,189 @@
+{
+  "page_setup": {
+    "size": "21.0 × 29.7 cm",
+    "margin_top": 2.0,
+    "margin_bottom": 2.0,
+    "margin_left": 3.0,
+    "margin_right": 2.0
+  },
+  "cover": {
+    "zone_name": "封面",
+    "title": {
+      "font": "黑体",
+      "size": "四号",
+      "bold": false,
+      "align": "居中"
+    },
+    "fields": [
+      {
+        "label": "题    目",
+        "value": "",
+        "row": 0
+      },
+      {
+        "label": "学    院",
+        "value": "",
+        "row": 2
+      },
+      {
+        "label": "专业年级",
+        "value": "",
+        "row": 3
+      },
+      {
+        "label": "学    号",
+        "value": "",
+        "row": 4
+      },
+      {
+        "label": "学生姓名",
+        "value": "",
+        "row": 5
+      },
+      {
+        "label": "指导教师、职称",
+        "value": "",
+        "row": 6
+      },
+      {
+        "label": "College",
+        "value": "College of Computer and Information Sciences",
+        "row": 0
+      },
+      {
+        "label": "Specialty and Grade",
+        "value": "Electronic Information Engineering, 2014 Technology, 2013",
+        "row": 1
+      },
+      {
+        "label": "Number",
+        "value": "3130101011",
+        "row": 2
+      },
+      {
+        "label": "Name",
+        "value": "Zhang San",
+        "row": 3
+      },
+      {
+        "label": "Advisor",
+        "value": "Lecturer Li Si",
+        "row": 4
+      },
+      {
+        "label": "Submitted Time",
+        "value": "May, 2018",
+        "row": 5
+      }
+    ]
+  },
+  "abstract_cn": {
+    "zone_name": "中文摘要",
+    "title": {
+      "font": "Times New Roman",
+      "size": "小二",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "Times New Roman",
+      "size": "小四",
+      "line_spacing": "1.25倍行距",
+      "first_indent": "2.3字符"
+    }
+  },
+  "abstract_en": {
+    "zone_name": "英文摘要",
+    "title": {
+      "font": "Times New Roman",
+      "size": "小二",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "Times New Roman",
+      "size": "小四",
+      "line_spacing": "1.25倍行距",
+      "first_indent": "2.3字符"
+    }
+  },
+  "toc": {
+    "zone_name": "目录",
+    "title": {
+      "font": "Times New Roman",
+      "size": "小二",
+      "bold": true,
+      "align": "居中"
+    }
+  },
+  "body": {
+    "zone_name": "正文",
+    "heading1": {
+      "font": "Times New Roman",
+      "size": "小二",
+      "bold": true,
+      "align": "居中",
+      "line_spacing": "1.25倍行距"
+    },
+    "heading2": {
+      "font": "Times New Roman",
+      "size": "小三",
+      "bold": true,
+      "align": "左对齐",
+      "line_spacing": "1.25倍行距"
+    },
+    "body": {
+      "font": "Times New Roman",
+      "size": "小四",
+      "align": "左对齐",
+      "line_spacing": "1.25倍行距",
+      "first_indent": "2.3字符"
+    }
+  },
+  "reference": {
+    "zone_name": "参考文献",
+    "title": {
+      "font": "Times New Roman",
+      "size": "四号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "宋体",
+      "size": "五号",
+      "line_spacing": "1.25倍行距"
+    },
+    "style": "GB/T 7714"
+  },
+  "acknowledgement": {
+    "zone_name": "致谢",
+    "title": {
+      "font": "Times New Roman",
+      "size": "小二",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "Times New Roman",
+      "size": "小四",
+      "line_spacing": "1.25倍行距",
+      "first_indent": "2.0字符"
+    }
+  },
+  "appendix": {
+    "zone_name": "附录",
+    "body": {
+      "font": "Times New Roman",
+      "size": "四号"
+    }
+  },
+  "_meta": {
+    "id": "b22b6554",
+    "original_file": "附件3：计算机与信息学院本科毕业设计说明书模板.doc",
+    "clean_report": {
+      "empty_paragraphs": 81,
+      "empty_runs": 155,
+      "textboxes": 32
+    }
+  }
+}

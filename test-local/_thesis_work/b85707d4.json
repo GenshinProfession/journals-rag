@@ -1,0 +1,194 @@
+{
+  "thesis_id": "b85707d4",
+  "topic": "基于STM32的智能温湿度监测系统设计",
+  "spec_id": "c33efe22",
+  "title": "基于STM32的智能温湿度监测系统设计",
+  "title_en": "Design of an Intelligent Temperature and Humidity Monitoring System Based on STM32",
+  "keywords_cn": [
+    "STM32",
+    "温湿度监测",
+    "DHT22",
+    "物联网",
+    "嵌入式系统"
+  ],
+  "keywords_en": [
+    "STM32",
+    "temperature and humidity monitoring",
+    "DHT22",
+    "Internet of Things",
+    "embedded system"
+  ],
+  "outline": {
+    "title": "基于STM32的智能温湿度监测系统设计",
+    "title_en": "Design of an Intelligent Temperature and Humidity Monitoring System Based on STM32",
+    "abstract_cn_outline": "本文设计并实现了一种基于STM32微控制器的智能温湿度监测系统。系统以STM32F103C8T6为核心，结合DHT22传感器采集环境温湿度数据，通过LCD显示屏实时显示，并利用Wi-Fi模块实现数据上传至云平台。系统具备低功耗、高精度和远程监控等特点，适用于农业大棚、仓储环境等场景。论文详细阐述了系统的硬件设计、软件实现、通信协议及测试结果。",
+    "keywords_cn": [
+      "STM32",
+      "温湿度监测",
+      "DHT22",
+      "物联网",
+      "嵌入式系统"
+    ],
+    "abstract_en_outline": "This paper designs and implements an intelligent temperature and humidity monitoring system based on the STM32 microcontroller. The system uses STM32F103C8T6 as the core, collects environmental data via DHT22 sensors, displays real-time information on an LCD screen, and uploads data to a cloud platform through a Wi-Fi module. The system features low power consumption, high accuracy, and remote monitoring capabilities, suitable for applications such as agricultural greenhouses and warehouse environments. The hardware design, software implementation, communication protocols, and test results are comprehensively presented.",
+    "keywords_en": [
+      "STM32",
+      "temperature and humidity monitoring",
+      "DHT22",
+      "Internet of Things",
+      "embedded system"
+    ],
+    "chapters": [
+      {
+        "number": "1",
+        "title": "引言",
+        "outline": "介绍课题的研究背景、意义以及当前温湿度监测技术的发展现状，明确本设计的目标与创新点。",
+        "sections": [
+          {
+            "number": "1.1",
+            "title": "课题背景",
+            "outline": "分析温湿度在工业、农业及日常生活中的重要性，指出传统监测手段的局限性"
+          },
+          {
+            "number": "1.2",
+            "title": "研究目的与意义",
+            "outline": "阐明本系统在智能化、远程化监测方面的应用价值"
+          },
+          {
+            "number": "1.3",
+            "title": "国内外研究现状",
+            "outline": "综述现有温湿度监测系统的技术路线与发展水平"
+          }
+        ]
+      },
+      {
+        "number": "2",
+        "title": "系统总体方案设计",
+        "outline": "提出系统的整体架构和技术路线，包括功能需求分析与方案选型。",
+        "sections": [
+          {
+            "number": "2.1",
+            "title": "系统功能需求分析",
+            "outline": "明确系统需实现的数据采集、显示、传输和报警等功能"
+          },
+          {
+            "number": "2.2",
+            "title": "系统总体架构设计",
+            "outline": "描述系统的硬件组成与软件流程框架"
+          },
+          {
+            "number": "2.3",
+            "title": "关键技术选型与比较",
+            "outline": "对比不同MCU、传感器和通信模块，确定选用STM32与DHT22等组件"
+          }
+        ]
+      },
+      {
+        "number": "3",
+        "title": "系统硬件设计",
+        "outline": "详细说明各硬件模块的设计原理与电路连接方式。",
+        "sections": [
+          {
+            "number": "3.1",
+            "title": "主控模块设计",
+            "outline": "介绍STM32最小系统电路，包括时钟、复位和电源设计"
+          },
+          {
+            "number": "3.2",
+            "title": "温湿度采集模块设计",
+            "outline": "阐述DHT22传感器的工作原理及其与STM32的接口设计"
+          },
+          {
+            "number": "3.3",
+            "title": "显示与通信模块设计",
+            "outline": "设计LCD显示电路与ESP8266 Wi-Fi模块的连接方案"
+          }
+        ]
+      },
+      {
+        "number": "4",
+        "title": "系统软件设计",
+        "outline": "完成系统各功能模块的程序设计与逻辑实现。",
+        "sections": [
+          {
+            "number": "4.1",
+            "title": "主程序流程设计",
+            "outline": "设计系统初始化、循环检测与任务调度流程"
+          },
+          {
+            "number": "4.2",
+            "title": "传感器数据采集程序",
+            "outline": "编写DHT22驱动代码，实现温湿度读取与校验"
+          },
+          {
+            "number": "4.3",
+            "title": "数据显示与网络传输程序",
+            "outline": "实现LCD显示控制及通过MQTT协议上传数据至云平台"
+          }
+        ]
+      },
+      {
+        "number": "5",
+        "title": "系统测试与结果分析",
+        "outline": "对系统各项功能进行测试，验证其稳定性与准确性。",
+        "sections": [
+          {
+            "number": "5.1",
+            "title": "测试环境与方法",
+            "outline": "搭建测试平台，制定功能与性能测试方案"
+          },
+          {
+            "number": "5.2",
+            "title": "测试结果展示",
+            "outline": "记录温湿度采集、显示、上传等环节的实际数据"
+          },
+          {
+            "number": "5.3",
+            "title": "结果分析与优化建议",
+            "outline": "分析误差来源，提出系统改进方向"
+          }
+        ]
+      },
+      {
+        "number": "6",
+        "title": "总结与展望",
+        "outline": "总结研究成果，指出系统优势与不足，展望未来扩展方向。",
+        "sections": [
+          {
+            "number": "6.1",
+            "title": "工作总结",
+            "outline": "归纳本设计完成的主要工作与达成的目标"
+          },
+          {
+            "number": "6.2",
+            "title": "系统不足与改进方向",
+            "outline": "分析当前系统的局限性，如功耗、响应速度等问题"
+          },
+          {
+            "number": "6.3",
+            "title": "应用前景展望",
+            "outline": "探讨系统在智慧农业、智能家居等领域的推广应用潜力"
+          }
+        ]
+      }
+    ],
+    "references_count": 10
+  },
+  "chapters": [
+    {
+      "number": "1",
+      "title": "引言",
+      "sections": [
+        {
+          "number": "1.1",
+          "title": "课题背景",
+          "content": "温湿度作为衡量环境状态的重要参数，在工业生产、农业生产以及人类日常生活中具有广泛而深远的影响。在工业领域，诸如电子制造、药品生产、食品加工等行业对环境的温湿度控制要求极为严格。例如，在半导体制造过程中，湿度过高可能导致芯片氧化或静电积累，从而影响产品质量与良品率[1]；而在制药行业中，药品的合成、储存及包装过程均需在恒定温湿度条件下进行，以确保其化学稳定性与药效[2]。农业方面，温室种植、畜禽养殖等现代化农业生产模式高度依赖于精准的环境调控。适宜的温湿度条件不仅能够促进作物生长、提高产量，还能有效抑制病虫害的发生[3]。研究表明，温室内相对湿度长期高于85%时，番茄等作物易发生灰霉病，严重影响农产品质量与经济效益[4]。在日常生活中，居住环境的温湿度同样直接关系到人体舒适度与健康水平。世界卫生组织（WHO）建议室内相对湿度应维持在40%~60%之间，过高或过低的湿度均可能引发呼吸系统疾病或加剧过敏症状[5]。\n\n然而，传统的温湿度监测手段多依赖于人工巡检或简单的机械式仪表，存在响应速度慢、测量精度低、数据记录不连续等显著缺陷。尤其在大范围或多点监测场景下，传统方法难以实现实时、动态的数据采集与远程监控，导致环境调控滞后甚至失效[6]。此外，多数传统设备缺乏数据存储与分析功能，无法为环境管理提供科学依据。随着物联网与嵌入式技术的发展，基于微控制器的智能监测系统逐渐成为解决上述问题的有效途径。特别是以STM32为代表的高性能ARM Cortex-M系列处理器，因其低功耗、高集成度和强大的外设接口能力，被广泛应用于环境监测系统的开发中[7]。因此，设计一种基于STM32的智能温湿度监测系统，不仅能够提升监测精度与自动化水平，也为实现环境参数的实时感知、远程传输与智能调控提供了技术支撑。"
+        }
+      ]
+    }
+  ],
+  "abstract_cn": "",
+  "abstract_en": "",
+  "references": [],
+  "acknowledgement": "",
+  "cover_info": {}
+}

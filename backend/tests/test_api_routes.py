@@ -13,8 +13,10 @@ def test_core_api_routes_are_registered() -> None:
     assert "/api/admin/billing/gateway-balance" in routes
     assert "/api/admin/billing/usage/reconcile" in routes
     assert "/api/admin/models" in routes
-    assert "/api/admin/schools" in routes
-    assert "/api/school-templates" in routes
+    assert "/api/admin/schools/schools" in routes
+    assert "/api/school-templates/schools" in routes
     assert "/api/projects" in routes
     assert "/api/projects/{project_id}/reference/review" in routes
     assert "/api/projects/{project_id}/rag/search" in routes
+    assert "/api/template-submissions" in routes
+    assert "/api/admin/template-submissions" in routes

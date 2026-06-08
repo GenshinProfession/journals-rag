@@ -16,6 +16,7 @@ from app.deps import DbSessionDep, WriterUserDep
 from app.models.school import School, SchoolTemplateGroup
 from app.models.user import AdminSchoolAssignment, User
 from app.schemas.schools import SchoolResponse, WriterTemplateOption
+from app.services.template_submission_service import get_template_completeness
 
 router = APIRouter()
 
@@ -45,6 +46,31 @@ def list_schools(_writer: WriterUserDep, db: DbSessionDep, q: str | None = None)
     if q:
         stmt = stmt.where(School.name.ilike(f"%{q}%"))
     return list(db.scalars(stmt).all())
+
+
+@router.get("/{group_id}/completeness")
+def get_template_completeness_endpoint(
+    _writer: WriterUserDep,
+    db: DbSessionDep,
+    group_id: UUID,
+) -> dict:
+    """Get completeness status for a school template group."""
+    # Verify the group exists and writer has access
+    group = db.get(SchoolTemplateGroup, group_id)
+    if group is None:
+        return {"error": "Template group not found"}
+    
+    # Check visibility
+    vis = _visibility_filter(_writer, db)
+    if vis is not True:
+        school = db.get(School, group.school_id)
+        if school is None:
+            return {"error": "School not found"}
+        hit = db.scalar(select(School.id).where(School.id == school.id, vis))
+        if hit is None:
+            return {"error": "Access denied"}
+    
+    return get_template_completeness(db, group_id)
 
 
 @router.get("/schools/{school_id}/templates", response_model=list[WriterTemplateOption])

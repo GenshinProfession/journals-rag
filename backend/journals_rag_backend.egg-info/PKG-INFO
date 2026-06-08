@@ -1,0 +1,25 @@
+Metadata-Version: 2.4
+Name: journals-rag-backend
+Version: 0.1.0
+Summary: FastAPI backend for thesis generation, billing, model routing, and RAG.
+Requires-Python: >=3.11
+Requires-Dist: alembic
+Requires-Dist: bcrypt<5,>=4.0.1
+Requires-Dist: celery
+Requires-Dist: fastapi
+Requires-Dist: httpx
+Requires-Dist: passlib[bcrypt]
+Requires-Dist: pgvector
+Requires-Dist: psycopg[binary]
+Requires-Dist: python-docx
+Requires-Dist: pypdf
+Requires-Dist: pydantic-settings
+Requires-Dist: python-jose[cryptography]
+Requires-Dist: python-multipart
+Requires-Dist: redis
+Requires-Dist: sqlalchemy
+Requires-Dist: uvicorn[standard]
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-asyncio; extra == "dev"
+Requires-Dist: ruff; extra == "dev"

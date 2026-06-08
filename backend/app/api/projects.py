@@ -829,7 +829,7 @@ def export_project(
     writer: WriterUserDep,
     db: DbSessionDep,
     project_id: UUID,
-    format: str = Query(default="markdown", pattern="^(markdown|latex|docx)$"),
+    format: str = Query(default="markdown", pattern="^(markdown|latex|docx|doc)$"),
 ) -> Response:
     project = _writer_project(db, writer, project_id)
     chapters_orm = list(
@@ -872,6 +872,23 @@ def export_project(
             content=docx_bytes,
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             headers={"Content-Disposition": 'attachment; filename="thesis.docx"'},
+        )
+
+    if format == "doc":
+        svc = DocxService(rules_json=rules_json, structure_json=struct_json, citation_json=cite_json)
+        doc_bytes = svc.generate_as_doc(
+            title=title,
+            degree_level=project.degree_level,
+            discipline=project.discipline,
+            abstract_cn=project.abstract or project.topic or "",
+            chapters=ch_dicts,
+            references=formatted_refs,
+            project_meta={"title": title, "学科门类": project.discipline},
+        )
+        return Response(
+            content=doc_bytes,
+            media_type="application/msword",
+            headers={"Content-Disposition": 'attachment; filename="thesis.doc"'},
         )
 
     if format == "latex":

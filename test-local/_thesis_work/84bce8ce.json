@@ -1,0 +1,132 @@
+{
+  "thesis_id": "84bce8ce",
+  "topic": "论文标题：基于 STM32 的智能温湿度监测系统设计\n写作主题：嵌入式系统、温湿度采集、STM32、传感器、远程监测、低成本设计\n模板规则：正文段落: 正文：宋体 / 小四号 / 1.5倍 / 2字符 / 两端对齐。\n标题层级: 一级标题：黑体 / 三号 / 左对齐；二级标题：黑体 / 小三号 / 左对齐。\n交叉引用: 正文引用显示为上标 [1]，点击跳转到文末参考文献；导出 DOCX 时应落成 Word 超链接/书签或交叉引用字段。\n参考文献: 参考文献标准：GB/T 7714；列表样式：宋体 / 五号 / 1.5倍。",
+  "spec_id": "f8912516",
+  "title": "基于 STM32 的智能温湿度监测系统设计",
+  "title_en": "Design of Intelligent Temperature and Humidity Monitoring System Based on STM32",
+  "outline": {
+    "title": "基于 STM32 的智能温湿度监测系统设计",
+    "title_en": "Design of Intelligent Temperature and Humidity Monitoring System Based on STM32",
+    "chapters": [
+      {
+        "number": "1",
+        "title": "绪论",
+        "sections": [
+          {
+            "number": "1.1",
+            "title": "研究背景与意义"
+          },
+          {
+            "number": "1.2",
+            "title": "国内外研究现状"
+          },
+          {
+            "number": "1.3",
+            "title": "论文主要研究内容与结构安排"
+          }
+        ]
+      },
+      {
+        "number": "2",
+        "title": "系统总体方案设计",
+        "sections": [
+          {
+            "number": "2.1",
+            "title": "系统功能需求分析"
+          },
+          {
+            "number": "2.2",
+            "title": "系统架构设计"
+          },
+          {
+            "number": "2.3",
+            "title": "关键技术选型与比较"
+          }
+        ]
+      },
+      {
+        "number": "3",
+        "title": "硬件系统设计",
+        "sections": [
+          {
+            "number": "3.1",
+            "title": "主控芯片 STM32 简介与选型"
+          },
+          {
+            "number": "3.2",
+            "title": "温湿度传感器模块设计"
+          },
+          {
+            "number": "3.3",
+            "title": "通信模块与远程传输电路设计"
+          },
+          {
+            "number": "3.4",
+            "title": "电源管理与低功耗设计"
+          }
+        ]
+      },
+      {
+        "number": "4",
+        "title": "软件系统设计",
+        "sections": [
+          {
+            "number": "4.1",
+            "title": "系统主程序流程设计"
+          },
+          {
+            "number": "4.2",
+            "title": "传感器数据采集与处理算法"
+          },
+          {
+            "number": "4.3",
+            "title": "远程监测与通信协议实现"
+          },
+          {
+            "number": "4.4",
+            "title": "人机交互界面设计"
+          }
+        ]
+      },
+      {
+        "number": "5",
+        "title": "系统测试与结果分析",
+        "sections": [
+          {
+            "number": "5.1",
+            "title": "测试环境搭建"
+          },
+          {
+            "number": "5.2",
+            "title": "功能测试与数据分析"
+          },
+          {
+            "number": "5.3",
+            "title": "系统稳定性与可靠性评估"
+          }
+        ]
+      },
+      {
+        "number": "6",
+        "title": "总结与展望",
+        "sections": [
+          {
+            "number": "6.1",
+            "title": "论文工作总结"
+          },
+          {
+            "number": "6.2",
+            "title": "系统创新点与优势"
+          },
+          {
+            "number": "6.3",
+            "title": "后续改进方向"
+          }
+        ]
+      }
+    ]
+  },
+  "chapters": [],
+  "cover_info": {},
+  "template_pages": []
+}

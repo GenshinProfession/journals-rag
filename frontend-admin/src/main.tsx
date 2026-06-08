@@ -13,6 +13,7 @@ import { PRODUCT_NAME, ADMIN_CONSOLE_TAGLINE } from './brand';
 import { Models } from './pages/Models';
 import { Schools } from './pages/Schools';
 import { TemplateEditor } from './pages/TemplateEditor';
+import { TemplateReview } from './pages/TemplateReview';
 import { Usage } from './pages/Usage';
 import { Universities } from './pages/Universities';
 import { Users } from './pages/Users';
@@ -78,14 +79,15 @@ function RequireAdmin({ children }: { children: React.ReactElement }) {
 }
 
 const ALL_MENU_ITEMS: { key: string; path: string; label: string; end?: boolean }[] = [
-  { key: 'dashboard',    path: '/',              label: '概览',     end: true },
-  { key: 'orgs',         path: '/orgs',          label: '机构授权' },
-  { key: 'writers',      path: '/writers',       label: '代写管理' },
-  { key: 'billing',      path: '/billing',       label: '计费流水' },
-  { key: 'usage',        path: '/usage',         label: 'AI 调用' },
-  { key: 'models',       path: '/models',        label: '模型目录' },
-  { key: 'schools',      path: '/schools',       label: '学校模板' },
-  { key: 'universities', path: '/universities',  label: '高校目录' },
+  { key: 'dashboard',          path: '/',                    label: '概览',     end: true },
+  { key: 'orgs',               path: '/orgs',                label: '机构授权' },
+  { key: 'writers',            path: '/writers',             label: '代写管理' },
+  { key: 'billing',            path: '/billing',             label: '计费流水' },
+  { key: 'usage',              path: '/usage',               label: 'AI 调用' },
+  { key: 'models',             path: '/models',              label: '模型目录' },
+  { key: 'schools',            path: '/schools',             label: '学校模板' },
+  { key: 'template-review',    path: '/template-review',     label: '模板审核' },
+  { key: 'universities',       path: '/universities',        label: '高校目录' },
 ];
 
 function Layout() {
@@ -138,6 +140,7 @@ function Layout() {
           <Route path="/models" element={<Models />} />
           <Route path="/schools" element={<Schools />} />
           <Route path="/schools/edit/:groupId" element={<TemplateEditor />} />
+          <Route path="/template-review" element={<TemplateReview />} />
           <Route path="/universities" element={<Universities />} />
         </Routes>
       </main>

@@ -1,0 +1,428 @@
+{
+  "_metadata": {
+    "school_name": "",
+    "college_name": "College of Computer and Information Sciences",
+    "degree_level": "bachelor",
+    "total_pages": 12,
+    "parsed_at": "2023-10-05T10:00:00Z",
+    "template_docx": "C:\\Users\\BlueJack\\Desktop\\journals-rag\\test-local\\_templates\\c44612bb.docx",
+    "original_file_name": "附件3：计算机与信息学院本科毕业设计说明书模板.doc"
+  },
+  "_structure": {
+    "description": "本模板包含双封面（中文封面+英文封面）、摘要、英文摘要、目录、正文、参考文献、致谢、附录，以及多个表格和图表示例",
+    "covers": [
+      {
+        "index": 1,
+        "type": "chinese",
+        "description": "中文封面，包含题目、学院、专业年级、学号、学生姓名、指导教师等信息",
+        "has_logo": false
+      },
+      {
+        "index": 2,
+        "type": "english",
+        "description": "英文封面，包含英文学院名、专业年级、学号、姓名、指导教师、提交时间",
+        "has_logo": false
+      }
+    ],
+    "special_pages": [
+      {
+        "type": "declaration",
+        "description": "未发现原创性声明页",
+        "page_hint": null
+      },
+      {
+        "type": "defense_record",
+        "description": "未发现答辩记录页",
+        "page_hint": null
+      }
+    ],
+    "body_start": {
+      "strategy": "after_toc",
+      "description": "正文从目录之后开始"
+    }
+  },
+  "page": {
+    "size": "A4",
+    "orientation": "portrait",
+    "margin": {
+      "top": 2.54,
+      "bottom": 2.54,
+      "left": 3.17,
+      "right": 3.17,
+      "binding": 0
+    }
+  },
+  "covers": [
+    {
+      "index": 1,
+      "type": "chinese",
+      "title_cn": {
+        "font": "黑体",
+        "size": "小二号",
+        "bold": true,
+        "align": "居中"
+      },
+      "title_en": {
+        "font": "Times New Roman",
+        "size": "二号",
+        "bold": false,
+        "align": "居中"
+      },
+      "fields": {
+        "college": {
+          "label": "学院",
+          "font": "宋体",
+          "size": "四号"
+        },
+        "major": {
+          "label": "专业年级",
+          "font": "宋体",
+          "size": "四号"
+        },
+        "student_id": {
+          "label": "学号",
+          "font": "宋体",
+          "size": "四号"
+        },
+        "student_name": {
+          "label": "姓名",
+          "font": "宋体",
+          "size": "四号"
+        },
+        "adviser": {
+          "label": "指导教师",
+          "font": "宋体",
+          "size": "四号"
+        },
+        "date": {
+          "label": "日期",
+          "font": "宋体",
+          "size": "四号"
+        }
+      }
+    },
+    {
+      "index": 2,
+      "type": "english",
+      "title_en": {
+        "font": "Times New Roman",
+        "size": "二号",
+        "bold": false,
+        "align": "居中"
+      },
+      "fields": {
+        "college": {
+          "label": "College",
+          "font": "Times New Roman",
+          "size": "小四号"
+        },
+        "major": {
+          "label": "Specialty and Grade",
+          "font": "Times New Roman",
+          "size": "小四号"
+        },
+        "student_id": {
+          "label": "Number",
+          "font": "Times New Roman",
+          "size": "小四号"
+        },
+        "student_name": {
+          "label": "Name",
+          "font": "Times New Roman",
+          "size": "小四号"
+        },
+        "adviser": {
+          "label": "Advisor",
+          "font": "Times New Roman",
+          "size": "小四号"
+        },
+        "date": {
+          "label": "Submitted Time",
+          "font": "Times New Roman",
+          "size": "小四号"
+        }
+      }
+    }
+  ],
+  "abstract_cn": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "宋体",
+      "size": "小四号",
+      "line_spacing": "1.5倍",
+      "first_indent": "2字符"
+    },
+    "keywords_label": {
+      "font": "宋体",
+      "size": "四号",
+      "bold": true
+    },
+    "keywords": {
+      "font": "宋体",
+      "size": "四号",
+      "separator": "；",
+      "count": "3-5个"
+    }
+  },
+  "abstract_en": {
+    "title": {
+      "font": "Times New Roman",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "Times New Roman",
+      "size": "小四号",
+      "line_spacing": "1.5倍"
+    },
+    "keywords_label": {
+      "font": "Times New Roman",
+      "size": "四号",
+      "bold": true
+    },
+    "keywords": {
+      "font": "Times New Roman",
+      "size": "四号",
+      "separator": "; "
+    }
+  },
+  "toc": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "level1": {
+      "font": "宋体",
+      "size": "小四号",
+      "bold": false
+    },
+    "level2": {
+      "font": "宋体",
+      "size": "小四号",
+      "bold": false
+    },
+    "level3": {
+      "font": "宋体",
+      "size": "小四号",
+      "bold": false
+    }
+  },
+  "body": {
+    "font": "宋体",
+    "size": "小四号",
+    "line_spacing": "1.5倍",
+    "first_indent": "2字符",
+    "align": "两端对齐"
+  },
+  "headings": [
+    {
+      "level": 1,
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "左对齐",
+      "numbering": "1",
+      "example": "1 引言"
+    },
+    {
+      "level": 2,
+      "font": "黑体",
+      "size": "三号",
+      "bold": true,
+      "align": "左对齐",
+      "numbering": "1.1",
+      "example": "1.1 课题设计的背景"
+    },
+    {
+      "level": 3,
+      "font": "黑体",
+      "size": "四号",
+      "bold": true,
+      "align": "左对齐",
+      "numbering": "1.1.1",
+      "example": "1.1.1 单片机最小系统"
+    }
+  ],
+  "figure": {
+    "title": {
+      "font": "宋体",
+      "size": "五号",
+      "bold": false,
+      "align": "居中"
+    },
+    "position": "图下方",
+    "numbering": "图 X-Y",
+    "example": "图 2-1"
+  },
+  "table": {
+    "title": {
+      "font": "宋体",
+      "size": "五号",
+      "bold": false,
+      "align": "居中"
+    },
+    "position": "表上方",
+    "numbering": "表 X-Y",
+    "example": "表 2-1"
+  },
+  "reference": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "style": "GB/T 7714",
+    "font": "宋体",
+    "size": "五号",
+    "line_spacing": "1.5倍",
+    "numbering": "[1]",
+    "type_marks": {
+      "journal": "[J]",
+      "book": "[M]",
+      "thesis": "[D]",
+      "conference": "[C]",
+      "electronic": "[EB/OL]"
+    }
+  },
+  "acknowledgement": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "宋体",
+      "size": "小四号",
+      "line_spacing": "1.5倍",
+      "first_indent": "2字符"
+    }
+  },
+  "appendix": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "宋体",
+      "size": "五号",
+      "line_spacing": "1.25倍",
+      "before_after": "0行"
+    },
+    "code": {
+      "font": "宋体",
+      "size": "五号",
+      "line_spacing": "单倍",
+      "before_after": "0行"
+    }
+  },
+  "header": {
+    "font": "宋体",
+    "size": "小五号",
+    "content": "章节标题"
+  },
+  "footer": {
+    "font": "宋体",
+    "size": "小五号",
+    "numbering": "阿拉伯数字",
+    "position": "居中"
+  },
+  "fill_fields": [
+    {
+      "key": "title",
+      "label": "论文题目",
+      "required": true,
+      "source": "template",
+      "page": 1,
+      "target": "模板第 1 页：论文题目 对应横线/占位",
+      "match": "题    目"
+    },
+    {
+      "key": "titleEn",
+      "label": "英文题目",
+      "required": false,
+      "source": "template",
+      "page": 1,
+      "target": "模板第 1 页：英文题目 对应横线/占位",
+      "match": "英文"
+    },
+    {
+      "key": "college",
+      "label": "学院",
+      "required": true,
+      "source": "template",
+      "page": 1,
+      "target": "模板第 1 页：学院 对应横线/占位",
+      "match": "学院"
+    },
+    {
+      "key": "major",
+      "label": "专业年级",
+      "required": true,
+      "source": "template",
+      "page": 1,
+      "target": "模板第 1 页：专业年级 对应横线/占位",
+      "match": "专业年级"
+    },
+    {
+      "key": "studentName",
+      "label": "学生姓名",
+      "required": true,
+      "source": "template",
+      "page": 1,
+      "target": "模板第 1 页：学生姓名 对应横线/占位",
+      "match": "学生姓名"
+    },
+    {
+      "key": "adviser",
+      "label": "指导教师、职称",
+      "required": false,
+      "source": "template",
+      "page": 1,
+      "target": "模板第 1 页：指导教师、职称 对应横线/占位",
+      "match": "指导教师"
+    }
+  ],
+  "body_target": {
+    "strategy": "before_first_body_heading",
+    "label": "正文标题附近",
+    "sections": [
+      {
+        "key": "abstract_cn",
+        "label": "中文摘要",
+        "target": "模板摘要页"
+      },
+      {
+        "key": "abstract_en",
+        "label": "英文摘要",
+        "target": "模板 Abstract 页"
+      },
+      {
+        "key": "body",
+        "label": "正文",
+        "target": "正文标题之后"
+      },
+      {
+        "key": "references",
+        "label": "参考文献",
+        "target": "参考文献页"
+      },
+      {
+        "key": "acknowledgement",
+        "label": "致谢",
+        "target": "致谢页"
+      }
+    ]
+  }
+}

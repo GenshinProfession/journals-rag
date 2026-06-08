@@ -385,3 +385,59 @@ class DocxService:
         buf = BytesIO()
         doc.save(buf)
         return buf.getvalue()
+
+    def generate_as_doc(
+        self,
+        *,
+        title: str,
+        degree_level: str,
+        discipline: str,
+        abstract_cn: str = "",
+        abstract_en: str = "",
+        keywords_cn: str = "",
+        keywords_en: str = "",
+        chapters: list[dict[str, str]],
+        references: list[str] | None = None,
+        project_meta: dict | None = None,
+    ) -> bytes:
+        """
+        Generate document in legacy .doc format.
+        
+        This method:
+        1. Generates .docx using python-docx
+        2. Converts to .doc using FormatConverter
+        3. Returns .doc bytes
+        """
+        # First generate .docx
+        docx_bytes = self.generate(
+            title=title,
+            degree_level=degree_level,
+            discipline=discipline,
+            abstract_cn=abstract_cn,
+            abstract_en=abstract_en,
+            keywords_cn=keywords_cn,
+            keywords_en=keywords_en,
+            chapters=chapters,
+            references=references,
+            project_meta=project_meta,
+        )
+        
+        # Convert to .doc
+        import tempfile
+        from pathlib import Path
+        from app.services.format_converter import get_converter
+        
+        converter = get_converter()
+        
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp_docx:
+            tmp_docx.write(docx_bytes)
+            tmp_docx_path = Path(tmp_docx.name)
+        
+        try:
+            tmp_doc_path = tmp_docx_path.with_suffix('.doc')
+            converter.convert(tmp_docx_path, 'doc', tmp_doc_path)
+            return tmp_doc_path.read_bytes()
+        finally:
+            tmp_docx_path.unlink(missing_ok=True)
+            if 'tmp_doc_path' in locals():
+                tmp_doc_path.unlink(missing_ok=True)

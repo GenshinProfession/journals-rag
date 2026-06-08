@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>论文模板区与正文区路线预览</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #fff;
+      --ink: #182230;
+      --muted: #667085;
+      --line: #d9e1ea;
+      --blue: #2563eb;
+      --green: #16803c;
+      --amber: #b45309;
+      --red: #b42318;
+      --soft-blue: #edf4ff;
+      --soft-green: #eefaf2;
+      --soft-amber: #fff7e8;
+      --soft-red: #fff1f1;
+      --shadow: 0 14px 30px rgba(15, 23, 42, .08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 276px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 20px 16px;
+      background: #111827;
+      color: #e5e7eb;
+      overflow: auto;
+    }
+
+    .brand {
+      padding: 4px 8px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .12);
+      margin-bottom: 16px;
+    }
+
+    .brand h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .brand p {
+      margin: 0;
+      color: #a7b0c0;
+      font-size: 12px;
+    }
+
+    .tree-title {
+      color: #8ea0ba;
+      font-size: 12px;
+      margin: 18px 8px 8px;
+    }
+
+    .tree-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #d6deea;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .tree-item.active { background: #263244; color: #fff; }
+    .tree-item.sub { padding-left: 24px; color: #b8c3d4; }
+    .tree-item span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f5f7fa;
+      color: #475467;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill.write { color: var(--blue); background: var(--soft-blue); border-color: #c9dbff; }
+    .pill.fill { color: var(--amber); background: var(--soft-amber); border-color: #f3d49a; }
+    .pill.keep { color: var(--green); background: var(--soft-green); border-color: #bde8c8; }
+    .pill.risk { color: var(--red); background: var(--soft-red); border-color: #ffc9c9; }
+    .sidebar .pill { min-height: 20px; padding: 1px 7px; font-size: 11px; border: 0; }
+
+    .main {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 22px 24px 40px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .topbar h2 {
+      margin: 0 0 5px;
+      font-size: 22px;
+    }
+
+    .topbar p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 7px;
+      padding: 9px 12px;
+      font: inherit;
+      font-size: 13px;
+      cursor: default;
+    }
+
+    button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .notice {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, .04);
+    }
+
+    .notice strong { display: block; font-size: 14px; margin-bottom: 4px; }
+    .notice p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .paper-wrap {
+      background: #e9edf3;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .paper {
+      width: min(100%, 860px);
+      min-height: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 54px 66px 70px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, .16);
+      font-family: SimSun, "Songti SC", serif;
+    }
+
+    .doc-chip-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .paper h1 {
+      margin: 0 0 18px;
+      text-align: center;
+      font-family: SimHei, "Microsoft YaHei", sans-serif;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .paper h2 {
+      margin: 30px 0 13px;
+      font-family: SimHei, "Microsoft YaHei", sans-serif;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .paper h3 {
+      margin: 20px 0 9px;
+      font-family: SimHei, "Microsoft YaHei", sans-serif;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .paper p {
+      margin: 0 0 10px;
+      font-size: 14px;
+      text-indent: 2em;
+      text-align: justify;
+    }
+
+    .zone-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      margin: 14px -12px 16px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #e5ebf2;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .zone-title b { font-size: 15px; }
+    .zone-title span { color: var(--muted); font-size: 12px; }
+
+    .template-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+      margin-bottom: 20px;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .field label {
+      color: #475467;
+      font-size: 13px;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      padding: 8px 9px;
+      font: inherit;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .title-box {
+      padding: 16px 18px;
+      border: 1px solid #dbe5f1;
+      border-radius: 8px;
+      background: #fbfdff;
+      margin-bottom: 16px;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .title-box .label {
+      color: #667085;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .title-box .cn {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .title-box .topic {
+      color: #475467;
+      font-size: 13px;
+    }
+
+    .format-card {
+      margin: 16px 0 20px;
+      border: 1px solid #dbe5f1;
+      border-radius: 8px;
+      background: #fbfdff;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .format-head {
+      padding: 10px 12px;
+      background: #eef4fb;
+      border-bottom: 1px solid #dbe5f1;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .format-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .format-grid div {
+      padding: 10px 12px;
+      border-right: 1px solid #e5ebf2;
+      border-bottom: 1px solid #e5ebf2;
+      font-size: 12px;
+      color: #475467;
+    }
+
+    .format-grid b {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+
+    .outline-map {
+      border: 1px solid #dbe5f1;
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      margin-bottom: 18px;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .outline-map h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .outline-map ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #475467;
+      font-size: 13px;
+    }
+
+    .paragraph {
+      position: relative;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      padding: 7px 9px;
+      margin: 0 -9px 8px;
+    }
+
+    .paragraph.selected {
+      border-color: #9ec5ff;
+      background: #f5f9ff;
+    }
+
+    .inline-tools {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin: 8px 0 14px;
+      padding-left: 2em;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .inline-tools button {
+      padding: 5px 9px;
+      font-size: 12px;
+    }
+
+    .citation {
+      color: #1d4ed8;
+      border-bottom: 1px solid #93c5fd;
+      font-family: "Times New Roman", serif;
+      font-size: 75%;
+      vertical-align: super;
+      text-indent: 0;
+      text-decoration: none;
+    }
+
+    .memory-card {
+      margin: 16px 0 20px;
+      border: 1px solid #c9dcff;
+      border-radius: 8px;
+      background: #f6f9ff;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .memory-head {
+      padding: 10px 12px;
+      background: #edf4ff;
+      border-bottom: 1px solid #c9dcff;
+      font-weight: 700;
+      color: #1d4ed8;
+      font-size: 13px;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .memory-grid div {
+      padding: 10px 12px;
+      border-right: 1px solid #dce8ff;
+      border-bottom: 1px solid #dce8ff;
+      color: #475467;
+      font-size: 12px;
+    }
+
+    .memory-grid b {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+
+    .references p {
+      text-indent: 0;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .execution-notes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel h3 {
+      margin: 0;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+      font-size: 15px;
+    }
+
+    .panel-body { padding: 15px; }
+
+    .route-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .route-step {
+      border: 1px solid #e5ebf2;
+      border-radius: 8px;
+      padding: 11px;
+      background: #fff;
+    }
+
+    .route-step strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .route-step p {
+      margin: 0;
+      color: #667085;
+      font-size: 13px;
+    }
+
+    .note-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #475467;
+      font-size: 13px;
+    }
+
+    .note-list li { margin-bottom: 8px; }
+
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; }
+      .execution-notes { grid-template-columns: 1fr; }
+      .template-fields, .format-grid, .memory-grid { grid-template-columns: 1fr; }
+      .notice { grid-template-columns: 1fr; }
+      .paper { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>文档内写作模式</h1>
+        <p>左侧只承接树、状态和跳转；真正编辑发生在文档里。</p>
+      </div>
+
+      <div class="tree-title">模板区</div>
+      <div class="tree-item active"><span>封面资料</span><span class="pill fill">人工填</span></div>
+      <div class="tree-item"><span>论文标题</span><span class="pill fill">来自模板</span></div>
+      <div class="tree-item"><span>目录页</span><span class="pill keep">保留</span></div>
+
+      <div class="tree-title">正文区</div>
+      <div class="tree-item"><span>正文格式规则</span><span class="pill write">必须解析</span></div>
+      <div class="tree-item"><span>长生成记忆</span><span class="pill write">必须支持</span></div>
+      <div class="tree-item sub"><span>1 绪论</span><span class="pill write">AI 写</span></div>
+      <div class="tree-item sub"><span>2 系统总体方案设计</span><span class="pill write">AI 写</span></div>
+      <div class="tree-item sub"><span>3 系统硬件设计</span><span class="pill write">AI 写</span></div>
+      <div class="tree-item sub"><span>参考文献</span><span class="pill write">引用联动</span></div>
+      <div class="tree-item sub"><span>致谢</span><span class="pill write">AI 写</span></div>
+
+      <div class="tree-title">导出检查</div>
+      <div class="tree-item"><span>正文样式</span><span class="pill write">已锁定</span></div>
+      <div class="tree-item"><span>上标引用 / 交叉引用</span><span class="pill risk">待实现</span></div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2>新的产品结构：模板区 + 正文区</h2>
+          <p>模板区负责人工资料和学校固定格式；正文区负责 AI 写作、引用、段落微调和最终导出。</p>
+        </div>
+        <div class="actions">
+          <button>模板指纹复用</button>
+          <button>分析正文格式</button>
+          <button class="primary">生成正文大纲</button>
+        </div>
+      </div>
+
+      <div class="notice">
+        <div>
+          <strong>关键修正：论文标题、论文主题、正文方向要分开</strong>
+          <p>论文标题应来自模板区的标题字段；论文主题是给 AI 写作时使用的研究方向、对象、方法、范围，不能只让用户填一个“题目”就直接生成大纲。</p>
+        </div>
+        <span class="pill write">已写入路线</span>
+      </div>
+
+      <section class="workspace">
+        <div class="paper-wrap">
+          <article class="paper">
+            <div class="doc-chip-row">
+              <span class="pill fill">模板区：人工填写</span>
+              <span class="pill write">正文区：AI 生成</span>
+              <span class="pill keep">目录 / 固定页：模板保留</span>
+            </div>
+
+            <div class="zone-title">
+              <b>模板区</b>
+              <span>只让用户填写模板要求的人工资料，不消耗 AI 写作额度</span>
+            </div>
+
+            <h1>基于 STM32 的智能温湿度监测系统设计</h1>
+            <div class="title-box">
+              <div class="label">论文标题，来自模板区字段</div>
+              <div class="cn">基于 STM32 的智能温湿度监测系统设计</div>
+              <div class="topic">论文主题给 AI 使用：嵌入式系统、温湿度采集、STM32、DHT22、物联网远程监测、低成本设计。</div>
+            </div>
+
+            <div class="template-fields">
+              <div class="field"><label>学院</label><input value="计算机与信息工程学院" readonly /></div>
+              <div class="field"><label>专业</label><input value="物联网工程" readonly /></div>
+              <div class="field"><label>学号</label><input value="20260001" readonly /></div>
+              <div class="field"><label>姓名</label><input value="张同学" readonly /></div>
+              <div class="field"><label>指导教师</label><input value="王老师" readonly /></div>
+              <div class="field"><label>完成日期</label><input value="2026 年 6 月" readonly /></div>
+            </div>
+
+            <div class="zone-title">
+              <b>正文区格式分析</b>
+              <span>这些不是展示用，是导出 DOCX 准确度的核心输入</span>
+            </div>
+
+            <div class="format-card">
+              <div class="format-head">正文区必须解析出的格式规则</div>
+              <div class="format-grid">
+                <div><b>页面与分节</b>A4、页边距、页眉页脚、章节是否另起页</div>
+                <div><b>正文段落</b>字体、字号、行距、首行缩进、段前段后、两端对齐</div>
+                <div><b>标题层级</b>一级到四级标题字体、编号规则、间距、是否居中</div>
+                <div><b>图表公式</b>题注位置、编号方式、图表标题字体、公式编号</div>
+                <div><b>参考文献</b>GB/T 7714 或其他格式、列表缩进、正文标注样式</div>
+                <div><b>特殊区块</b>摘要、目录、正文、参考文献、致谢、附录的先后顺序</div>
+              </div>
+            </div>
+
+            <div class="zone-title">
+              <b>正文区</b>
+              <span>AI 写作、大纲映射、文献引用、段落微调都在文档里完成</span>
+            </div>
+
+            <div class="memory-card">
+              <div class="memory-head">长生成与上下文记忆</div>
+              <div class="memory-grid">
+                <div><b>项目记忆</b>保存论文标题、研究主题、模板正文格式、已确认大纲、术语表和禁止事项。</div>
+                <div><b>章节记忆</b>每章生成后沉淀摘要、关键结论、已用文献和待衔接内容，供下一章引用。</div>
+                <div><b>段落续写</b>长内容按小节/段落生成，失败后可从最后成功段继续，不重复扣整篇成本。</div>
+                <div><b>一致性检查</b>生成前检索前文记忆，避免术语、设备型号、章节观点和引用编号前后不一致。</div>
+              </div>
+            </div>
+
+            <div class="outline-map">
+              <h4>大纲生成输入不再只有“论文主题”</h4>
+              <ul>
+                <li>论文标题：模板区已填好的正式标题。</li>
+                <li>论文主题：研究对象、方法、范围、实验/设计目标。</li>
+                <li>模板正文槽位：哪些章节属于正文区，哪些是参考文献和致谢。</li>
+                <li>可用文献：上传或检索后的文献，决定正文引用和参考文献列表。</li>
+              </ul>
+            </div>
+
+            <h2>1 绪论</h2>
+            <h3>1.1 研究背景与意义</h3>
+            <div class="paragraph selected">
+              <p>温湿度监测在农业生产、仓储管理和智能家居等场景中具有重要意义。传统人工记录方式存在实时性不足、数据连续性差和人工成本较高等问题，因此有必要设计一种低成本、可扩展、能够稳定运行的智能监测系统<a class="citation" href="#ref1">[1]</a>。</p>
+            </div>
+            <div class="inline-tools">
+              <button>润色本段</button>
+              <button>扩写本段</button>
+              <button>降低重复率</button>
+              <button class="primary">按要求改写</button>
+              <button>插入引用</button>
+            </div>
+            <p>本课题以 STM32 微控制器为核心，结合温湿度传感器、显示模块和无线通信模块，实现环境数据采集、展示与上传。</p>
+
+            <h3>1.2 国内外研究现状</h3>
+            <p>现有温湿度监测系统逐渐从单点采集转向网络化、平台化和智能化管理，相关研究主要集中在传感器精度、低功耗通信和远程数据管理等方向<a class="citation" href="#ref2">[2]</a>。</p>
+
+            <h2>2 系统总体方案设计</h2>
+            <h3>2.1 系统功能需求分析</h3>
+            <p>系统需要完成温湿度数据采集、阈值报警、实时显示和远程传输等功能，并保证硬件结构简洁、软件逻辑清晰。</p>
+
+            <h1 style="margin-top: 42px;">参考文献</h1>
+            <div class="references">
+              <p id="ref1">[1] 张三, 李四. 基于 STM32 的环境监测系统设计[J]. 电子技术应用, 2024, 50(3): 88-93.</p>
+              <p id="ref2">[2] Wang X, Liu Y. Design of an IoT Temperature and Humidity Monitoring Platform[J]. Sensors, 2023, 23(11): 1-14.</p>
+            </div>
+
+            <h1 style="margin-top: 36px;">致谢</h1>
+            <p>感谢指导教师在论文选题、系统设计和论文修改过程中给予的指导与帮助。</p>
+          </article>
+        </div>
+
+        <section class="execution-notes">
+          <div class="panel">
+            <h3>后续执行路线</h3>
+            <div class="panel-body route-list">
+              <div class="route-step">
+                <strong>1. 模板解析输出改成两大区</strong>
+                <p>结构 DSL 直接产出 template_zone 与 body_zone。模板区只收集字段，正文区才进入 AI 写作。</p>
+              </div>
+              <div class="route-step">
+                <strong>2. 正文格式完整分析</strong>
+                <p>正文区需要独立抽取 body、heading1-4、figure、table、equation、reference、acknowledgement 的格式。</p>
+              </div>
+              <div class="route-step">
+                <strong>3. 大纲生成输入重构</strong>
+                <p>使用正式标题 + 研究主题 + 模板正文槽位 + 文献约束，而不是只传一个 topic。</p>
+              </div>
+              <div class="route-step">
+                <strong>4. 文档内编辑交互</strong>
+                <p>段落点击后浮出工具条；左侧树只做跳转、状态、章节批量操作，不再左右对照编辑。</p>
+              </div>
+              <div class="route-step">
+                <strong>5. 长生成与记忆系统</strong>
+                <p>生成过程拆成项目记忆、章节记忆、小节生成、段落续写和一致性检查，支持长论文不断点、不丢上下文。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>参考文献脚注 / 交叉引用调研结论</h3>
+            <div class="panel-body">
+              <ul class="note-list">
+                <li>当前本地实现只是普通文本标注和最后的参考文献列表，没有真正建立 Word 脚注、尾注或交叉引用字段。</li>
+                <li>python-docx 官方 API 对脚注/尾注支持不足；要做原生脚注需要注入 footnotes.xml、关系文件和 w:footnoteReference。</li>
+                <li>如果学校要求的是 GB/T 7714 的正文 [1] 标注，应渲染为小号右上角上标，并做“内部超链接 + bookmark”，让上标 [1] 跳到最后参考文献。</li>
+                <li>如果学校要求页脚脚注，则需要实现 OOXML 后处理，不能只靠 python-docx 普通段落 API。</li>
+                <li>当前 test-local 的 bookmark id 固定为 0，必须改成递增唯一 id；内部链接应使用 w:anchor，而不是把 #ref 当外部 relationship。正文 run 需要设置 vertAlign=superscript 和更小字号。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

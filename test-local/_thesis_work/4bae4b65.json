@@ -1,0 +1,123 @@
+{
+  "thesis_id": "4bae4b65",
+  "topic": "",
+  "spec_id": "0084011d",
+  "title": "213",
+  "title_en": "123",
+  "chapters": [
+    {
+      "number": "1",
+      "title": "引言",
+      "sections": [
+        {
+          "number": "1.1",
+          "title": "研究背景与意义",
+          "content": ""
+        },
+        {
+          "number": "1.2",
+          "title": "国内外研究现状",
+          "content": ""
+        },
+        {
+          "number": "1.3",
+          "title": "研究内容与结构安排",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "number": "2",
+      "title": "理论基础与相关概念",
+      "sections": [
+        {
+          "number": "2.1",
+          "title": "核心概念界定",
+          "content": ""
+        },
+        {
+          "number": "2.2",
+          "title": "相关理论框架",
+          "content": ""
+        },
+        {
+          "number": "2.3",
+          "title": "技术方法概述",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "number": "3",
+      "title": "研究设计与方法",
+      "sections": [
+        {
+          "number": "3.1",
+          "title": "研究思路与路径",
+          "content": ""
+        },
+        {
+          "number": "3.2",
+          "title": "数据来源与样本选择",
+          "content": ""
+        },
+        {
+          "number": "3.3",
+          "title": "模型构建与分析工具",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "number": "4",
+      "title": "实证分析或案例研究",
+      "sections": [
+        {
+          "number": "4.1",
+          "title": "数据分析结果",
+          "content": ""
+        },
+        {
+          "number": "4.2",
+          "title": "案例描述与比较",
+          "content": ""
+        },
+        {
+          "number": "4.3",
+          "title": "结果讨论",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "number": "5",
+      "title": "结论与建议",
+      "sections": [
+        {
+          "number": "5.1",
+          "title": "主要研究结论",
+          "content": ""
+        },
+        {
+          "number": "5.2",
+          "title": "政策或实践建议",
+          "content": ""
+        },
+        {
+          "number": "5.3",
+          "title": "研究局限与展望",
+          "content": ""
+        }
+      ]
+    }
+  ],
+  "references": [],
+  "cover_info": {
+    "college": "213",
+    "major": "123",
+    "student_id": "",
+    "name": "123",
+    "advisor": "21321",
+    "date": ""
+  }
+}

@@ -13,9 +13,10 @@ import {
   EditOutlined, SyncOutlined, DownloadOutlined, ExperimentOutlined,
   OrderedListOutlined, SaveOutlined, DeleteOutlined, SafetyCertificateOutlined,
   ThunderboltOutlined, PlusOutlined,
-  FileWordOutlined,
+  FileWordOutlined, UploadOutlined as UploadTemplateOutlined,
 } from '@ant-design/icons';
 import { apiFetch } from '../api/client';
+import { SubmitTemplateModal } from '../components/SubmitTemplateModal';
 
 const { Text, Title } = Typography;
 
@@ -155,8 +156,29 @@ export function Wizard() {
   const [litSearchQuery, setLitSearchQuery] = useState('');
   const [litSearchResults, setLitSearchResults] = useState<SearchResult[]>([]);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showSubmitTemplate, setShowSubmitTemplate] = useState(false);
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
+
+  // Template completeness query
+  const templateCompletenessQ = useQuery({
+    queryKey: ['writer', 'template-completeness', project?.school_id],
+    queryFn: async () => {
+      if (!project?.school_id) return null;
+      // First get the template groups for this school
+      const groups = await apiFetch(`/api/schools/${project.school_id}/templates`) as Array<{ group_id: string }>;
+      if (!groups?.length) return null;
+      // Then check completeness of the first group
+      return apiFetch(`/api/school-templates/${groups[0].group_id}/completeness`) as Promise<{
+        has_group: boolean;
+        structure: boolean;
+        format_rules: boolean;
+        citation_rules: boolean;
+      }>;
+    },
+    enabled: Boolean(project?.school_id),
+  });
+  const templateCompleteness = templateCompletenessQ.data;
 
   useEffect(() => {
     setActiveChapterId(null); setChapterDrafts({});
@@ -418,6 +440,34 @@ export function Wizard() {
           ]}}>
             <Button icon={<DownloadOutlined />} loading={exportDoc.isPending}>导出</Button>
           </Dropdown>
+          
+          {/* Template status indicator */}
+          {templateCompleteness && (
+            <Tooltip title={
+              <div>
+                <div>结构规则: {templateCompleteness.structure ? '✅ 已配置' : '❌ 未配置'}</div>
+                <div>格式规则: {templateCompleteness.format_rules ? '✅ 已配置' : '❌ 未配置'}</div>
+                <div>引用规则: {templateCompleteness.citation_rules ? '✅ 已配置' : '❌ 未配置'}</div>
+              </div>
+            }>
+              <Tag 
+                color={templateCompleteness.structure && templateCompleteness.format_rules && templateCompleteness.citation_rules ? 'success' : 'warning'}
+                style={{ cursor: 'pointer' }}
+                onClick={() => setShowSubmitTemplate(true)}
+              >
+                模板: {templateCompleteness.structure && templateCompleteness.format_rules && templateCompleteness.citation_rules ? '完整' : '不完整'}
+              </Tag>
+            </Tooltip>
+          )}
+          {(!templateCompleteness || !templateCompleteness.has_group) && project?.school_id && (
+            <Button 
+              size="small" 
+              icon={<UploadTemplateOutlined />} 
+              onClick={() => setShowSubmitTemplate(true)}
+            >
+              上传学校模板
+            </Button>
+          )}
         </Space>
       </div>
 
@@ -695,6 +745,13 @@ export function Wizard() {
         )}
         {litSearch.isSuccess && litSearchResults.length === 0 && <Empty description="未找到相关文献" />}
       </Modal>
+
+      {/* Submit Template Modal */}
+      <SubmitTemplateModal
+        open={showSubmitTemplate}
+        onClose={() => setShowSubmitTemplate(false)}
+        schoolName={project?.school_id ? undefined : undefined}
+      />
     </div>
   );
 }

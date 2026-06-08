@@ -1,4 +1,4 @@
-from app.models.ai_usage import AIUsageRecord
+﻿from app.models.ai_usage import AIUsageRecord
 from app.models.billing import AccountWallet, RechargeRecord, WalletLedger
 from app.models.job import BackgroundJob
 from app.models.model_catalog import ModelCatalog
@@ -11,6 +11,7 @@ from app.models.school import (
     TemplateFormatRules,
     TemplateCitationRules,
 )
+from app.models.template_submission import TemplateSubmission
 from app.models.university import UniversityDirectory
 from app.models.user import AdminSchoolAssignment, User
 
@@ -34,7 +35,7 @@ __all__ = [
     "TemplateCitationRules",
     "TemplateFormatRules",
     "TemplateStructure",
+    "TemplateSubmission",
     "User",
-    "UniversityDirectory",
     "WalletLedger",
 ]

@@ -12,7 +12,7 @@ import {
   useParams,
 } from 'react-router-dom';
 import { Avatar, Button, ConfigProvider, Input, Layout } from 'antd';
-import { HomeOutlined, PlusOutlined, ReadOutlined, WalletOutlined } from '@ant-design/icons';
+import { FileTextOutlined, HomeOutlined, PlusOutlined, ReadOutlined, WalletOutlined } from '@ant-design/icons';
 import zhCN from 'antd/locale/zh_CN';
 import { WriterAuthProvider, useWriterAuth } from './auth/WriterAuthContext';
 import { LoginModal } from './components/LoginModal';
@@ -22,6 +22,7 @@ import { NewProject } from './pages/NewProject';
 import { Wallet } from './pages/Wallet';
 import { Wizard } from './pages/Wizard';
 import { Guide } from './pages/Guide';
+import { TemplateSubmissions } from './pages/TemplateSubmissions';
 import './styles.css';
 
 const queryClient = new QueryClient();
@@ -142,6 +143,7 @@ function WriterAppShell() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {navItem('/', <HomeOutlined />, '工作台', true)}
           {navItem('/wallet', <WalletOutlined />, '余额')}
+          {navItem('/template-submissions', <FileTextOutlined />, '模板贡献')}
           {navItem('/guide', <ReadOutlined />, '使用教程')}
         </div>
 
@@ -219,6 +221,7 @@ function WriterAppShell() {
             <Route path="/work/new" element={<NewProject />} />
             <Route path="/work/:projectId" element={<Wizard />} />
             <Route path="/wallet" element={<Wallet />} />
+            <Route path="/template-submissions" element={<TemplateSubmissions />} />
             <Route path="/guide" element={<Guide />} />
             <Route path="/wizard" element={<Navigate to="/" replace />} />
             <Route path="/wizard/:projectId" element={<LegacyWizardRedirect />} />

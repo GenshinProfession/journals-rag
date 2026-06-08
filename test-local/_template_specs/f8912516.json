@@ -1,0 +1,260 @@
+{
+  "_metadata": {
+    "version": "2.0",
+    "school_name": "学校名称",
+    "college_name": "College of Computer and Information Sciences",
+    "degree_level": "bachelor",
+    "parsed_at": "2024-06-05T10:00:00Z",
+    "source_file": "论文模板文档.txt"
+  },
+  "page": {
+    "size": "A4",
+    "orientation": "portrait"
+  },
+  "margin": {
+    "top": 2.54,
+    "bottom": 2.54,
+    "left": 3.17,
+    "right": 3.17,
+    "binding": 0
+  },
+  "cover": {
+    "title_cn": {
+      "font": "宋体",
+      "size": "小二号",
+      "bold": false,
+      "align": "居中"
+    },
+    "title_en": {
+      "font": "Times New Roman",
+      "size": "二号",
+      "bold": false,
+      "align": "居中",
+      "case_rule": "实词首字母大写"
+    },
+    "field": {
+      "font": "宋体",
+      "size": "四号"
+    },
+    "advisor_format": "Professor（教授）、Associate Professor（副教授）、Lecturer（讲师）",
+    "date_format": "YYYY 年 M 月"
+  },
+  "abstract_cn": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中",
+      "spacing_before": "0行",
+      "spacing_after": "0行"
+    },
+    "body": {
+      "font": "宋体",
+      "size": "小四号",
+      "line_spacing": "1.5倍",
+      "first_indent": "2字符"
+    },
+    "keywords_label": {
+      "font": "宋体",
+      "size": "四号",
+      "bold": true
+    },
+    "keywords": {
+      "font": "宋体",
+      "size": "四号",
+      "separator": "；",
+      "count_min": 3,
+      "count_max": 5
+    }
+  },
+  "abstract_en": {
+    "title": {
+      "font": "Times New Roman",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "Times New Roman",
+      "size": "小四号",
+      "line_spacing": "1.5倍"
+    },
+    "keywords_label": {
+      "font": "Times New Roman",
+      "size": "四号",
+      "bold": true
+    },
+    "keywords": {
+      "font": "Times New Roman",
+      "size": "四号",
+      "separator": "; "
+    }
+  },
+  "toc": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "level1": {
+      "font": "宋体",
+      "size": "小四号",
+      "bold": false
+    },
+    "level2": {
+      "font": "宋体",
+      "size": "小四号",
+      "bold": false
+    },
+    "level3": {
+      "font": "宋体",
+      "size": "小四号",
+      "bold": false
+    }
+  },
+  "body": {
+    "font": "宋体",
+    "size": "小四号",
+    "line_spacing": "1.5倍",
+    "first_indent": "2字符",
+    "align": "两端对齐",
+    "spacing_before": "0行",
+    "spacing_after": "0行"
+  },
+  "heading1": {
+    "font": "黑体",
+    "size": "三号",
+    "bold": true,
+    "align": "左对齐",
+    "spacing_before": "0行",
+    "spacing_after": "0行",
+    "numbering": "1",
+    "example": "1 引言"
+  },
+  "heading2": {
+    "font": "黑体",
+    "size": "小三号",
+    "bold": true,
+    "align": "左对齐",
+    "spacing_before": "0行",
+    "spacing_after": "0行",
+    "numbering": "1.1",
+    "example": "1.1 课题设计的背景"
+  },
+  "heading3": {
+    "font": "黑体",
+    "size": "四号",
+    "bold": true,
+    "align": "左对齐",
+    "spacing_before": "0行",
+    "spacing_after": "0行",
+    "numbering": "1.1.1",
+    "example": "1.1.1 具体内容"
+  },
+  "heading4": {
+    "font": "黑体",
+    "size": "小四号",
+    "bold": true,
+    "align": "左对齐",
+    "spacing_before": "0行",
+    "spacing_after": "0行"
+  },
+  "figure": {
+    "title": {
+      "font": "宋体",
+      "size": "五号",
+      "bold": false,
+      "align": "居中"
+    },
+    "position": "图下方",
+    "numbering": "章节编号",
+    "number_format": "图 X-Y",
+    "example": "图 2-1"
+  },
+  "table": {
+    "title": {
+      "font": "宋体",
+      "size": "五号",
+      "bold": false,
+      "align": "居中"
+    },
+    "position": "表上方",
+    "numbering": "章节编号",
+    "number_format": "表 X-Y",
+    "example": "表 2-1"
+  },
+  "equation": {
+    "numbering": "章节编号",
+    "number_format": "(X-Y)",
+    "number_align": "右对齐",
+    "example": "(4-1)"
+  },
+  "reference": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "style": "GB/T 7714",
+    "font": "宋体",
+    "size": "五号",
+    "line_spacing": "1.5倍",
+    "numbering": "[1]",
+    "inline_format": "[1]",
+    "type_marks": {
+      "journal": "[J]",
+      "book": "[M]",
+      "thesis": "[D]",
+      "conference": "[C]",
+      "electronic": "[EB/OL]"
+    },
+    "multi_author": "超过3人用'等'或'et al.'"
+  },
+  "acknowledgement": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "宋体",
+      "size": "小四号",
+      "line_spacing": "1.5倍",
+      "first_indent": "2字符"
+    }
+  },
+  "appendix": {
+    "title": {
+      "font": "黑体",
+      "size": "小二号",
+      "bold": true,
+      "align": "居中"
+    },
+    "body": {
+      "font": "宋体",
+      "size": "五号",
+      "line_spacing": "1.25倍",
+      "spacing_before": "0行",
+      "spacing_after": "0行"
+    },
+    "code": {
+      "font": "Courier New",
+      "size": "五号",
+      "line_spacing": "单倍"
+    }
+  },
+  "header": {
+    "font": "宋体",
+    "size": "小五号",
+    "content": "章节标题"
+  },
+  "footer": {
+    "font": "宋体",
+    "size": "小五号",
+    "numbering": "阿拉伯数字",
+    "position": "居中"
+  }
+}

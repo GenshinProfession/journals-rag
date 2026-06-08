@@ -1,4 +1,4 @@
-from functools import lru_cache
+﻿from functools import lru_cache
 
 from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -58,6 +58,16 @@ class Settings(BaseSettings):
     bootstrap_demo_model: bool = Field(
         default=False,
         description="Create a development model catalog row when no models exist.",
+    )
+
+    # Template submission rewards
+    template_submission_reward_cents: int = Field(
+        default=5000,
+        description="Token reward (in cents) for an approved template submission.",
+    )
+    template_first_school_bonus_cents: int = Field(
+        default=3000,
+        description="Extra bonus (in cents) when this is the first template for a school.",
     )
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
