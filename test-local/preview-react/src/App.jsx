@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { renderAsync } from 'docx-preview'
+import JSZip from 'jszip'
 import './App.css'
 
 const API = 'http://127.0.0.1:8899'
@@ -100,13 +101,45 @@ function annotateRenderedNodes(container, manifest) {
     delete el.dataset.zone
     delete el.dataset.role
   })
+
+  // --- Annotate tables ---
+  const mediaNodes = nodes.filter((n) => n.zone === 'media')
+  const tables = [...container.querySelectorAll('.docx-render table')]
+  let tableMediaIdx = 0
+  for (const table of tables) {
+    // Find matching table node by顺序
+    const tableNode = mediaNodes.find((n) => n.role === 'table' && !container.querySelector(`[data-node-id="${n.nodeId}"]`))
+    if (tableNode) {
+      table.dataset.nodeId = tableNode.nodeId
+      table.dataset.zone = tableNode.zone
+      table.dataset.role = tableNode.role
+    }
+  }
+
+  // --- Annotate paragraphs (including image-only paragraphs) ---
   const blocks = [...container.querySelectorAll('.docx-render p, .docx-render h1, .docx-render h2, .docx-render h3')]
   let cursor = 0
+  let imageMediaIdx = 0
 
   for (const block of blocks) {
     if (block.closest('table')) continue
     const text = normalizeText(block.textContent || '')
-    if (!text || /^\d+$/.test(text)) continue
+    const hasImage = block.querySelector('img, svg, image')
+    // Skip empty non-image paragraphs
+    if (!text && !hasImage) continue
+    // Skip pure number paragraphs
+    if (text && /^\d+$/.test(text) && !hasImage) continue
+
+    // For image-only paragraphs (no text), try to match with image media nodes
+    if (!text && hasImage) {
+      const imgNode = mediaNodes.find((n) => n.role === 'image' && !container.querySelector(`[data-node-id="${n.nodeId}"]`))
+      if (imgNode) {
+        block.dataset.nodeId = imgNode.nodeId
+        block.dataset.zone = imgNode.zone
+        block.dataset.role = imgNode.role
+      }
+      continue
+    }
 
     let matchIndex = -1
     for (let i = cursor; i < Math.min(nodes.length, cursor + 80); i++) {
@@ -124,6 +157,28 @@ function annotateRenderedNodes(container, manifest) {
       cursor = matchIndex + 1
     }
   }
+
+  // Fallback: match newly generated nodes that the sliding window missed.
+  const matchedNodeIds = new Set(
+    [...container.querySelectorAll('[data-node-id]')].map((el) => el.dataset.nodeId),
+  )
+  const unmatchedGenerated = nodes.filter((n) => n.generated && !matchedNodeIds.has(n.nodeId))
+  if (unmatchedGenerated.length) {
+    const unmatchedBlocks = blocks.filter((b) => !b.closest('table') && !b.dataset.nodeId)
+    for (const block of unmatchedBlocks) {
+      const text = normalizeText(block.textContent || '')
+      if (!text) continue
+      const match = unmatchedGenerated.find((n) => {
+        const variants = [n.displayText, n.text].map((v) => normalizeText(v || '')).filter(Boolean)
+        return variants.some((v) => v === text || (v.length > 4 && text.length > 4 && (v.includes(text) || text.includes(v))))
+      })
+      if (match) {
+        block.dataset.nodeId = match.nodeId
+        block.dataset.zone = match.zone
+        block.dataset.role = match.role
+      }
+    }
+  }
 }
 
 function applyPreviewMarkers(container, manifest, activeRule, selectedNodeId) {
@@ -138,10 +193,121 @@ function applyPreviewMarkers(container, manifest, activeRule, selectedNodeId) {
   })
 }
 
-function DocxPreview({ blob, version, zoom, manifest, activeRule, selectedNodeId, selectedNode, previewRef, restoreScrollTopRef, onPickNode, onQuickInsert }) {
+function CiteAutocomplete({ refs, onSelect }) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [targetEl, setTargetEl] = useState(null)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const listRef = useRef(null)
+
+  const filtered = useMemo(() => {
+    if (!refs?.length) return []
+    const q = query.toLowerCase()
+    return q
+      ? refs.filter((r) => (r.label || '').toLowerCase().includes(q) || (r.text || '').toLowerCase().includes(q))
+      : refs
+  }, [refs, query])
+
+  useEffect(() => {
+    if (!open || !listRef.current) return
+    const el = listRef.current.children[activeIdx]
+    if (el) el.scrollIntoView({ block: 'nearest' })
+  }, [activeIdx, open])
+
+  useEffect(() => {
+    const handleInput = (e) => {
+      const el = e.target
+      if (el.tagName !== 'TEXTAREA') return
+      const val = el.value || ''
+      const caret = el.selectionStart || 0
+      const before = val.slice(0, caret)
+      const match = before.match(/@cite\s*(\S*)$/i)
+      if (match) {
+        setQuery(match[1])
+        setTargetEl(el)
+        setActiveIdx(0)
+        setOpen(true)
+        const rect = el.getBoundingClientRect()
+        setPos({ top: rect.bottom + 4, left: rect.left })
+      } else {
+        setOpen(false)
+      }
+    }
+    const handleKeyDown = (e) => {
+      if (!open) return
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, filtered.length - 1)) }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx((i) => Math.max(i - 1, 0)) }
+      else if (e.key === 'Enter' && filtered.length) { e.preventDefault(); pick(filtered[activeIdx]) }
+      else if (e.key === 'Escape') { setOpen(false) }
+    }
+    document.addEventListener('input', handleInput, true)
+    document.addEventListener('keydown', handleKeyDown, true)
+    return () => {
+      document.removeEventListener('input', handleInput, true)
+      document.removeEventListener('keydown', handleKeyDown, true)
+    }
+  }, [open, filtered, activeIdx])
+
+  const pick = (ref) => {
+    if (!targetEl) return
+    const el = targetEl
+    const val = el.value
+    const caret = el.selectionStart || 0
+    const before = val.slice(0, caret)
+    const after = val.slice(caret)
+    const newBefore = before.replace(/@cite\s*\S*$/i, `{{cite:${ref.id}}}`)
+    const newText = newBefore + after
+    const newCaret = newBefore.length
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set
+    nativeInputValueSetter.call(el, newText)
+    el.dispatchEvent(new Event('input', { bubbles: true }))
+    requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = newCaret; el.focus() })
+    setOpen(false)
+  }
+
+  if (!open || !filtered.length) return null
+
+  return (
+    <div className="cite-popup" style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, maxHeight: 220, overflow: 'auto', background: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, boxShadow: '0 8px 24px rgba(0,0,0,.15)', width: 340 }} ref={listRef}>
+      {filtered.map((ref, i) => (
+        <div
+          key={ref.id}
+          onClick={() => pick(ref)}
+          style={{ padding: '7px 10px', cursor: 'pointer', fontSize: 12, background: i === activeIdx ? '#eef4ff' : 'transparent', borderBottom: i < filtered.length - 1 ? '1px solid #f1f5f9' : 'none' }}
+          onMouseEnter={() => setActiveIdx(i)}
+        >
+          <strong style={{ color: '#2563eb', marginRight: 6 }}>{ref.label}</strong>
+          <span style={{ color: '#334155' }}>{ref.text?.slice(0, 60)}{ref.text?.length > 60 ? '…' : ''}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function DocxPreview({
+  blob,
+  version,
+  zoom,
+  manifest,
+  activeRule,
+  selectedNodeId,
+  selectedNode,
+  previewRef,
+  restoreScrollTopRef,
+  formatTypes,
+  selectedFormatId,
+  onPickNode,
+  onInlineInsert,
+  inserting,
+  citationRegistry,
+}) {
   const localRef = useRef(null)
   const scrollTopRef = useRef(0)
   const [quickAddPos, setQuickAddPos] = useState(null)
+  const [insertOpen, setInsertOpen] = useState(false)
+  const [inlineText, setInlineText] = useState('')
+  const [insertFormatId, setInsertFormatId] = useState(selectedFormatId)
   const setRef = (node) => {
     localRef.current = node
     if (previewRef) previewRef.current = node
@@ -151,18 +317,20 @@ function DocxPreview({ blob, version, zoom, manifest, activeRule, selectedNodeId
     const container = localRef.current
     if (!container || !selectedNodeId || !selectedNode?.acceptsGenerated) {
       setQuickAddPos(null)
+      setInsertOpen(false)
       return
     }
     const selected = container.querySelector(`[data-node-id="${selectedNodeId}"]`)
     if (!selected) {
       setQuickAddPos(null)
+      setInsertOpen(false)
       return
     }
     const selectedRect = selected.getBoundingClientRect()
     const containerRect = container.getBoundingClientRect()
     setQuickAddPos({
-      top: Math.max(12, selectedRect.bottom - containerRect.top + container.scrollTop + 8),
-      left: Math.min(container.clientWidth - 56, selectedRect.right - containerRect.left + container.scrollLeft + 10),
+      top: Math.min(container.clientHeight - 190, Math.max(58, selectedRect.bottom - containerRect.top + 8)),
+      left: Math.min(container.clientWidth - 390, Math.max(14, selectedRect.right - containerRect.left + 10)),
     })
   }
 
@@ -180,7 +348,44 @@ function DocxPreview({ blob, version, zoom, manifest, activeRule, selectedNodeId
       ignoreFonts: false,
       breakPages: true,
       ignoreLastRenderedPageBreak: true,
-    }).then(() => {
+    }).then(async () => {
+      // Apply page margins from OOXML section properties
+      try {
+        const zip = await JSZip.loadAsync(blob)
+        const xmlStr = await zip.file('word/document.xml')?.async('text')
+        if (xmlStr) {
+          const parser = new DOMParser()
+          const doc = parser.parseFromString(xmlStr, 'application/xml')
+          const sectPr = doc.querySelector('sectPr')
+          if (sectPr) {
+            const pgMar = sectPr.querySelector('pgMar')
+            if (pgMar) {
+              const top = parseInt(pgMar.getAttribute('top') || '1440') / 20
+              const bottom = parseInt(pgMar.getAttribute('bottom') || '1440') / 20
+              const left = parseInt(pgMar.getAttribute('left') || '1800') / 20
+              const right = parseInt(pgMar.getAttribute('right') || '1800') / 20
+              // Use smaller左右边距 to avoid content overflow; the binding margin
+              // (left > right) is for physical printing, not needed in web preview
+              const hMargin = Math.min(left, right, 30)
+              const section = container.querySelector('section.docx-render') || container.querySelector('section')
+              if (section) {
+                section.style.paddingTop = `${top}mm`
+                section.style.paddingBottom = `${bottom}mm`
+                section.style.paddingLeft = `${hMargin}mm`
+                section.style.paddingRight = `${hMargin}mm`
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Ignore margin parsing errors
+      }
+      // Hide stray list numbers on empty paragraphs (TOC bookmarks with numbering)
+      container.querySelectorAll('p').forEach((p) => {
+        if (!p.textContent.trim() && p.classList.toString().includes('docx-render-num')) {
+          p.style.display = 'none'
+        }
+      })
       const restoreScroll = () => {
         container.scrollTop = previousScrollTop
         scrollTopRef.current = previousScrollTop
@@ -220,14 +425,130 @@ function DocxPreview({ blob, version, zoom, manifest, activeRule, selectedNodeId
     } else {
       setQuickAddPos(null)
     }
-  }, [activeRule, selectedNodeId, blob, version])
+  }, [activeRule, selectedNodeId, selectedNode?.acceptsGenerated, blob, version])
+
+  useEffect(() => {
+    setInsertFormatId(selectedFormatId)
+  }, [selectedFormatId, selectedNodeId])
 
   const handleClick = (event) => {
-    const target = event.target.closest('[data-node-id]')
+    const citeLink = event.target.closest('a[href^="#ref"]')
+    if (citeLink) {
+      event.preventDefault()
+      const refId = citeLink.getAttribute('href')?.slice(1)
+      const anchor = localRef.current?.querySelector(`#${CSS.escape(refId)}`)
+      if (anchor) anchor.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      return
+    }
+
+    // Handle table cell clicks — find the parent table with data-node-id
+    const cellTag = event.target.tagName?.toLowerCase()
+    if (cellTag === 'td' || cellTag === 'th') {
+      const table = event.target.closest('table[data-node-id]')
+      if (table) {
+        const node = (manifest?.nodes || []).find((n) => n.nodeId === table.dataset.nodeId)
+        if (node?.zone === 'references') return
+        onPickNode?.(table.dataset.nodeId)
+        return
+      }
+    }
+
+    // When clicking on an image/svg that extends beyond its parent paragraph,
+    // check if the click position falls within another paragraph's bounding box
+    const tag = event.target.tagName?.toLowerCase()
+    if (tag === 'img' || tag === 'image' || tag === 'svg' || tag === 'span') {
+      const parentP = event.target.closest('[data-node-id]')
+      const container = localRef.current
+      if (container && parentP) {
+        const allNodes = container.querySelectorAll('[data-node-id]')
+        for (const node of allNodes) {
+          if (node === parentP) continue
+          const r = node.getBoundingClientRect()
+          if (
+            event.clientX >= r.left && event.clientX <= r.right &&
+            event.clientY >= r.top && event.clientY <= r.bottom
+          ) {
+            const parentNode = (manifest?.nodes || []).find((n) => n.nodeId === parentP.dataset.nodeId)
+            if (parentNode?.zone === 'references') return
+            const clickNode = (manifest?.nodes || []).find((n) => n.nodeId === node.dataset.nodeId)
+            if (clickNode?.zone === 'references') return
+            onPickNode?.(node.dataset.nodeId)
+            return
+          }
+        }
+      }
+    }
+
+    const target = event.target.closest('[data-node-id]') || findNearestNodeElement(event)
     if (target?.dataset?.nodeId) {
+      const node = (manifest?.nodes || []).find((n) => n.nodeId === target.dataset.nodeId)
+      if (node?.zone === 'references') return
       onPickNode?.(target.dataset.nodeId)
     }
   }
+
+  const findNearestNodeElement = (event) => {
+    const container = localRef.current
+    if (!container) return null
+    const nodes = [...container.querySelectorAll('[data-node-id]')]
+    let exact = null
+    let exactDist = Number.POSITIVE_INFINITY
+    let best = null
+    let bestDistance = Number.POSITIVE_INFINITY
+
+    for (const node of nodes) {
+      const rect = node.getBoundingClientRect()
+      // Exact match: click is within the actual bounding box
+      if (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      ) {
+        const centerY = rect.top + rect.height / 2
+        const dist = Math.abs(event.clientY - centerY)
+        if (dist < exactDist) {
+          exact = node
+          exactDist = dist
+        }
+      }
+      // Expanded match: click is within expanded bounding box (fallback)
+      const expanded = {
+        left: rect.left - 18,
+        right: rect.right + 18,
+        top: rect.top - 10,
+        bottom: rect.bottom + 10,
+      }
+      if (
+        event.clientX >= expanded.left &&
+        event.clientX <= expanded.right &&
+        event.clientY >= expanded.top &&
+        event.clientY <= expanded.bottom
+      ) {
+        const centerY = rect.top + rect.height / 2
+        const dist = Math.abs(event.clientY - centerY)
+        if (dist < bestDistance) {
+          best = node
+          bestDistance = dist
+        }
+      }
+    }
+
+    return exact || best
+  }
+
+  const submitInlineInsert = async () => {
+    const text = inlineText.trim()
+    if (!text || inserting) return
+    const formatType = formatTypes.find((item) => item.id === insertFormatId) || formatTypes[0]
+    await onInlineInsert?.(text, formatType)
+    setInlineText('')
+    setInsertOpen(false)
+  }
+
+  const insertPopoverTop = quickAddPos
+    ? (quickAddPos.top > 310 ? quickAddPos.top - 270 : quickAddPos.top + 42)
+    : 0
 
   return (
     <div className="docx-preview-frame">
@@ -241,14 +562,73 @@ function DocxPreview({ blob, version, zoom, manifest, activeRule, selectedNodeId
         }}
       />
       {quickAddPos && (
-        <button
-          className="preview-add-button"
-          style={{ top: quickAddPos.top, left: quickAddPos.left }}
-          onClick={onQuickInsert}
-          title="在选中段落后插入正文"
-        >
-          +
-        </button>
+        <>
+          <button
+            className="preview-add-button"
+            style={{ top: quickAddPos.top, left: quickAddPos.left }}
+            onClick={(event) => {
+              event.stopPropagation()
+              setInsertOpen((open) => !open)
+            }}
+            title="在选中段落后插入正文"
+          >
+            +
+          </button>
+          {insertOpen && (
+            <div
+              className="preview-insert-popover"
+              style={{ top: insertPopoverTop, left: quickAddPos.left }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <label className="preview-insert-format">
+                套用规范
+                <select value={insertFormatId} onChange={(event) => setInsertFormatId(event.target.value)}>
+                  {formatTypes.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+              </label>
+              <textarea
+                value={inlineText}
+                onChange={(event) => setInlineText(event.target.value)}
+                placeholder="在这里写入新段落，输入 @cite 插入引用"
+                rows={5}
+                autoFocus
+              />
+              <CiteAutocomplete refs={citationRegistry} onSelect={(ref) => {
+                const token = `{{cite:${ref.id}}}`
+                setInlineText((cur) => {
+                  const ta = document.querySelector('.preview-insert-popover textarea')
+                  if (ta) {
+                    const s = ta.selectionStart || 0
+                    const e = ta.selectionEnd || 0
+                    return cur.slice(0, s) + token + cur.slice(e)
+                  }
+                  return cur + token
+                })
+              }} />
+              <div className="preview-insert-actions">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInlineText('')
+                    setInsertOpen(false)
+                  }}
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  className="primary"
+                  disabled={inserting || !inlineText.trim()}
+                  onClick={submitInlineInsert}
+                >
+                  {inserting ? '写入中' : '插入正文'}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
@@ -740,7 +1120,164 @@ function WritingPanel({
   )
 }
 
-function ParagraphFormatPanel({ node, formatTypes, selectedFormatId, selectedRule, onSave, loading }) {
+function MediaInfoPanel({ node, onDelete, onInsertImage, onInsertTable, loading }) {
+  const [insertMode, setInsertMode] = useState(null) // 'image' or 'table'
+  const [tableRows, setTableRows] = useState(3)
+  const [tableCols, setTableCols] = useState(3)
+  const [imageWidth, setImageWidth] = useState(400)
+  const fileInputRef = useRef(null)
+
+  if (!node) return null
+
+  const isImage = node.role === 'image'
+  const isTable = node.role === 'table'
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      onInsertImage?.(file, imageWidth)
+      setInsertMode(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleTableInsert = () => {
+    if (tableRows > 0 && tableCols > 0) {
+      onInsertTable?.(tableRows, tableCols)
+      setInsertMode(null)
+    }
+  }
+
+  return (
+    <section className="workflow-card selected-node-card">
+      <h3>{isImage ? '图片信息' : isTable ? '表格信息' : '媒体操作'}</h3>
+      <div className="selected-node-meta">
+        <strong>{node.nodeId}</strong>
+        <span>{isImage ? '图片' : isTable ? '表格' : '媒体'}</span>
+      </div>
+
+      {isImage && (
+        <div className="format-details">
+          <div><span>类型</span><strong>嵌入图片</strong></div>
+          {node.width > 0 && <div><span>宽度</span><strong>{node.width} px</strong></div>}
+          {node.height > 0 && <div><span>高度</span><strong>{node.height} px</strong></div>}
+        </div>
+      )}
+
+      {isTable && (
+        <div className="format-details">
+          <div><span>类型</span><strong>表格</strong></div>
+          <div><span>行数</span><strong>{node.rows}</strong></div>
+          <div><span>列数</span><strong>{node.cols}</strong></div>
+          {node.cellTexts?.length > 0 && (
+            <div><span>内容摘要</span><strong>{node.cellTexts.join(' / ').slice(0, 60)}</strong></div>
+          )}
+        </div>
+      )}
+
+      {/* Insert controls */}
+      <div className="media-insert-controls">
+        <button
+          className="primary"
+          disabled={loading}
+          onClick={() => setInsertMode(insertMode === 'image' ? null : 'image')}
+        >
+          插入图片
+        </button>
+        <button
+          className="primary"
+          disabled={loading}
+          onClick={() => setInsertMode(insertMode === 'table' ? null : 'table')}
+        >
+          插入表格
+        </button>
+      </div>
+
+      {/* Image insert panel */}
+      {insertMode === 'image' && (
+        <div className="media-insert-panel">
+          <label>
+            图片宽度 (px)
+            <input
+              type="number"
+              value={imageWidth}
+              onChange={(e) => setImageWidth(Number(e.target.value))}
+              min={100}
+              max={1000}
+            />
+          </label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            style={{ display: 'none' }}
+          />
+          <button
+            className="primary"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+          >
+            选择图片文件
+          </button>
+          <button
+            onClick={() => setInsertMode(null)}
+          >
+            取消
+          </button>
+        </div>
+      )}
+
+      {/* Table insert panel */}
+      {insertMode === 'table' && (
+        <div className="media-insert-panel">
+          <label>
+            行数
+            <input
+              type="number"
+              value={tableRows}
+              onChange={(e) => setTableRows(Number(e.target.value))}
+              min={1}
+              max={20}
+            />
+          </label>
+          <label>
+            列数
+            <input
+              type="number"
+              value={tableCols}
+              onChange={(e) => setTableCols(Number(e.target.value))}
+              min={1}
+              max={10}
+            />
+          </label>
+          <button
+            className="primary"
+            onClick={handleTableInsert}
+            disabled={loading}
+          >
+            插入表格
+          </button>
+          <button
+            onClick={() => setInsertMode(null)}
+          >
+            取消
+          </button>
+        </div>
+      )}
+
+      <button
+        className="danger"
+        disabled={loading}
+        onClick={() => onDelete(node)}
+      >
+        {loading ? '删除中' : '删除当前媒体'}
+      </button>
+    </section>
+  )
+}
+
+function ParagraphFormatPanel({ node, formatTypes, selectedFormatId, selectedRule, onSave, onDelete, loading, citationRegistry }) {
   const [draft, setDraft] = useState('')
   const [formatId, setFormatId] = useState(selectedFormatId)
 
@@ -788,6 +1325,18 @@ function ParagraphFormatPanel({ node, formatTypes, selectedFormatId, selectedRul
           <label>
             段落内容
             <textarea value={draft} onChange={(event) => setDraft(event.target.value)} rows={4} />
+            <CiteAutocomplete refs={citationRegistry} onSelect={(ref) => {
+              const token = `{{cite:${ref.id}}}`
+              setDraft((cur) => {
+                const ta = document.querySelector('.workflow-card textarea')
+                if (ta) {
+                  const s = ta.selectionStart || 0
+                  const e = ta.selectionEnd || 0
+                  return cur.slice(0, s) + token + cur.slice(e)
+                }
+                return cur + token
+              })
+            }} />
           </label>
           <label>
             套用规范
@@ -803,6 +1352,9 @@ function ParagraphFormatPanel({ node, formatTypes, selectedFormatId, selectedRul
             onClick={() => onSave(node, draft, selectedFormat)}
           >
             {loading ? '保存中' : '替换当前段落'}
+          </button>
+          <button className="danger" disabled={loading} onClick={() => onDelete(node)}>
+            删除当前段落
           </button>
         </>
       )}
@@ -949,7 +1501,6 @@ function App() {
   const [formatTypes, setFormatTypes] = useState(DEFAULT_FORMAT_TYPES)
   const [selectedFormatId, setSelectedFormatId] = useState(DEFAULT_FORMAT_TYPES[0].id)
   const [formatModalOpen, setFormatModalOpen] = useState(false)
-  const [writeModeHint, setWriteModeHint] = useState('append')
   const previewRef = useRef(null)
   const restoreScrollTopRef = useRef(0)
 
@@ -1004,10 +1555,17 @@ function App() {
     }
   }
 
-  const quickInsertAfterSelected = () => {
+  const inlineInsertAfterSelected = async (text, formatType) => {
     if (!selectedNode?.acceptsGenerated) return
-    setWriteModeHint('insertAfter')
-    setStatus('已选择在当前段落后插入正文')
+    const targetFormat = formatType || formatTypes.find((item) => item.id === selectedFormatId) || DEFAULT_FORMAT_TYPES[0]
+    await addGeneratedNode(
+      text,
+      targetFormat.zone,
+      targetFormat.role,
+      'insertAfter',
+      selectedNode.nodeId,
+      targetFormat.custom ? targetFormat.format : null,
+    )
   }
 
   const loadDocx = async (caseId, version) => {
@@ -1114,6 +1672,95 @@ function App() {
     )
   }
 
+  const deleteCurrentNode = async (node) => {
+    if (!manifest?.caseId || !node?.nodeId) return
+    if (!node.acceptsGenerated && node.zone !== 'media') return
+    restoreScrollTopRef.current = previewRef.current?.scrollTop || 0
+    setNodeBusy(true)
+    setStatus('正在删除当前段落...')
+    try {
+      const response = await fetch(`${API}/case/${manifest.caseId}/node/${node.nodeId}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        throw new Error(err.error || '删除段落失败')
+      }
+      const nextManifest = await response.json()
+      setManifest(nextManifest)
+      setRuleFormats(Object.fromEntries(nextManifest.rules.map((rule) => [rule.ruleId, rule.format])))
+      setFormatTypes((current) => formatTypesFromManifest(nextManifest, current))
+      setSelectedNodeId('')
+      await loadDocx(nextManifest.caseId, nextManifest.version)
+      setStatus('已删除当前段落并刷新预览')
+    } catch (error) {
+      setStatus(`删除失败：${error.message}`)
+    } finally {
+      setNodeBusy(false)
+    }
+  }
+
+  const insertImage = async (file, widthPx = 400) => {
+    if (!manifest?.caseId) return
+    restoreScrollTopRef.current = previewRef.current?.scrollTop || 0
+    setNodeBusy(true)
+    setStatus('正在插入图片...')
+    try {
+      const anchorId = selectedNode?.acceptsGenerated ? selectedNode.nodeId : ''
+      const response = await fetch(`${API}/case/${manifest.caseId}/image?anchor=${anchorId}&width=${widthPx}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'X-File-Name': file.name,
+        },
+        body: file,
+      })
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        throw new Error(err.error || '插入图片失败')
+      }
+      const nextManifest = await response.json()
+      setManifest(nextManifest)
+      setRuleFormats(Object.fromEntries(nextManifest.rules.map((rule) => [rule.ruleId, rule.format])))
+      setFormatTypes((current) => formatTypesFromManifest(nextManifest, current))
+      await loadDocx(nextManifest.caseId, nextManifest.version)
+      setStatus('已插入图片并刷新预览')
+    } catch (error) {
+      setStatus(`插入图片失败：${error.message}`)
+    } finally {
+      setNodeBusy(false)
+    }
+  }
+
+  const insertTable = async (rows, cols) => {
+    if (!manifest?.caseId) return
+    restoreScrollTopRef.current = previewRef.current?.scrollTop || 0
+    setNodeBusy(true)
+    setStatus('正在插入表格...')
+    try {
+      const anchorId = selectedNode?.acceptsGenerated ? selectedNode.nodeId : ''
+      const response = await fetch(`${API}/case/${manifest.caseId}/table`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows, cols, anchorNodeId: anchorId }),
+      })
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        throw new Error(err.error || '插入表格失败')
+      }
+      const nextManifest = await response.json()
+      setManifest(nextManifest)
+      setRuleFormats(Object.fromEntries(nextManifest.rules.map((rule) => [rule.ruleId, rule.format])))
+      setFormatTypes((current) => formatTypesFromManifest(nextManifest, current))
+      await loadDocx(nextManifest.caseId, nextManifest.version)
+      setStatus('已插入表格并刷新预览')
+    } catch (error) {
+      setStatus(`插入表格失败：${error.message}`)
+    } finally {
+      setNodeBusy(false)
+    }
+  }
+
   const changeNodeRole = async (nodeId, zone, role) => {
     if (!manifest?.caseId || !nodeId) return
     restoreScrollTopRef.current = previewRef.current?.scrollTop || 0
@@ -1162,25 +1809,26 @@ function App() {
           </button>
         </header>
 
-        <WritingPanel
-          selectedNode={selectedNode}
-          formatTypes={formatTypes}
-          selectedFormatId={selectedFormatId}
-          onSelectFormat={setSelectedFormatId}
-          onOpenLibrary={() => setFormatModalOpen(true)}
-          citationRegistry={manifest?.citationRegistry || []}
-          modeHint={writeModeHint}
-          onAdd={addGeneratedNode}
-          loading={nodeBusy}
-        />
-        <ParagraphFormatPanel
-          node={selectedNode}
-          formatTypes={formatTypes}
-          selectedFormatId={selectedFormatId}
-          selectedRule={selectedRule}
-          onSave={saveCurrentNode}
-          loading={nodeBusy}
-        />
+        {selectedNode?.zone === 'media' ? (
+          <MediaInfoPanel
+            node={selectedNode}
+            onDelete={deleteCurrentNode}
+            onInsertImage={insertImage}
+            onInsertTable={insertTable}
+            loading={nodeBusy}
+          />
+        ) : (
+          <ParagraphFormatPanel
+            node={selectedNode}
+            formatTypes={formatTypes}
+            selectedFormatId={selectedFormatId}
+            selectedRule={selectedRule}
+            onSave={saveCurrentNode}
+            onDelete={deleteCurrentNode}
+            loading={nodeBusy}
+            citationRegistry={manifest?.citationRegistry}
+          />
+        )}
 
         <details className="rules rules-shell">
           <summary>正文格式批量调整</summary>
@@ -1236,8 +1884,12 @@ function App() {
           selectedNode={selectedNode}
           previewRef={previewRef}
           restoreScrollTopRef={restoreScrollTopRef}
+          formatTypes={formatTypes}
+          selectedFormatId={selectedFormatId}
           onPickNode={pickNode}
-          onQuickInsert={quickInsertAfterSelected}
+          onInlineInsert={inlineInsertAfterSelected}
+          inserting={nodeBusy}
+          citationRegistry={manifest?.citationRegistry}
         />
       </main>
       <FormatLibraryModal

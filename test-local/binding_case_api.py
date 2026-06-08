@@ -81,6 +81,71 @@ def _document_xml(docx_path: Path):
     return etree.fromstring(raw)
 
 
+def _parse_styles(docx_path: Path):
+    """Parse word/styles.xml and return a dict of style_id → formatting properties."""
+    try:
+        with zipfile.ZipFile(docx_path, "r") as zf:
+            raw = zf.read("word/styles.xml")
+    except (KeyError, FileNotFoundError):
+        return {}
+    root = etree.fromstring(raw)
+    styles = {}
+    for style_el in root.xpath("//w:style", namespaces=NS):
+        style_id = style_el.get(f"{{{NS['w']}}}styleId", "")
+        if not style_id:
+            continue
+        # Resolve basedOn chain (up to 3 levels)
+        resolved = {}
+        current = style_el
+        chain = [current]
+        for _ in range(3):
+            based_on = current.find(f"{{{NS['w']}}}basedOn")
+            if based_on is None:
+                break
+            parent_id = based_on.get(f"{{{NS['w']}}}val", "")
+            if not parent_id or parent_id == style_id:
+                break
+            for s in root.xpath(f"//w:style[@w:styleId='{parent_id}']", namespaces=NS):
+                current = s
+                chain.append(current)
+                break
+        # Collect properties from chain (reversed = base first, derived overrides)
+        for s in reversed(chain):
+            rpr = s.find(f"{{{NS['w']}}}rPr")
+            if rpr is not None:
+                fonts_el = rpr.find(f"{{{NS['w']}}}rFonts")
+                if fonts_el is not None and fonts_el.get(f"{{{NS['w']}}}ascii"):
+                    resolved["font"] = fonts_el.get(f"{{{NS['w']}}}ascii", "")
+                sz_el = rpr.find(f"{{{NS['w']}}}sz")
+                if sz_el is not None and sz_el.get(f"{{{NS['w']}}}val"):
+                    resolved["sizePt"] = int(sz_el.get(f"{{{NS['w']}}}val", "24")) / 2
+                b_el = rpr.find(f"{{{NS['w']}}}b")
+                if b_el is not None:
+                    resolved["bold"] = b_el.get(f"{{{NS['w']}}}val", "1") != "0"
+            ppr = s.find(f"{{{NS['w']}}}pPr")
+            if ppr is not None:
+                jc_el = ppr.find(f"{{{NS['w']}}}jc")
+                if jc_el is not None and jc_el.get(f"{{{NS['w']}}}val"):
+                    resolved["alignment"] = jc_el.get(f"{{{NS['w']}}}val", "left")
+                spacing_el = ppr.find(f"{{{NS['w']}}}spacing")
+                if spacing_el is not None:
+                    line = spacing_el.get(f"{{{NS['w']}}}line")
+                    if line and line != "auto":
+                        resolved["lineSpacing"] = round(int(line) / 240, 2)
+        styles[style_id] = resolved
+    return styles
+
+
+# Cache parsed styles per docx path
+_style_cache = {}
+
+
+def _get_styles(docx_path: Path):
+    if docx_path not in _style_cache:
+        _style_cache[docx_path] = _parse_styles(docx_path)
+    return _style_cache[docx_path]
+
+
 def _write_document_xml(docx_path: Path, root):
     temp_path = docx_path.with_suffix(".tmp.docx")
     updated_xml = etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone="yes")
@@ -129,6 +194,352 @@ def _p_meta(p):
         "outlineLevel": outline.get(f"{{{NS['w']}}}val") if outline is not None else "",
         "hasNumbering": numbering is not None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Format extraction & clustering
+# ---------------------------------------------------------------------------
+
+def _extract_para_format(p, docx_path=None):
+    """Extract the visual formatting fingerprint of a paragraph from OOXML.
+    Resolves style references via styles.xml when docx_path is provided."""
+    styles = _get_styles(docx_path) if docx_path else {}
+
+    # Resolve paragraph style
+    ps_el = _first(p, "./w:pPr/w:pStyle")
+    pstyle_id = ps_el.get(f"{{{NS['w']}}}val", "") if ps_el is not None else ""
+    pstyle_fmt = styles.get(pstyle_id, {})
+
+    # --- run-level properties (first non-empty run) ---
+    rpr = None
+    for r in p.xpath("./w:r/w:rPr", namespaces=NS):
+        txt = "".join(r.xpath("../w:t/text()", namespaces=NS))
+        if txt.strip():
+            rpr = r
+            break
+
+    # Resolve run style
+    rstyle_id = ""
+    if rpr is not None:
+        rs_el = _first(rpr, "./w:rStyle")
+        if rs_el is not None:
+            rstyle_id = rs_el.get(f"{{{NS['w']}}}val", "")
+    rstyle_fmt = styles.get(rstyle_id, {})
+
+    def _rval(tag, default=None):
+        if rpr is not None:
+            el = _first(rpr, f"./w:{tag}")
+            if el is not None:
+                return el.get(f"{{{NS['w']}}}val", default)
+        return default
+
+    # Font: direct → run style → paragraph style → fallback
+    font = _rval("rFonts", "")
+    if not font:
+        font = rstyle_fmt.get("font", "")
+    if not font:
+        font = pstyle_fmt.get("font", "")
+    if not font:
+        font = "宋体"  # default
+
+    # Font size: direct → run style → paragraph style → default 12pt
+    sz = _rval("sz")
+    size_pt = int(sz) / 2 if sz else rstyle_fmt.get("sizePt", pstyle_fmt.get("sizePt", 12.0))
+
+    # Bold: direct → run style → paragraph style
+    bold_direct = _rval("b")
+    if bold_direct is not None:
+        bold = bold_direct != "0"
+    elif "bold" in rstyle_fmt:
+        bold = rstyle_fmt["bold"]
+    else:
+        bold = pstyle_fmt.get("bold", False)
+
+    # --- paragraph-level properties ---
+    ppr = _first(p, "./w:pPr")
+
+    def _pval(tag, default=None):
+        if ppr is not None:
+            el = _first(ppr, f"./w:{tag}")
+            if el is not None:
+                return el.get(f"{{{NS['w']}}}val", default)
+        return default
+
+    # Alignment: direct → paragraph style → default left
+    alignment = _pval("jc")
+    if not alignment or alignment not in ("center", "both", "right", "left"):
+        alignment = pstyle_fmt.get("alignment", "left")
+
+    # Line spacing
+    ls = _pval("line")
+    ls_rule = _pval("lineRule")
+    if ls and ls != "auto":
+        twips = int(ls)
+        line_spacing = round(twips / 240, 2)
+    else:
+        line_spacing = pstyle_fmt.get("lineSpacing", 1.0)
+
+    # First-line indent (twips → characters)
+    fi = _pval("firstLine")
+    fi_chars = round(int(fi) / 240, 1) if fi else 0
+
+    # Left indent
+    li = _pval("left")
+    left_indent = round(int(li) / 240, 1) if li else 0
+
+    return {
+        "font": font,
+        "sizePt": size_pt,
+        "bold": bold,
+        "alignment": alignment,
+        "lineSpacing": line_spacing,
+        "firstLineIndentChars": fi_chars,
+        "leftIndentChars": left_indent,
+    }
+
+
+def _format_fingerprint(fmt):
+    """Create a hashable fingerprint from a format dict."""
+    return (
+        fmt["font"],
+        round(fmt["sizePt"], 1),
+        fmt["bold"],
+        fmt["alignment"],
+        round(fmt["lineSpacing"], 2),
+        round(fmt["firstLineIndentChars"], 1),
+        round(fmt["leftIndentChars"], 1),
+    )
+
+
+def _detect_heading_level(text):
+    """Detect heading level from numbered text patterns (1, 1.1, 1.1.1, etc.)."""
+    compact = re.sub(r"\s+", "", text or "")
+    if re.match(r"^\d+\.\d+\.\d+\s*\S", compact):
+        return "heading3"
+    if re.match(r"^\d+\.\d+\s*\S", compact):
+        return "heading2"
+    if re.match(r"^\d+\s+[一-鿿A-Za-z]", compact):
+        return "heading1"
+    return None
+
+
+def _cluster_body_by_format(nodes):
+    """Cluster body-zone nodes by format fingerprint. Auto-detect heading levels
+    using styleId from the document's paragraph styles."""
+    body_nodes = [n for n in nodes if n.get("zone") == "body" and n.get("text", "").strip()]
+    if not body_nodes:
+        return
+
+    # Build fingerprint → cluster
+    clusters = {}
+    for node in body_nodes:
+        fp = node.get("_fingerprint")
+        if fp not in clusters:
+            clusters[fp] = {"fingerprint": fp, "format": node.get("_format", {}), "nodes": []}
+        clusters[fp]["nodes"].append(node)
+
+    # Sort clusters by size (descending) to identify the dominant format
+    sorted_clusters = sorted(clusters.values(), key=lambda c: len(c["nodes"]), reverse=True)
+
+    # The largest cluster is likely body paragraph
+    body_cluster = sorted_clusters[0] if sorted_clusters else None
+
+    # Detect heading levels using styleId
+    # Collect styleId → heading level mapping from nodes that have clear heading patterns
+    style_heading_map = {}
+    for node in body_nodes:
+        style_id = node.get("styleId", "")
+        if not style_id:
+            continue
+        # Count how many nodes with this styleId exist
+        count = sum(1 for n in body_nodes if n.get("styleId") == style_id)
+        if count < 2:
+            continue
+        # Check if this style is used for headings by looking at format characteristics
+        fmt = node.get("_format", {})
+        is_bold = fmt.get("bold", False)
+        alignment = fmt.get("alignment", "left")
+        size = fmt.get("sizePt", 12)
+        # Heuristic: headings are typically bold, smaller count, different format from body
+        if style_id not in style_heading_map:
+            style_heading_map[style_id] = {"count": count, "format": fmt, "nodes": []}
+        style_heading_map[style_id]["nodes"].append(node)
+
+    # Determine heading levels based on font size hierarchy
+    # Larger font = higher level heading
+    body_fmt = body_cluster["format"] if body_cluster else {}
+    body_size = body_fmt.get("sizePt", 12)
+
+    heading_styles = []
+    for style_id, info in style_heading_map.items():
+        fmt = info["format"]
+        size = fmt.get("sizePt", 12)
+        is_bold = fmt.get("bold", False)
+        # Skip if same size as body and not bold (likely body paragraphs)
+        if size == body_size and not is_bold:
+            continue
+        heading_styles.append((style_id, size, info))
+
+    # Sort by font size descending (largest = heading1)
+    heading_styles.sort(key=lambda x: -x[1])
+
+    level_names = ["heading1", "heading2", "heading3", "heading4"]
+    for i, (style_id, size, info) in enumerate(heading_styles):
+        level = level_names[min(i, len(level_names) - 1)]
+        for node in info["nodes"]:
+            style_heading_map[style_id]["level"] = level
+
+    # Assign roles to all body nodes
+    for node in body_nodes:
+        style_id = node.get("styleId", "")
+        if style_id in style_heading_map and "level" in style_heading_map[style_id]:
+            node["role"] = style_heading_map[style_id]["level"]
+        else:
+            node["role"] = "paragraph"
+
+
+def _build_dynamic_rules(nodes):
+    """Generate format rules dynamically from clustered nodes."""
+    # Collect unique format clusters
+    clusters = {}
+    for node in nodes:
+        if node.get("zone") != "body":
+            continue
+        fp = node.get("_fingerprint")
+        role = node.get("role", "paragraph")
+        key = (fp, role)
+        if key not in clusters:
+            clusters[key] = {
+                "fingerprint": fp,
+                "format": node.get("_format", {}),
+                "role": role,
+                "nodes": [],
+            }
+        clusters[key]["nodes"].append(node)
+
+    # Build rules from clusters
+    rules = []
+    role_labels = {
+        "heading1": "一级标题",
+        "heading2": "二级标题",
+        "heading3": "三级标题",
+        "paragraph": "正文段落",
+    }
+
+    for (fp, role), cluster in clusters.items():
+        rule_id = f"body.{role}"
+        # Deduplicate: if multiple clusters have same role, append index
+        existing_ids = [r["ruleId"] for r in rules]
+        if rule_id in existing_ids:
+            idx = 2
+            while f"body.{role}_{idx}" in existing_ids:
+                idx += 1
+            rule_id = f"body.{role}_{idx}"
+
+        label = role_labels.get(role, role)
+        fmt = cluster["format"]
+        if role.startswith("heading"):
+            fmt = {**fmt, "clearIndent": True}
+
+        rules.append({
+            "ruleId": rule_id,
+            "label": label,
+            "sectionKey": "body",
+            "sectionLabel": "正文",
+            "selector": {"zone": "body", "role": role},
+            "targetNodeIds": [n["nodeId"] for n in cluster["nodes"]],
+            "targetCount": len(cluster["nodes"]),
+            "format": fmt,
+        })
+
+    # Sort: headings first (by level), then paragraph
+    level_order = {"heading1": 0, "heading2": 1, "heading3": 2, "paragraph": 10}
+    rules.sort(key=lambda r: (level_order.get(r["selector"]["role"], 5), -r["targetCount"]))
+
+    return rules
+
+
+# ---------------------------------------------------------------------------
+# Image & table extraction
+# ---------------------------------------------------------------------------
+
+def _extract_images(root):
+    """Extract image information from OOXML body paragraphs."""
+    WP = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+    A = "http://schemas.openxmlformats.org/drawingml/2006/main"
+    R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+    VML = "urn:schemas-microsoft-com:vml"
+    tree = etree.ElementTree(root)
+
+    images = []
+    paragraphs = root.xpath("./w:body/w:p", namespaces=NS)
+    for p_index, p in enumerate(paragraphs):
+        # Check for DrawingML images (w:drawing)
+        for drawing in p.xpath(".//w:drawing", namespaces=NS):
+            extent = drawing.find(f".//{{{WP}}}extent")
+            cx = int(extent.get("cx", "0")) if extent is not None else 0
+            cy = int(extent.get("cy", "0")) if extent is not None else 0
+            width_px = round(cx / 9525) if cx else 0
+            height_px = round(cy / 9525) if cy else 0
+            blip = drawing.find(f".//{{{A}}}blip")
+            embed_id = blip.get(f"{{{R}}}embed", "") if blip is not None else ""
+            xpath = tree.getpath(p)
+            images.append({
+                "kind": "image",
+                "paraIndex": p_index,
+                "width": width_px,
+                "height": height_px,
+                "embedId": embed_id,
+                "xpath": xpath,
+                "text": f"[图片 {width_px}×{height_px}px]",
+            })
+
+        # Check for VML images (w:pict)
+        for pict in p.xpath(".//w:pict", namespaces=NS):
+            imagedata = pict.find(f".//{{{VML}}}imagedata")
+            if imagedata is not None:
+                xpath = tree.getpath(p)
+                images.append({
+                    "kind": "image",
+                    "paraIndex": p_index,
+                    "width": 0,
+                    "height": 0,
+                    "embedId": imagedata.get(f"{{{R}}}id", ""),
+                    "xpath": xpath,
+                    "text": "[VML图片]",
+                })
+    return images
+
+
+def _extract_tables(root):
+    """Extract table information from OOXML body."""
+    tables = []
+    tree = etree.ElementTree(root)
+    body = root.find(f"{{{NS['w']}}}body")
+    if body is None:
+        return tables
+    for tbl_index, tbl in enumerate(body.findall(f"{{{NS['w']}}}tbl")):
+        rows = tbl.findall(f"{{{NS['w']}}}tr")
+        row_count = len(rows)
+        col_count = 0
+        cell_texts = []
+        for row in rows:
+            cells = row.findall(f"{{{NS['w']}}}tc")
+            col_count = max(col_count, len(cells))
+            for cell in cells[:3]:
+                text = "".join(cell.xpath(".//w:t/text()", namespaces=NS)).strip()
+                if text:
+                    cell_texts.append(text[:30])
+        xpath = tree.getpath(tbl)
+        tables.append({
+            "kind": "table",
+            "rows": row_count,
+            "cols": col_count,
+            "cellTexts": cell_texts[:6],
+            "xpath": xpath,
+            "text": f"[表格 {row_count}行×{col_count}列]",
+        })
+    return tables
 
 
 def _first(parent, xpath):
@@ -261,11 +672,11 @@ def _parse_toc_heading(text: str):
     if not compact:
         return None
 
-    # 目录项通常是「2.1标题页码」。优先提取 1/2/3 级标题，页码只作为尾部数字剥离。
+    # 目录项通常是「2.1标题页码」。编号后必须紧跟空格或中文字符，防止把标题里的数字吃进去。
     patterns = [
-        (r"^(\d+\.\d+\.\d+)(.+?)(\d{1,3})$", "heading3"),
-        (r"^(\d+\.\d+)(.+?)(\d{1,3})$", "heading2"),
-        (r"^(\d+)([^\d].+?)(\d{1,3})$", "heading1"),
+        (r"^(\d+\.\d+\.\d+)\s+(.+?)(\d{1,3})$", "heading3"),
+        (r"^(\d+\.\d+)\s+(.+?)(\d{1,3})$", "heading2"),
+        (r"^(\d+)\s+([^\d].+?)(\d{1,3})$", "heading1"),
     ]
     for pattern, role in patterns:
         match = re.match(pattern, compact)
@@ -310,11 +721,10 @@ def _match_toc_heading(text: str, toc_headings, cursor: int):
 
 
 def _looks_media_text(text: str):
+    """Detect template instruction text (not actual figure/table captions)."""
     compact = _compact_text(text)
     if not compact:
         return False
-    if re.match(r"^(图|表)\d", compact):
-        return True
     markers = [
         "图序号", "图名", "图题", "表序号", "表名", "表题",
         "先有文字说明", "再引出图", "再引出表",
@@ -366,7 +776,7 @@ def build_manifest(docx_path: Path):
             if re.match(r"^\d+\s+.+", text):
                 zone = "body"
                 role = "heading1"
-        if zone == "toc":
+        if zone in ("toc", "cover", "cover_en"):
             continue
         if not text or _looks_media_text(text):
             continue
@@ -388,12 +798,49 @@ def build_manifest(docx_path: Path):
             "text": text[:90],
             **_p_meta(p),
         }
+        # Extract formatting properties for clustering
+        fmt = _extract_para_format(p, docx_path)
+        node["_format"] = fmt
+        node["_fingerprint"] = _format_fingerprint(fmt)
         if source_number:
             node["sourceNumberLabel"] = source_number
         nodes.append(node)
 
     _refine_nodes(nodes)
-    rules = _build_rules(nodes)
+
+    # Dynamically cluster body nodes by format and detect heading levels
+    _cluster_body_by_format(nodes)
+
+    # Extract images and tables as media nodes
+    image_list = _extract_images(root)
+    table_list = _extract_tables(root)
+    for img in image_list:
+        nodes.append({
+            "nodeId": f"img{len(nodes):04d}",
+            "kind": "image",
+            "zone": "media",
+            "role": "image",
+            "text": img["text"],
+            "width": img["width"],
+            "height": img["height"],
+            "embedId": img.get("embedId", ""),
+            "paraIndex": img["paraIndex"],
+            "xpath": img.get("xpath", ""),
+        })
+    for tbl in table_list:
+        nodes.append({
+            "nodeId": f"tbl{len(nodes):04d}",
+            "kind": "table",
+            "zone": "media",
+            "role": "table",
+            "text": tbl["text"],
+            "rows": tbl["rows"],
+            "cols": tbl["cols"],
+            "cellTexts": tbl["cellTexts"],
+            "xpath": tbl.get("xpath", ""),
+        })
+
+    rules = _build_dynamic_rules(nodes)
     manifest = {
         "source": docx_path.name,
         "nodeCount": len(nodes),
@@ -523,6 +970,17 @@ def _node_product_meta(node):
             "cleaningAction": "write_area",
             "lockedReason": "",
             "anchorPolicy": ["append", "insertAfter", "replace"],
+        }
+    if zone == "media":
+        kind_label = "图片" if role == "image" else "表格"
+        return {
+            "sectionType": "media",
+            "sectionLabel": f"{kind_label}区",
+            "editable": True,
+            "acceptsGenerated": False,
+            "cleaningAction": "media_item",
+            "lockedReason": "",
+            "anchorPolicy": ["delete", "replace"],
         }
     if zone == "toc":
         return {
@@ -675,6 +1133,7 @@ def _attach_heading_numbers(manifest: dict):
 
 
 def _attach_product_manifest(manifest: dict):
+    manifest["nodeCount"] = len(manifest.get("nodes", []))
     for node in manifest.get("nodes", []):
         node.update(_node_product_meta(node))
     _attach_heading_numbers(manifest)
@@ -1132,6 +1591,263 @@ def update_node_role(case_id: str, node_id: str, zone: str, role: str):
     return manifest
 
 
+def delete_node(case_id: str, node_id: str):
+    folder = CASE_DIR / case_id
+    work_docx = folder / "work.docx"
+    manifest_path = folder / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    root = _document_xml(work_docx)
+
+    node, target = _find_node_element(root, manifest, node_id)
+    if not node or target is None:
+        raise KeyError(f"node not found: {node_id}")
+    # Media nodes (images, tables) can be deleted even though they're locked
+    if not node.get("acceptsGenerated") and node.get("zone") != "media":
+        raise ValueError(f"node is locked and cannot be deleted: {node_id}")
+
+    parent = target.getparent()
+    if parent is None:
+        raise RuntimeError("node has no parent")
+    parent.remove(target)
+    manifest["nodes"] = [n for n in manifest.get("nodes", []) if n.get("nodeId") != node_id]
+
+    _sync_node_xpaths(manifest, root)
+    _sort_manifest_nodes_by_document_order(manifest, root)
+    _refresh_rule_targets(manifest)
+    _attach_product_manifest(manifest)
+    _materialize_heading_numbers(root, manifest)
+    _materialize_reference_numbers(root, manifest)
+    _write_document_xml(work_docx, root)
+    manifest["version"] = int(time.time() * 1000)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    return manifest
+
+
+def insert_image(case_id: str, image_data: bytes, filename: str, anchor_node_id: str = "", width_px: int = 400):
+    """Insert an image into the DOCX after the anchor node (or at end of body)."""
+    import hashlib
+    import struct
+
+    folder = CASE_DIR / case_id
+    work_docx = folder / "work.docx"
+    manifest_path = folder / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    # Determine image dimensions from data if possible
+    height_px = 300  # default aspect ratio
+    try:
+        # Try to detect PNG dimensions
+        if image_data[:8] == b'\x89PNG\r\n\x1a\n':
+            w = struct.unpack('>I', image_data[16:20])[0]
+            h = struct.unpack('>I', image_data[20:24])[0]
+            if w > 0 and h > 0:
+                height_px = round(width_px * h / w)
+        # Try to detect JPEG dimensions (simplified)
+        elif image_data[:2] == b'\xff\xd8':
+            height_px = round(width_px * 0.75)
+    except Exception:
+        pass
+
+    # Generate unique image filename and relationship ID
+    img_hash = hashlib.md5(image_data).hexdigest()[:8]
+    img_filename = f"image_{img_hash}.png"
+    rel_id = f"rImg{img_hash}"
+
+    # First, update the DOCX zip to add image and relationships
+    temp_path = work_docx.with_suffix(".tmp.docx")
+    with zipfile.ZipFile(work_docx, "r") as zin:
+        with zipfile.ZipFile(temp_path, "w", zipfile.ZIP_DEFLATED) as zout:
+            for item in zin.infolist():
+                if item.filename == "[Content_Types].xml":
+                    content = zin.read(item.filename)
+                    ct_root = etree.fromstring(content)
+                    existing = ct_root.xpath("//Default[@Extension='png']")
+                    if not existing:
+                        default_el = etree.SubElement(ct_root, "Default")
+                        default_el.set("Extension", "png")
+                        default_el.set("ContentType", "image/png")
+                    zout.writestr(item, etree.tostring(ct_root, xml_declaration=True, encoding="UTF-8", standalone="yes"))
+                elif item.filename == "word/_rels/document.xml.rels":
+                    content = zin.read(item.filename)
+                    rels_root = etree.fromstring(content)
+                    existing = rels_root.xpath(f"//Relationship[@Id='{rel_id}']")
+                    if not existing:
+                        rel = etree.SubElement(rels_root, "Relationship")
+                        rel.set("Id", rel_id)
+                        rel.set("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image")
+                        rel.set("Target", f"media/{img_filename}")
+                    zout.writestr(item, etree.tostring(rels_root, xml_declaration=True, encoding="UTF-8", standalone="yes"))
+                else:
+                    zout.writestr(item, zin.read(item.filename))
+            # Add image file
+            zout.writestr(f"word/media/{img_filename}", image_data)
+    temp_path.replace(work_docx)
+
+    # Now read document.xml and add image paragraph
+    root = _document_xml(work_docx)
+    body = root.find(f"{{{NS['w']}}}body")
+    W = NS['w']
+    WP_NS = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+    A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
+    R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+    PIC_NS = "http://schemas.openxmlformats.org/drawingml/2006/picture"
+
+    # Find anchor position
+    insert_idx = len(list(body))  # default: end of body
+    if anchor_node_id:
+        anchor_node, anchor_el = _find_node_element(root, manifest, anchor_node_id)
+        if anchor_el is not None:
+            parent = anchor_el.getparent()
+            insert_idx = list(parent).index(anchor_el) + 1
+
+    # Create paragraph with centered alignment for image
+    p = etree.Element(f"{{{W}}}p")
+    ppr = etree.SubElement(p, f"{{{W}}}pPr")
+    jc = etree.SubElement(ppr, f"{{{W}}}jc")
+    jc.set(f"{{{W}}}val", "center")
+
+    # Create run with drawing
+    run = etree.SubElement(p, f"{{{W}}}r")
+    drawing = etree.SubElement(run, f"{{{W}}}drawing")
+
+    # Create inline drawing
+    inline = etree.SubElement(drawing, f"{{{WP_NS}}}inline")
+    inline.set("distT", "0")
+    inline.set("distB", "0")
+    inline.set("distL", "0")
+    inline.set("distR", "0")
+
+    # Set size
+    extent = etree.SubElement(inline, f"{{{WP_NS}}}extent")
+    cx = width_px * 9525  # EMU
+    cy = height_px * 9525
+    extent.set("cx", str(int(cx)))
+    extent.set("cy", str(int(cy)))
+
+    # Set effect extent
+    effectExtent = etree.SubElement(inline, f"{{{WP_NS}}}effectExtent")
+    effectExtent.set("L", "0")
+    effectExtent.set("T", "0")
+    effectExtent.set("R", "0")
+    effectExtent.set("B", "0")
+
+    # Doc properties
+    docPr = etree.SubElement(inline, f"{{{WP_NS}}}docPr")
+    docPr.set("id", str(len(manifest.get("nodes", [])) + 1))
+    docPr.set("name", img_filename)
+
+    # Graphic
+    graphic = etree.SubElement(inline, f"{{{A_NS}}}graphic")
+    graphicData = etree.SubElement(graphic, f"{{{A_NS}}}graphicData")
+    graphicData.set("uri", "http://schemas.openxmlformats.org/drawingml/2006/picture")
+
+    # Picture
+    pic = etree.SubElement(graphicData, f"{{{PIC_NS}}}pic")
+    nvPicPr = etree.SubElement(pic, f"{{{PIC_NS}}}nvPicPr")
+    cNvPr = etree.SubElement(nvPicPr, f"{{{PIC_NS}}}cNvPr")
+    cNvPr.set("id", "0")
+    cNvPr.set("name", img_filename)
+    cNvPicPr = etree.SubElement(nvPicPr, f"{{{PIC_NS}}}cNvPicPr")
+
+    blipFill = etree.SubElement(pic, f"{{{PIC_NS}}}blipFill")
+    blip = etree.SubElement(blipFill, f"{{{A_NS}}}blip")
+    blip.set(f"{{{R_NS}}}embed", rel_id)
+
+    stretch = etree.SubElement(blipFill, f"{{{A_NS}}}stretch")
+    fillRect = etree.SubElement(stretch, f"{{{A_NS}}}fillRect")
+
+    spPr = etree.SubElement(pic, f"{{{PIC_NS}}}spPr")
+    xfrm = etree.SubElement(spPr, f"{{{A_NS}}}xfrm")
+    off = etree.SubElement(xfrm, f"{{{A_NS}}}off")
+    off.set("x", "0")
+    off.set("y", "0")
+    ext = etree.SubElement(xfrm, f"{{{A_NS}}}ext")
+    ext.set("cx", str(int(cx)))
+    ext.set("cy", str(int(cy)))
+
+    prstGeom = etree.SubElement(spPr, f"{{{A_NS}}}prstGeom")
+    prstGeom.set("prst", "rect")
+
+    # Insert at the calculated position
+    body.insert(insert_idx, p)
+
+    # Write updated document.xml
+    _write_document_xml(work_docx, root)
+
+    # Update manifest
+    _sync_node_xpaths(manifest, root)
+    _sort_manifest_nodes_by_document_order(manifest, root)
+    _refresh_rule_targets(manifest)
+    _attach_product_manifest(manifest)
+    manifest["version"] = int(time.time() * 1000)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    return manifest
+
+
+def insert_table(case_id: str, rows: int, cols: int, anchor_node_id: str = ""):
+    """Insert an empty table into the DOCX after the anchor node (or at end of body)."""
+    folder = CASE_DIR / case_id
+    work_docx = folder / "work.docx"
+    manifest_path = folder / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    root = _document_xml(work_docx)
+    body = root.find(f"{{{NS['w']}}}body")
+
+    W = NS['w']
+
+    # Find anchor position
+    insert_idx = len(list(body))  # default: end of body
+    if anchor_node_id:
+        anchor_node, anchor_el = _find_node_element(root, manifest, anchor_node_id)
+        if anchor_el is not None:
+            parent = anchor_el.getparent()
+            insert_idx = list(parent).index(anchor_el) + 1
+
+    # Create table element
+    tbl = etree.Element(f"{{{W}}}tbl")
+
+    # Table properties
+    tblPr = etree.SubElement(tbl, f"{{{W}}}tblPr")
+    tblStyle = etree.SubElement(tblPr, f"{{{W}}}tblStyle")
+    tblStyle.set(f"{{{W}}}val", "TableGrid")
+    tblW = etree.SubElement(tblPr, f"{{{W}}}tblW")
+    tblW.set(f"{{{W}}}w", "0")
+    tblW.set(f"{{{W}}}type", "auto")
+    tblBorders = etree.SubElement(tblPr, f"{{{W}}}tblBorders")
+    for border_name in ["top", "left", "bottom", "right", "insideH", "insideV"]:
+        border = etree.SubElement(tblBorders, f"{{{W}}}{border_name}")
+        border.set(f"{{{W}}}val", "single")
+        border.set(f"{{{W}}}sz", "4")
+        border.set(f"{{{W}}}space", "0")
+        border.set(f"{{{W}}}color", "000000")
+
+    # Create rows and cells
+    for _ in range(rows):
+        tr = etree.SubElement(tbl, f"{{{W}}}tr")
+        for _ in range(cols):
+            tc = etree.SubElement(tr, f"{{{W}}}tc")
+            # Cell properties
+            tcPr = etree.SubElement(tc, f"{{{W}}}tcPr")
+            tcW = etree.SubElement(tcPr, f"{{{W}}}tcW")
+            tcW.set(f"{{{W}}}w", str(round(8500 / cols)))  # Distribute width
+            tcW.set(f"{{{W}}}type", "dxa")
+            # Empty paragraph in cell
+            etree.SubElement(tc, f"{{{W}}}p")
+
+    # Insert at the calculated position
+    body.insert(insert_idx, tbl)
+
+    # Update manifest
+    _sync_node_xpaths(manifest, root)
+    _sort_manifest_nodes_by_document_order(manifest, root)
+    _refresh_rule_targets(manifest)
+    _attach_product_manifest(manifest)
+    _write_document_xml(work_docx, root)
+    manifest["version"] = int(time.time() * 1000)
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    return manifest
+
+
 def _apply_paragraph_style(p, fmt):
     ppr = _ensure(p, "w:pPr", before_first_run=True)
 
@@ -1152,7 +1868,9 @@ def _apply_paragraph_style(p, fmt):
 
     if fmt.get("firstLineIndentChars") is not None:
         ind = _ensure(ppr, "w:ind")
-        _set_attr(ind, "firstLineChars", int(float(fmt["firstLineIndentChars"]) * 100))
+        chars = float(fmt["firstLineIndentChars"])
+        _set_attr(ind, "firstLineChars", int(chars * 100))
+        _set_attr(ind, "firstLine", int(chars * 240))
 
     runs = p.xpath(".//w:r", namespaces=NS)
     if not runs:
@@ -1197,8 +1915,13 @@ def apply_rule(case_id: str, rule_id: str, fmt: dict):
         targets = root.xpath(node["xpath"], namespaces=NS)
         if targets:
             _apply_paragraph_style(targets[0], fmt)
+            node.update(_p_meta(targets[0]))
 
     rule["format"] = fmt
+    _sync_node_xpaths(manifest, root)
+    _sort_manifest_nodes_by_document_order(manifest, root)
+    _refresh_rule_targets(manifest)
+    _attach_product_manifest(manifest)
     _write_document_xml(work_docx, root)
     manifest["version"] = int(time.time() * 1000)
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -1226,7 +1949,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, X-File-Name")
         self.end_headers()
 
@@ -1287,6 +2010,38 @@ class Handler(BaseHTTPRequestHandler):
                 manifest = create_case(source)
                 _send_json(self, 200, manifest)
                 return
+            # Image insert: POST /case/{caseId}/image
+            if self.path.startswith("/case/") and self.path.endswith("/image"):
+                parts = self.path.split("/")
+                case_id = parts[2]
+                # Read multipart form data (simplified - expects raw body with X-File-Name header)
+                length = int(self.headers.get("Content-Length", "0"))
+                if length <= 0:
+                    _send_json(self, 400, {"error": "empty image data"})
+                    return
+                image_data = self.rfile.read(length)
+                filename = self.headers.get("X-File-Name", "image.png")
+                # Parse query params for anchor and width
+                from urllib.parse import urlparse, parse_qs
+                parsed = urlparse(self.path)
+                params = parse_qs(parsed.query)
+                anchor_node_id = params.get("anchor", [""])[0]
+                width_px = int(params.get("width", ["400"])[0])
+                manifest = insert_image(case_id, image_data, filename, anchor_node_id, width_px)
+                _send_json(self, 200, manifest)
+                return
+            # Table insert: POST /case/{caseId}/table
+            if self.path.startswith("/case/") and self.path.endswith("/table"):
+                parts = self.path.split("/")
+                case_id = parts[2]
+                length = int(self.headers.get("Content-Length", "0"))
+                data = json.loads(self.rfile.read(length) or b"{}")
+                rows = data.get("rows", 3)
+                cols = data.get("cols", 3)
+                anchor_node_id = data.get("anchorNodeId", "")
+                manifest = insert_table(case_id, rows, cols, anchor_node_id)
+                _send_json(self, 200, manifest)
+                return
         except Exception as exc:
             _send_json(self, 500, {"error": str(exc)})
             return
@@ -1315,6 +2070,20 @@ class Handler(BaseHTTPRequestHandler):
                     data.get("zone", "body"),
                     data.get("role", "paragraph"),
                 )
+                _send_json(self, 200, manifest)
+                return
+        except Exception as exc:
+            _send_json(self, 500, {"error": str(exc)})
+            return
+        _send_json(self, 404, {"error": "not found"})
+
+    def do_DELETE(self):
+        try:
+            if self.path.startswith("/case/") and "/node/" in self.path:
+                parts = self.path.split("/")
+                case_id = parts[2]
+                node_id = parts[4]
+                manifest = delete_node(case_id, node_id)
                 _send_json(self, 200, manifest)
                 return
         except Exception as exc:
