@@ -23,6 +23,7 @@ import { Wallet } from './pages/Wallet';
 import { Wizard } from './pages/Wizard';
 import { Guide } from './pages/Guide';
 import { TemplateSubmissions } from './pages/TemplateSubmissions';
+import { TemplatePreview } from './pages/TemplatePreview';
 import './styles.css';
 
 const queryClient = new QueryClient();
@@ -145,6 +146,7 @@ function WriterAppShell() {
           {navItem('/wallet', <WalletOutlined />, '余额')}
           {navItem('/template-submissions', <FileTextOutlined />, '模板贡献')}
           {navItem('/guide', <ReadOutlined />, '使用教程')}
+          {navItem('/template-preview', <FileTextOutlined />, '模板预览')}
         </div>
 
         <div
@@ -223,6 +225,7 @@ function WriterAppShell() {
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/template-submissions" element={<TemplateSubmissions />} />
             <Route path="/guide" element={<Guide />} />
+            <Route path="/template-preview" element={<TemplatePreview />} />
             <Route path="/wizard" element={<Navigate to="/" replace />} />
             <Route path="/wizard/:projectId" element={<LegacyWizardRedirect />} />
             <Route path="*" element={<Navigate to="/" replace />} />

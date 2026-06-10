@@ -15,6 +15,7 @@ from app.api import (
     projects,
     rag,
     schools,
+    template_binding,
     template_submissions,
     wallet,
 )
@@ -36,3 +37,4 @@ router.include_router(projects.router, prefix="/projects", tags=["projects"])
 router.include_router(literature.router, prefix="/projects/{project_id}/literature", tags=["literature"])
 router.include_router(rag.router, prefix="/projects/{project_id}/rag", tags=["rag"])
 router.include_router(template_submissions.router, prefix="/template-submissions", tags=["template-submissions"])
+router.include_router(template_binding.router, prefix="/template-binding", tags=["template-binding"])
