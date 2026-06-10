@@ -36,7 +36,7 @@ interface DocxPreviewProps {
 /** Apply zoom to the docx wrapper */
 function applyZoom(container: HTMLElement | null, zoom: number): void {
   if (!container) return
-  const wrapper = container.querySelector('.docx-render') as HTMLElement | null
+  const wrapper = container.querySelector('.docx-render-wrapper') as HTMLElement | null
   if (!wrapper) return
   wrapper.style.transform = `scale(${zoom})`
   wrapper.style.transformOrigin = 'top center'

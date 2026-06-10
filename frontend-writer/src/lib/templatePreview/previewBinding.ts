@@ -34,11 +34,25 @@ export function bindPreviewNodes(container: HTMLElement, manifest: Manifest | nu
     const anchor = container.querySelector(`#${CSS.escape(anchorName)}`)
     if (!anchor) continue
 
-    const element = resolveBlockElement(anchor, node)
-    if (element) {
-      stampNode(element, node)
-      registry.bound++
+    let element = resolveBlockElement(anchor, node)
+    if (!element) continue
+
+    // Collision: the resolved block is already claimed by another node.
+    // Happens when several inline graphics render into one <p> (multiple VML
+    // images share a paragraph). Give each image its own rendered graphic.
+    const claimedBy = element.dataset.nodeId
+    if (claimedBy && claimedBy !== node.nodeId) {
+      if (node.kind === 'image') {
+        const graphic = pickUnclaimedGraphic(element)
+        if (!graphic) continue
+        element = graphic
+      } else {
+        continue
+      }
     }
+
+    stampNode(element, node)
+    registry.bound++
   }
 
   // Pass 2: fallback for missing nodes — try paraId lookup
@@ -93,6 +107,16 @@ export function bindPreviewNodes(container: HTMLElement, manifest: Manifest | nu
   }
 
   return registry
+}
+
+/** For a block holding multiple graphics, return the next graphic wrapper not yet bound. */
+function pickUnclaimedGraphic(block: HTMLElement): HTMLElement | null {
+  const graphics = block.querySelectorAll('svg, img')
+  for (const g of graphics) {
+    const wrapper = (g.closest('span, div') as HTMLElement | null) || (g as HTMLElement)
+    if (!wrapper.dataset.nodeId) return wrapper
+  }
+  return null
 }
 
 /** Resolve the block-level element from an anchor span */
