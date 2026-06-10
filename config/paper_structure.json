@@ -1,0 +1,461 @@
+{
+  "version": "1.0.0",
+  "description": "论文结构配置文件",
+  "semanticLabels": {
+    "封面": {
+      "aliases": [
+        "Cover",
+        "封面页",
+        "title page",
+        "封皮"
+      ],
+      "type": "section",
+      "required": true,
+      "identifyBy": "content",
+      "keywords": [
+        "学校",
+        "学院",
+        "专业",
+        "学号",
+        "姓名",
+        "指导教师",
+        "毕业设计",
+        "毕业论文"
+      ],
+      "format": {
+        "font": "黑体",
+        "sizePt": 22,
+        "bold": true,
+        "alignment": "center"
+      }
+    },
+    "目录": {
+      "aliases": [
+        "Table of Contents",
+        "目录页",
+        "Contents",
+        "目  录"
+      ],
+      "type": "section",
+      "required": false,
+      "identifyBy": "keyword",
+      "keywords": [
+        "目录",
+        "contents"
+      ],
+      "format": {
+        "font": "宋体",
+        "sizePt": 12,
+        "alignment": "left"
+      }
+    },
+    "中文摘要": {
+      "aliases": [
+        "摘要",
+        "摘  要",
+        "中文摘要",
+        "内容提要",
+        "abstract_cn"
+      ],
+      "type": "section",
+      "required": true,
+      "identifyBy": "keyword",
+      "keywords": [
+        "摘要",
+        "关键词"
+      ],
+      "format": {
+        "font": "黑体",
+        "sizePt": 18,
+        "bold": true,
+        "alignment": "center"
+      }
+    },
+    "英文摘要": {
+      "aliases": [
+        "Abstract",
+        "ABSTRACT",
+        "英文摘要",
+        "abstract_en"
+      ],
+      "type": "section",
+      "required": false,
+      "identifyBy": "keyword",
+      "keywords": [
+        "abstract",
+        "keywords"
+      ],
+      "format": {
+        "font": "Times New Roman",
+        "sizePt": 18,
+        "bold": true,
+        "alignment": "center"
+      }
+    },
+    "正文": {
+      "aliases": [
+        "Body",
+        "正文",
+        "本论"
+      ],
+      "type": "section",
+      "required": true,
+      "identifyBy": "structure",
+      "description": "有大纲结构的区域（包含一级、二级、三级标题和正文段落）",
+      "format": {
+        "font": "宋体",
+        "sizePt": 12,
+        "alignment": "both"
+      }
+    },
+    "致谢": {
+      "aliases": [
+        "Acknowledgments",
+        "感谢词",
+        "致谢词",
+        "谢辞",
+        "鸣谢",
+        "acknowledgement"
+      ],
+      "type": "section",
+      "required": false,
+      "identifyBy": "keyword",
+      "keywords": [
+        "致谢",
+        "感谢词",
+        "感谢"
+      ],
+      "format": {
+        "font": "宋体",
+        "sizePt": 12,
+        "alignment": "both"
+      }
+    },
+    "参考文献": {
+      "aliases": [
+        "References",
+        "引用文献",
+        "参考资料",
+        "参考文献表"
+      ],
+      "type": "section",
+      "required": true,
+      "identifyBy": "keyword",
+      "keywords": [
+        "参考文献",
+        "references"
+      ],
+      "format": {
+        "font": "宋体",
+        "sizePt": 10.5,
+        "alignment": "left"
+      }
+    },
+    "附录": {
+      "aliases": [
+        "Appendix",
+        "附录",
+        "附  录"
+      ],
+      "type": "section",
+      "required": false,
+      "identifyBy": "keyword",
+      "keywords": [
+        "附录",
+        "appendix"
+      ],
+      "format": {
+        "font": "宋体",
+        "sizePt": 12,
+        "alignment": "both"
+      }
+    }
+  },
+  "nodeTypes": {
+    "标题": {
+      "type": "heading",
+      "levels": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "format": {
+        "font": "黑体",
+        "bold": true
+      }
+    },
+    "正文": {
+      "type": "paragraph",
+      "format": {
+        "font": "宋体",
+        "sizePt": 12,
+        "alignment": "both"
+      }
+    },
+    "表格": {
+      "type": "table",
+      "format": {
+        "border": "single",
+        "padding": "6px"
+      }
+    },
+    "图片": {
+      "type": "image",
+      "format": {
+        "maxWidth": "100%",
+        "maxHeight": "200px"
+      }
+    }
+  },
+  "zoneTypes": {
+    "封面": {
+      "type": "cover",
+      "children": [
+        "标题",
+        "正文"
+      ]
+    },
+    "目录": {
+      "type": "toc",
+      "children": [
+        "标题",
+        "正文"
+      ]
+    },
+    "摘要": {
+      "type": "abstract",
+      "children": [
+        "标题",
+        "正文",
+        "关键词"
+      ]
+    },
+    "正文": {
+      "type": "body",
+      "children": [
+        "标题",
+        "正文",
+        "表格",
+        "图片"
+      ]
+    },
+    "致谢": {
+      "type": "acknowledgments",
+      "children": [
+        "标题",
+        "正文"
+      ]
+    },
+    "参考文献": {
+      "type": "references",
+      "children": [
+        "正文"
+      ]
+    },
+    "附录": {
+      "type": "appendix",
+      "children": [
+        "标题",
+        "正文",
+        "表格",
+        "图片"
+      ]
+    }
+  },
+  "formatRules": {
+    "摘要标题": {
+      "font": "宋体",
+      "sizePt": 18.0,
+      "bold": true,
+      "alignment": "center",
+      "lineSpacing": 1.25,
+      "spaceBefore": 1.3,
+      "spaceAfter": 1.3,
+      "firstLineIndentChars": 0,
+      "color": "#000000"
+    },
+    "摘要正文": {
+      "font": "宋体",
+      "sizePt": 12.0,
+      "bold": false,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "firstLineIndentChars": 2.0,
+      "spaceBefore": 0.0,
+      "spaceAfter": 0.0,
+      "color": "#FF0000"
+    },
+    "关键词": {
+      "font": "宋体",
+      "sizePt": 12.0,
+      "bold": false,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "spaceBefore": 0.65,
+      "spaceAfter": 0.65,
+      "firstLineIndentChars": 0,
+      "color": "#FF0000"
+    },
+    "英文标题": {
+      "font": "宋体",
+      "sizePt": 18.0,
+      "bold": true,
+      "alignment": "center",
+      "lineSpacing": 1.25,
+      "spaceBefore": 0,
+      "spaceAfter": 0,
+      "firstLineIndentChars": 0,
+      "color": "#000000"
+    },
+    "英文正文": {
+      "font": "宋体",
+      "sizePt": 12.0,
+      "bold": false,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "firstLineIndentChars": 2.0,
+      "spaceBefore": 0.65,
+      "spaceAfter": 0.65,
+      "color": "#FF0000"
+    },
+    "英文关键词": {
+      "font": "宋体",
+      "sizePt": 12.0,
+      "bold": false,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "spaceBefore": 0.65,
+      "spaceAfter": 0.65,
+      "firstLineIndentChars": 0,
+      "color": "#FF0000"
+    },
+    "一级标题": {
+      "font": "Times New Roman",
+      "sizePt": 18.0,
+      "bold": true,
+      "alignment": "center",
+      "lineSpacing": 1.0,
+      "clearIndent": true,
+      "spaceBefore": 1.3,
+      "spaceAfter": 1.3,
+      "firstLineIndentChars": 0.0,
+      "color": "#000000"
+    },
+    "二级标题": {
+      "font": "Times New Roman",
+      "sizePt": 15.0,
+      "bold": true,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "clearIndent": true,
+      "spaceBefore": 0.65,
+      "spaceAfter": 0.65,
+      "firstLineIndentChars": 0.0,
+      "color": "#000000"
+    },
+    "三级标题": {
+      "font": "Times New Roman",
+      "sizePt": 12.0,
+      "bold": true,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "clearIndent": true,
+      "spaceBefore": 0.0,
+      "spaceAfter": 0.0,
+      "firstLineIndentChars": 0.0,
+      "color": "#000000"
+    },
+    "正文段落": {
+      "font": "宋体",
+      "sizePt": 12.0,
+      "bold": false,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "firstLineIndentChars": 2.0,
+      "spaceBefore": 0.65,
+      "spaceAfter": 0.65,
+      "color": "#FF0000"
+    },
+    "图片标注": {
+      "font": "宋体",
+      "sizePt": 10.5,
+      "bold": false,
+      "alignment": "center",
+      "lineSpacing": 1.0
+    },
+    "表格标注": {
+      "font": "宋体",
+      "sizePt": 10.5,
+      "bold": false,
+      "alignment": "center",
+      "lineSpacing": 1.0
+    },
+    "表格文本": {
+      "font": "宋体",
+      "sizePt": 10.5,
+      "bold": false,
+      "alignment": "left",
+      "lineSpacing": 1.0
+    },
+    "致谢标题": {
+      "font": "宋体",
+      "sizePt": 18.0,
+      "bold": true,
+      "alignment": "center",
+      "lineSpacing": 1.25,
+      "spaceBefore": 1.3,
+      "spaceAfter": 1.3,
+      "firstLineIndentChars": 0,
+      "color": "#000000"
+    },
+    "致谢正文": {
+      "font": "宋体",
+      "sizePt": 12,
+      "bold": false,
+      "alignment": "left",
+      "lineSpacing": 1.25,
+      "firstLineIndentChars": 0,
+      "spaceBefore": 0,
+      "spaceAfter": 0,
+      "color": "#000000"
+    },
+    "参考文献标题": {
+      "font": "宋体",
+      "sizePt": 14.0,
+      "bold": true,
+      "alignment": "center",
+      "lineSpacing": 1.25,
+      "spaceBefore": 1.3,
+      "spaceAfter": 1.3,
+      "firstLineIndentChars": 0,
+      "color": "#000000"
+    },
+    "参考文献条目": {
+      "font": "宋体",
+      "sizePt": 12,
+      "bold": true,
+      "alignment": "left",
+      "lineSpacing": 1.5,
+      "spaceBefore": 0.0,
+      "spaceAfter": 0.0,
+      "firstLineIndentChars": 0,
+      "color": "#000000"
+    },
+    "附录标题": {
+      "font": "黑体",
+      "sizePt": 16,
+      "bold": true,
+      "alignment": "center",
+      "lineSpacing": 1.25
+    },
+    "附录正文": {
+      "font": "宋体",
+      "sizePt": 12,
+      "bold": false,
+      "alignment": "both",
+      "lineSpacing": 1.25,
+      "firstLineIndentChars": 2
+    }
+  }
+}
