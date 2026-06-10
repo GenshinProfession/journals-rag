@@ -2,10 +2,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { renderAsync } from 'docx-preview'
 import JSZip from 'jszip'
 import CiteAutocomplete from './CiteAutocomplete'
-import { bindPreviewNodes, applyPreviewMarkers } from '../../lib/templatePreview/previewBinding'
+import { bindPreviewNodes, applyPreviewMarkers, applyLockedPageMasks, checkBindingHealth } from '../../lib/templatePreview/previewBinding'
 import type { Manifest, TplNode, Rule, FormatType, CitationRef } from '../../types/templatePreview'
-
-const PREVIEW_API = '/api/template-binding'
 
 interface MenuPos {
   top: number
@@ -35,64 +33,13 @@ interface DocxPreviewProps {
   onFitWidth: () => void
 }
 
-function applyLockedPreviewPages(container: HTMLElement, manifest: Manifest | null): void {
-  const pages = manifest?.lockedPreview?.pages || []
-  if (!pages.length) return
-  const sections = container.querySelectorAll('section.docx-render')
-  if (!sections.length) return
-
-  const lockSection = (section: Element, pageNo: number, label = `锁定页 ${pageNo}`) => {
-    const imageUrl = `${PREVIEW_API}/${manifest!.caseId}/preview/page/${pageNo}`
-    const htmlSection = section as HTMLElement
-    htmlSection.dataset.lockedPreviewPage = String(pageNo)
-    htmlSection.style.position = 'relative'
-    const height = htmlSection.getBoundingClientRect().height || 800
-    htmlSection.style.height = `${height}px`
-    htmlSection.innerHTML = `
-      <div class="locked-preview-page">
-        <div class="locked-preview-loading">正在生成锁定页预览...</div>
-        <img draggable="false" alt="locked preview page ${pageNo}" src="${imageUrl}" />
-        <div class="locked-preview-badge">${label}</div>
-      </div>
-    `
-    const img = htmlSection.querySelector('img')!
-    img.onload = () => htmlSection.classList.add('locked-preview-ready')
-    img.onerror = () => htmlSection.classList.add('locked-preview-error')
-  }
-
-  for (const pageNo of pages) {
-    const section = sections[pageNo - 1]
-    if (!section) continue
-    section.querySelectorAll('[data-node-id]').forEach(el => {
-      const htmlEl = el as HTMLElement
-      if (htmlEl.dataset.nodeId) {
-        (window as any).__lockedNodeMap = (window as any).__lockedNodeMap || {}
-        ;(window as any).__lockedNodeMap[htmlEl.dataset.nodeId] = section
-      }
-    })
-    lockSection(section, pageNo)
-  }
-
-  if (manifest?.lockedPreview?.autoSections?.includes('toc')) {
-    sections.forEach((section, index) => {
-      const htmlSection = section as HTMLElement
-      if (htmlSection.dataset.lockedPreviewPage) return
-      const compact = (htmlSection.textContent || '').replace(/\s+/g, '')
-      if (compact.includes('目录') && (compact.includes('1引言') || compact.includes('参考文献') || compact.includes('致谢'))) {
-        lockSection(htmlSection, index + 1, `目录锁定页 ${index + 1}`)
-      }
-    })
-  }
-}
-
-/** Apply zoom to the docx wrapper, adjusting container height to prevent overlap */
+/** Apply zoom to the docx wrapper */
 function applyZoom(container: HTMLElement | null, zoom: number): void {
   if (!container) return
   const wrapper = container.querySelector('.docx-render') as HTMLElement | null
   if (!wrapper) return
   wrapper.style.transform = `scale(${zoom})`
   wrapper.style.transformOrigin = 'top center'
-  // Set container min-height based on scaled wrapper height
   const wrapperHeight = wrapper.scrollHeight * zoom
   container.style.minHeight = `${wrapperHeight}px`
 }
@@ -126,13 +73,13 @@ export default function DocxPreview({
   const [inlineText, setInlineText] = useState('')
   const [insertFormatId, setInsertFormatId] = useState(selectedFormatId)
   const [menuMode, setMenuMode] = useState<'choose' | 'text'>('choose')
+  const [bindingWarning, setBindingWarning] = useState<string | null>(null)
 
   const setRef = (node: HTMLDivElement | null) => {
     localRef.current = node
     if (previewRef) (previewRef as React.MutableRefObject<HTMLDivElement | null>).current = node
   }
 
-  /** Calculate menu position relative to container, near the paper's left edge */
   const updateMenuPos = useCallback(() => {
     const container = localRef.current
     if (!container || !selectedNodeId || !selectedNode?.acceptsGenerated) {
@@ -149,7 +96,6 @@ export default function DocxPreview({
     const selectedRect = selected.getBoundingClientRect()
     const containerRect = container.getBoundingClientRect()
     const relTop = selectedRect.top - containerRect.top + container.scrollTop
-    // Find the paper section to get its left edge
     const section = container.querySelector('section.docx-render') as HTMLElement | null
     const sectionLeft = section ? section.getBoundingClientRect().left - containerRect.left : 40
     setMenuPos({
@@ -176,20 +122,23 @@ export default function DocxPreview({
       breakPages: true,
       ignoreLastRenderedPageBreak: true,
     }).then(async () => {
-      // docx-preview already reads pgMar from OOXML and applies margins to each section.
-      // No manual margin application needed.
-
+      // Hide stray list numbers on empty paragraphs
       container.querySelectorAll('p').forEach((p) => {
         if (!p.textContent?.trim() && p.classList.toString().includes('docx-render-num')) {
           p.style.display = 'none'
         }
       })
 
-      bindPreviewNodes(container, manifest)
-      applyLockedPreviewPages(container, manifest)
+      // Bind nodes (with fallback for VML textboxes)
+      const registry = bindPreviewNodes(container, manifest)
+      const warning = checkBindingHealth(registry)
+      setBindingWarning(warning)
+
+      // Apply locked-page masks (overlay, not DOM replacement)
+      applyLockedPageMasks(container, manifest)
+
       applyPreviewMarkers(container, manifest, activeRule, selectedNodeId || '')
 
-      // Apply zoom AFTER rendering is complete
       renderDoneRef.current = true
       applyZoom(container, zoom)
 
@@ -198,13 +147,11 @@ export default function DocxPreview({
     }).catch(console.error)
   }, [blob, version, manifest])
 
-  // ─── Apply zoom when it changes (only if render is done) ───
   useEffect(() => {
     if (!renderDoneRef.current) return
     applyZoom(localRef.current, zoom)
   }, [zoom])
 
-  // ─── Update markers and menu position on selection change ───
   useEffect(() => {
     const container = localRef.current
     if (!container) return
@@ -213,15 +160,8 @@ export default function DocxPreview({
     if (selectedNodeId) {
       const selected = container.querySelector(`[data-node-id="${selectedNodeId}"]`) as HTMLElement | null
       if (selected) {
-        // Use instant scroll to avoid menu desync during smooth scroll
         selected.scrollIntoView({ block: 'center' })
-        // Update menu position after scroll settles
-        requestAnimationFrame(() => {
-          updateMenuPos()
-        })
-      } else {
-        const lockedMap = (window as any).__lockedNodeMap || {}
-        lockedMap[selectedNodeId]?.scrollIntoView({ block: 'center' })
+        requestAnimationFrame(() => updateMenuPos())
       }
     } else {
       setMenuPos(null)
@@ -232,39 +172,40 @@ export default function DocxPreview({
     setInsertFormatId(selectedFormatId)
   }, [selectedFormatId, selectedNodeId])
 
-  // ─── Scroll handler: keep menu position in sync ───
   const handleScroll = useCallback(() => {
     scrollTopRef.current = localRef.current?.scrollTop || 0
-    if (menuOpen) {
-      updateMenuPos()
-    }
+    if (menuOpen) updateMenuPos()
   }, [menuOpen, updateMenuPos])
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement
+
+    // Ignore clicks on the locked-page mask
+    if (target.classList.contains('locked-page-mask') || target.classList.contains('locked-page-label')) return
+
+    // Citation link
     const citeLink = target.closest('a[href^="#ref"]') as HTMLAnchorElement | null
     if (citeLink) {
       event.preventDefault()
       const refId = citeLink.getAttribute('href')?.slice(1)
-      if (refId) {
-        localRef.current?.querySelector(`#${CSS.escape(refId)}`)?.scrollIntoView({ block: 'center' })
-      }
+      if (refId) localRef.current?.querySelector(`#${CSS.escape(refId)}`)?.scrollIntoView({ block: 'center' })
       return
     }
 
+    // Click inside a table: bubble up to the <table> node, not the cell paragraph
     const cellTag = target.tagName?.toLowerCase()
-    if (cellTag === 'td' || cellTag === 'th') {
+    if (cellTag === 'td' || cellTag === 'th' || target.closest('td, th')) {
       const table = target.closest('table[data-node-id]') as HTMLElement | null
       if (table) {
         const node = (manifest?.nodes || []).find((n) => n.nodeId === table.dataset.nodeId)
-        if (node?.zone === 'references') return
-        onPickNode?.(table.dataset.nodeId!)
+        if (node?.zone !== 'references') onPickNode?.(table.dataset.nodeId!)
         return
       }
     }
 
+    // Click on image/svg that might overlap other nodes
     const tag = target.tagName?.toLowerCase()
-    if (tag === 'img' || tag === 'image' || tag === 'svg' || tag === 'span') {
+    if (tag === 'img' || tag === 'image' || tag === 'svg') {
       const parentP = target.closest('[data-node-id]') as HTMLElement | null
       const container = localRef.current
       if (container && parentP) {
@@ -273,19 +214,18 @@ export default function DocxPreview({
           const r = node.getBoundingClientRect()
           if (event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom) {
             const clickNode = (manifest?.nodes || []).find((n) => n.nodeId === node.dataset.nodeId)
-            if (clickNode?.zone === 'references') return
-            onPickNode?.(node.dataset.nodeId!)
+            if (clickNode?.zone !== 'references') onPickNode?.(node.dataset.nodeId!)
             return
           }
         }
       }
     }
 
+    // Default: find nearest bound node
     const nearestTarget = (target.closest('[data-node-id]') as HTMLElement | null) || findNearestNodeElement(event)
     if (nearestTarget?.dataset?.nodeId) {
       const node = (manifest?.nodes || []).find((n) => n.nodeId === nearestTarget.dataset.nodeId)
-      if (node?.zone === 'references') return
-      onPickNode(nearestTarget.dataset.nodeId)
+      if (node?.zone !== 'references') onPickNode(nearestTarget.dataset.nodeId)
     }
   }
 
@@ -329,7 +269,6 @@ export default function DocxPreview({
     setInlineText('')
   }
 
-  // Position menu: if near bottom, open upward
   const menuTop = menuPos
     ? (menuPos.top > (localRef.current?.clientHeight || 600) - 260
         ? menuPos.top - 220
@@ -338,56 +277,46 @@ export default function DocxPreview({
 
   return (
     <div className="docx-preview-frame">
-      <div
-        ref={setRef}
-        className="docx-preview"
-        onClick={handleClick}
-        onScroll={handleScroll}
-      />
+      <div ref={setRef} className="docx-preview" onClick={handleClick} onScroll={handleScroll} />
 
-      {/* Left-margin insert button, positioned near paper edge */}
+      {/* Binding warning badge */}
+      {bindingWarning && (
+        <div className="binding-warning" title={bindingWarning}>
+          ⚠ {bindingWarning}
+        </div>
+      )}
+
+      {/* Left-margin insert button */}
       {menuPos && selectedNode?.acceptsGenerated && (
         <button
           className="insert-gutter-btn"
           style={{ top: menuPos.top, left: menuPos.paperLeft }}
-          onClick={(e) => {
-            e.stopPropagation()
-            setMenuOpen(o => !o)
-            setMenuMode('choose')
-          }}
+          onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); setMenuMode('choose') }}
           title="插入内容"
-        >
-          +
-        </button>
+        >+</button>
       )}
 
       {/* Insert menu */}
       {menuOpen && menuPos && (
-        <div
-          className="insert-menu"
-          style={{ top: menuTop, left: (menuPos.paperLeft || 4) + 34 }}
-          onClick={e => e.stopPropagation()}
-        >
+        <div className="insert-menu" style={{ top: menuTop, left: (menuPos.paperLeft || 4) + 34 }} onClick={e => e.stopPropagation()}>
           {menuMode === 'choose' && (
             <>
               <div className="insert-menu-title">插入内容</div>
               <button className="insert-menu-item" onClick={() => setMenuMode('text')}>
-                <span className="insert-menu-icon">{'¶'}</span>文本段落
+                <span className="insert-menu-icon">¶</span>文本段落
               </button>
               <button className="insert-menu-item" onClick={() => { closeMenu(); onStartImageInsert?.('after') }}>
-                <span className="insert-menu-icon">{'🖼'}</span>图片
+                <span className="insert-menu-icon">🖼</span>图片
               </button>
               <button className="insert-menu-item" onClick={() => { closeMenu(); onStartTableInsert?.('after') }}>
-                <span className="insert-menu-icon">{'⊞'}</span>表格
+                <span className="insert-menu-icon">⊞</span>表格
               </button>
               <div className="insert-menu-divider" />
               {formatTypes.filter(f => !f.custom).slice(0, 4).map(f => (
                 <button key={f.id} className="insert-menu-item insert-menu-format" onClick={async () => {
                   await onInlineInsert?.('新段落内容', f, 'insertAfter')
                   closeMenu()
-                }}>
-                  {f.label}
-                </button>
+                }}>{f.label}</button>
               ))}
             </>
           )}
@@ -395,17 +324,11 @@ export default function DocxPreview({
           {menuMode === 'text' && (
             <>
               <div className="insert-menu-title">
-                <button className="insert-menu-back" onClick={() => setMenuMode('choose')}>{'←'}</button>
+                <button className="insert-menu-back" onClick={() => setMenuMode('choose')}>←</button>
                 插入文本
               </div>
-              <select
-                className="insert-menu-select"
-                value={insertFormatId}
-                onChange={e => setInsertFormatId(e.target.value)}
-              >
-                {formatTypes.map(item => (
-                  <option key={item.id} value={item.id}>{item.label}</option>
-                ))}
+              <select className="insert-menu-select" value={insertFormatId} onChange={e => setInsertFormatId(e.target.value)}>
+                {formatTypes.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
               <textarea
                 className="insert-menu-textarea"
@@ -419,11 +342,7 @@ export default function DocxPreview({
                 const token = `{{cite:${ref.id}}}`
                 setInlineText(cur => {
                   const ta = document.querySelector('.insert-menu-textarea') as HTMLTextAreaElement | null
-                  if (ta) {
-                    const s = ta.selectionStart || 0
-                    const e = ta.selectionEnd || 0
-                    return cur.slice(0, s) + token + cur.slice(e)
-                  }
+                  if (ta) { const s = ta.selectionStart || 0; const e = ta.selectionEnd || 0; return cur.slice(0, s) + token + cur.slice(e) }
                   return cur + token
                 })
               }} />

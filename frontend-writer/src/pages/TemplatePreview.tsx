@@ -250,10 +250,9 @@ const templatePreviewStyles = `
 .bound-selected { outline: 2px solid #2563EB; outline-offset: 2px; background: rgba(37,99,235,0.04); }
 .bound-hit { outline: 1px dashed rgba(37,99,235,0.25); outline-offset: 1px; }
 .bound-locked { cursor: default; }
-.locked-preview-page { position: relative; width: 100%; min-height: 200px; }
-.locked-preview-page img { width: 100%; height: auto; }
-.locked-preview-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #667085; font-size: 13px; }
-.locked-preview-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.locked-page-mask { position: absolute; inset: 0; background: rgba(255,255,255,0.55); backdrop-filter: blur(1px); z-index: 5; display: flex; align-items: flex-start; justify-content: flex-end; padding: 8px; pointer-events: none; }
+.locked-page-label { background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 4px; pointer-events: none; }
+.binding-warning { position: absolute; bottom: 12px; right: 12px; background: #FFFBEB; color: #D97706; font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(217,119,6,0.2); z-index: 10; cursor: help; }
 
 /* Responsive */
 @media (max-width: 1200px) {

@@ -1114,53 +1114,40 @@
   font-size: 12px;
 }
 
-/* ─── Locked preview pages ─── */
-.locked-preview-page {
-  position: relative;
-  width: 100%;
-  min-height: 200px;
-}
-
-.locked-preview-page img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.locked-preview-loading {
+/* ─── Locked page mask overlay ─── */
+.locked-page-mask {
   position: absolute;
   inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(1px);
+  z-index: 5;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  font-size: 13px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 8px;
+  pointer-events: none;
 }
 
-.locked-preview-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0,0,0,0.6);
-  color: white;
+.locked-page-label {
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
   font-size: 11px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 4px;
+  pointer-events: none;
 }
 
-.locked-preview-page img {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.locked-preview-ready .locked-preview-page img {
-  opacity: 1;
-}
-
-.locked-preview-ready .locked-preview-loading {
-  display: none;
-}
-
-.locked-preview-error .locked-preview-loading {
-  color: var(--danger);
+/* ─── Binding warning badge ─── */
+.binding-warning {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: var(--amber-light);
+  color: var(--amber);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  z-index: 10;
+  cursor: help;
 }
